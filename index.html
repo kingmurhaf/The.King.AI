@@ -6,7 +6,7 @@
 <title>👑 The King AI</title>
 <meta name="description" content="The King AI — مساعدك الذكي المحلي | Developed by Murhaf Hassan"/>
 <meta name="author" content="Murhaf Hassan"/>
-<meta name="theme-color" content="#c9952a"/>
+<meta name="theme-color" content="#070a12"/>
 <meta name="application-name" content="King AI"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -323,15 +323,16 @@ body.fs-xl  { font-size:19px; }
   display:flex; align-items:center; justify-content:space-between;
   padding:0 10px; height:52px;
   background:var(--surface);
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid var(--border2);
   flex-shrink:0; gap:6px;
   position:relative; z-index:10;
   box-shadow:0 1px 0 var(--border);
 }
 .header::after {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
-  background:linear-gradient(90deg, transparent, rgba(201,149,42,0.35), transparent);
+  content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
   pointer-events:none;
+  opacity:0.5;
 }
 .header-brand {
   display:flex; align-items:center; gap:8px; min-width:0; flex:1; overflow:hidden;
@@ -3126,24 +3127,24 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
   <div class="header">
     <div class="header-brand">
       <div style="position:relative;flex-shrink:0">
-        <div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--purple));display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;box-shadow:0 2px 8px rgba(201,149,42,0.3);flex-shrink:0"><i class="fas fa-crown"></i></div>
+        <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--purple));display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;box-shadow:0 2px 8px rgba(201,149,42,0.3);flex-shrink:0"><i class="fas fa-crown"></i></div>
         <div class="status-dot" id="statusDot"></div>
       </div>
-      <div style="min-width:0;flex:1;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:5px">
-          <div class="header-title">The <span>King</span> AI</div>
-          <div class="header-badge" id="vBadge">v24.2</div>
+      <div style="display:flex;flex-direction:column;justify-content:center;min-width:0;flex:1">
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:.85rem;font-weight:900;color:var(--text);white-space:nowrap">The <span style="color:var(--gold)">King</span> AI</span>
+          <span id="vBadge" style="font-size:.55rem;font-weight:700;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,149,42,.22);padding:1px 5px;border-radius:5px;flex-shrink:0">v25.0</span>
         </div>
-        <div class="header-subtitle">مساعدك الذكي · Claude · Gemini</div>
-        <div class="header-subtitle" style="font-size:.55rem;opacity:.5;letter-spacing:.5px">by Murhaf Hassan</div>
+        <div style="font-size:.58rem;color:var(--text3);white-space:nowrap;margin-top:1px">
+          by <span style="color:var(--gold);font-weight:700">Murhaf Hassan</span>
+        </div>
       </div>
     </div>
     <div class="header-actions">
       <span class="save-ind" id="saveInd"></span>
       <button class="icon-btn" id="installBtn" title="تثبيت" style="display:none"><i class="fas fa-download"></i></button>
-      <button class="icon-btn" id="aiEngineBtn" title="محرك AI" style="font-size:10px;font-weight:800;min-width:auto;padding:0 6px;width:auto;gap:2px"><span id="aiEngineLbl">⚡Auto</span></button>
+      <button class="icon-btn mode-auto" id="aiEngineBtn" title="محرك AI" style="font-size:10px;font-weight:800;min-width:auto;padding:0 6px;width:auto;gap:2px"><span id="aiEngineLbl">⚡ Auto</span></button>
       <button class="icon-btn" id="offlineModeHeaderBtn" title="وضع عدم الاتصال"><i class="fas fa-plug"></i></button>
-      <button class="icon-btn" id="themeQuickBtn" title="تغيير السمة بسرعة" style="font-size:9px;font-weight:800;width:auto;padding:0 5px;gap:1px"><i class="fas fa-palette" style="font-size:9px"></i></button>
       <button class="icon-btn" id="themeToggleBtn" title="الثيم"><i class="fas fa-moon"></i></button>
       <button class="icon-btn" id="speakToggleBtn" title="قراءة/إيقاف"><i class="fas fa-volume-up"></i></button>
       <button class="icon-btn" id="memBtn" title="الذاكرة"><i class="fas fa-brain"></i></button>
@@ -5412,6 +5413,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
       <div class="s-tab" data-p="notif"><i class="fas fa-bell"></i> إشعارات</div>
       <div class="s-tab" data-p="backup"><i class="fas fa-cloud"></i> نسخ</div>
       <div class="s-tab" data-p="advanced"><i class="fas fa-cog"></i> متقدم</div>
+      <div class="s-tab" data-p="guide"><i class="fas fa-book"></i> تعليمات</div>
     </div>
 
     <div style="flex:1;overflow-y:auto;padding:12px 10px 80px">
@@ -5875,6 +5877,259 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
       </div>
     </div>
 
+
+    <!-- ══ تعليمات وعن التطبيق ══ -->
+    <div id="p-guide" class="s-panel">
+
+      <!-- بطاقة عن التطبيق -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(201,149,42,.08),rgba(124,58,237,.08));border-color:rgba(201,149,42,.3);text-align:center;padding:20px">
+        <div style="font-size:2.8rem;margin-bottom:6px">👑</div>
+        <div style="font-size:1.15rem;font-weight:900;color:var(--gold);letter-spacing:.5px">The King AI</div>
+        <div style="font-size:.75rem;color:var(--text2);margin:4px 0">مساعدك الذكي الملكي · v25.0</div>
+        <div style="height:1px;background:var(--border);margin:12px 0"></div>
+        <div style="font-size:.68rem;color:var(--text3);margin-bottom:4px">تطوير وتصميم</div>
+        <div style="font-size:1rem;font-weight:900;color:var(--gold2);letter-spacing:1.5px">✦ Murhaf Hassan ✦</div>
+        <div style="font-size:.6rem;color:var(--text3);margin-top:8px;opacity:.6">© 2025 — جميع الحقوق محفوظة</div>
+      </div>
+
+      <!-- تفعيل المنبهات - أعلى لأنه مهم -->
+      <div class="card" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.03)">
+        <div class="card-title" style="color:#f87171"><i class="fas fa-bell"></i> تفعيل المنبهات ← مهم جداً!</div>
+        <div style="font-size:.76rem;color:var(--text2);line-height:2;margin:6px 0">
+          <div style="display:flex;gap:8px;align-items:baseline"><span style="color:var(--gold);font-weight:800;flex-shrink:0">①</span><span>اقبل إذن الإشعارات عند ظهوره</span></div>
+          <div style="display:flex;gap:8px;align-items:baseline"><span style="color:var(--gold);font-weight:800;flex-shrink:0">②</span><span>إعدادات الهاتف ← التطبيقات ← King AI ← <strong>البطارية ← غير محدود</strong></span></div>
+          <div style="display:flex;gap:8px;align-items:baseline"><span style="color:var(--gold);font-weight:800;flex-shrink:0">③</span><span>إشعارات ← تأكد أنها مفعّلة ✅</span></div>
+        </div>
+        <button onclick="typeof _askPermOnce==='function'&&_askPermOnce()" style="width:100%;margin-top:8px;padding:11px;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.35);color:#f87171;border-radius:11px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">
+          <i class="fas fa-bell"></i> تفعيل الإشعارات الآن
+        </button>
+      </div>
+
+      <!-- المميزات الكاملة -->
+      <div class="card">
+        <div class="card-title"><i class="fas fa-crown" style="color:var(--gold)"></i> كل مميزات التطبيق</div>
+
+        <!-- AI -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:.68rem;font-weight:800;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px"><i class="fas fa-robot"></i> الذكاء الاصطناعي</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🤖 Claude AI</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">أقوى نماذج Anthropic</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">✦ Gemini AI</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">نموذج Google الذكي</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">⚡ Auto Mode</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">تبديل تلقائي ذكي</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🖼 تحليل صور</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">فهم محتوى الصور</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🔊 قراءة صوتية</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">TTS بدون إنترنت</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🌐 ترجمة فورية</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">ترجم أي نص</div></div>
+          </div>
+        </div>
+
+        <!-- بحث -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:.68rem;font-weight:800;color:#38bdf8;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px"><i class="fas fa-search"></i> البحث الذكي</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🌍 بحث إنترنت</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">DuckDuckGo + Google</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🌤 الطقس</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">طقس أي مدينة</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">💱 أسعار عملات</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">دولار ريال يورو...</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🕌 مواقيت الصلاة</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">بناءً على موقعك</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">📖 ويكيبيديا</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">معلومات موسوعية</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">▶ بحث فيديو</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">YouTube مدمج</div></div>
+          </div>
+        </div>
+
+        <!-- الحاسبة -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:.68rem;font-weight:800;color:#a78bfa;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px"><i class="fas fa-calculator"></i> الحاسبة العلمية</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🔢 حساب أساسي</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">+−×÷ وتحويل سريع</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">📐 مثلثات</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">sin cos tan...</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">📊 جبر وإحصاء</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">معادلات + انحدار</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">∫ تفاضل وتكامل</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">مشتقات + تكاملات</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">⚛ فيزياء وكيمياء</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">قوانين + عناصر</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">⚖️ تحويل وحدات</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">طول وزن حرارة...</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">📈 رسم بياني</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">2D و3D تفاعلي</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">💰 حسابات مالية</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">فوائد + قروض</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">▦ مصفوفات</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">عمليات المصفوفات</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">💻 تحويل برمجي</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">hex bin dec...</div></div>
+          </div>
+        </div>
+
+        <!-- ذاكرة وتذكيرات -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:.68rem;font-weight:800;color:#4ade80;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px"><i class="fas fa-brain"></i> الذاكرة والمنظّم</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🧠 ذاكرة دائمة</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">يحفظ ما تعلّمه</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">⏰ منبهات ذكية</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">تعمل مع إغلاق التطبيق</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🔁 تكرار يومي/أسبوعي</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">تذكيرات متكررة</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🔥 تتبع عادات</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">Streak + إحصاء</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">📚 مراجعة ذكية</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">اختبار ما حفظته</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">💾 نسخ احتياطي</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">تصدير واستيراد</div></div>
+          </div>
+        </div>
+
+        <!-- مظهر وأمان -->
+        <div>
+          <div style="font-size:.68rem;font-weight:800;color:#fbbf24;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px"><i class="fas fa-palette"></i> مظهر وأمان</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🎨 22 ثيم</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">ألوان وأنماط متنوعة</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">🔐 قفل بـ PIN</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">حماية بكلمة سر</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">👆 بصمة الإصبع</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">فتح بالبصمة</div></div>
+            <div style="background:var(--surface2);border-radius:9px;padding:8px;border:1px solid var(--border)"><div style="font-size:.72rem;font-weight:700;color:var(--text)">📴 وضع offline</div><div style="font-size:.62rem;color:var(--text3);margin-top:2px">يعمل بدون نت</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- الأوامر النصية الكاملة -->
+      <div class="card">
+        <div class="card-title"><i class="fas fa-terminal" style="color:var(--gold)"></i> الأوامر النصية الكاملة</div>
+
+        <!-- بحث ومعلومات -->
+        <div style="font-size:.65rem;font-weight:800;color:#38bdf8;margin:8px 0 5px;letter-spacing:.8px">🔍 بحث ومعلومات</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:var(--gold);flex-shrink:0">ابحث عن [موضوع]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">بحث في الإنترنت</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:var(--gold);flex-shrink:0">طقس [المدينة]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">حالة الطقس الآن</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:var(--gold);flex-shrink:0">مواقيت الصلاة</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">أوقات الصلاة حسب موقعك</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:var(--gold);flex-shrink:0">سعر الدولار / اليورو</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">أسعار العملات</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:var(--gold);flex-shrink:0">شغّل فيديو [موضوع]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">بحث YouTube مدمج</span>
+          </div>
+        </div>
+
+        <!-- ذاكرة وتعلم -->
+        <div style="font-size:.65rem;font-weight:800;color:#4ade80;margin:10px 0 5px;letter-spacing:.8px">🧠 الذاكرة والتعلم</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#4ade80;flex-shrink:0">احفظ أن [معلومة]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">تعليم معلومة جديدة</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#4ade80;flex-shrink:0">تذكر أن [معلومة]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">حفظ معلومة</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#4ade80;flex-shrink:0">اسمي [اسمك]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">يحفظ اسمك</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#4ade80;flex-shrink:0">ما اسمي؟</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">يتذكر اسمك</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#4ade80;flex-shrink:0">إحصائيات</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">إحصائيات الذاكرة</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#4ade80;flex-shrink:0">آخر ما تعلمت</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">آخر المعلومات المحفوظة</span>
+          </div>
+        </div>
+
+        <!-- تذكيرات -->
+        <div style="font-size:.65rem;font-weight:800;color:#a78bfa;margin:10px 0 5px;letter-spacing:.8px">⏰ التذكيرات والمنبه</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#a78bfa;flex-shrink:0">ذكّرني بـ [نص] الساعة [وقت]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">إضافة تذكير</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#a78bfa;flex-shrink:0">نبّهني بـ [نص] [الوقت]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">منبه صوتي</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#a78bfa;flex-shrink:0">فكّرني بـ [نص] [الوقت]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">تذكير بوقت محدد</span>
+          </div>
+        </div>
+
+        <!-- وقت وتاريخ -->
+        <div style="font-size:.65rem;font-weight:800;color:#fbbf24;margin:10px 0 5px;letter-spacing:.8px">🕐 الوقت والتاريخ</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#fbbf24;flex-shrink:0">كم الساعة الآن؟</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">الوقت الحالي</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#fbbf24;flex-shrink:0">ما اليوم؟ / التاريخ اليوم</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">التاريخ الميلادي والهجري</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#fbbf24;flex-shrink:0">كم عمر [شخص/شيء]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">حساب العمر</span>
+          </div>
+        </div>
+
+        <!-- ترجمة -->
+        <div style="font-size:.65rem;font-weight:800;color:#f472b6;margin:10px 0 5px;letter-spacing:.8px">🌐 الترجمة</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#f472b6;flex-shrink:0">ترجم [النص]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">ترجمة فورية</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#f472b6;flex-shrink:0">ترجم آخر رد</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">ترجمة آخر إجابة</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#f472b6;flex-shrink:0">translate [text]</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">ترجمة بالإنجليزية</span>
+          </div>
+        </div>
+
+        <!-- حسابات سريعة -->
+        <div style="font-size:.65rem;font-weight:800;color:#c084fc;margin:10px 0 5px;letter-spacing:.8px">🔢 حسابات سريعة من المحادثة</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#c084fc;flex-shrink:0">25 × 4 + 10</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">عمليات حسابية مباشرة</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#c084fc;flex-shrink:0">جذر 144</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">الجذر التربيعي</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#c084fc;flex-shrink:0">مساحة دائرة نصف قطرها 5</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">هندسة تلقائية</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:#c084fc;flex-shrink:0">أعداد أولية بين 1 و 50</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">نظرية الأعداد</span>
+          </div>
+        </div>
+
+        <!-- محادثة عامة -->
+        <div style="font-size:.65rem;font-weight:800;color:var(--text2);margin:10px 0 5px;letter-spacing:.8px">💬 محادثة عامة</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:var(--text2);flex-shrink:0">من أنت؟</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">يعرّف بنفسه</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:var(--text2);flex-shrink:0">أين أنا؟</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">الوقت والتاريخ معاً</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:var(--text2);flex-shrink:0">مراجعة</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">اختبر ما حفظته</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:8px;gap:8px">
+            <code style="font-size:.73rem;color:var(--text2);flex-shrink:0">صباح الخير / مساء الخير</code>
+            <span style="font-size:.65rem;color:var(--text3);text-align:left">تحية ورد</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /p-guide -->
     </div><!-- /scroll area -->
   </div><!-- /screen-body -->
 </div><!-- /settings -->
@@ -12490,7 +12745,7 @@ if(cc){
     '<div class="welcome-hero">'+
     '<div class="welcome-crown"><i class="fas fa-crown"></i></div>'+
     '<div class="welcome-title">The <span>King</span> AI</div>'+
-    '<div class="welcome-desc">مساعدك الذكي — يتعلم، يبحث، ويجيب بدقة</div>'+
+    '<div class="welcome-desc">مساعدك الذكي الملكي — يتعلم، يبحث ويجيب · Claude · Gemini · بدون إنترنت</div>'+
     '<div class="welcome-chips">'+
     '<span class="welcome-chip" data-fill="ما هو الذكاء الاصطناعي؟"><i class="fas fa-brain" style="color:var(--gold)"></i> اسأل أي شيء</span>'+
     '<span class="welcome-chip" data-fill="ما آخر الأخبار؟"><i class="fas fa-globe" style="color:#38bdf8"></i> ابحث في الإنترنت</span>'+
@@ -12598,7 +12853,7 @@ if('serviceWorker' in navigator){
    يعمل بالكامل بدون إنترنت بعد أول تحميل
 ═══════════════════════════════════════════════════════════ */
 
-const VER = 'king-ai-v25.0';
+const VER = 'king-ai-v25.1';
 const SCOPE = self.registration.scope;
 
 /* الملفات المطلوب تخزينها مسبقاً */
@@ -12836,19 +13091,25 @@ async function _requestPermissions() {
   /* 1️⃣ إشعارات — الأهم */
   try {
     if ('Notification' in window) {
-      if (Notification.permission === 'default') {
+      const perm = Notification.permission;
+      if (perm === 'default') {
+        // طلب الإذن
         const p = await Notification.requestPermission();
         results.notification = p;
-        if (p === 'granted' && typeof toast === 'function') {
-          toast('✅ تم تفعيل الإشعارات — المنبه سيعمل الآن', 3000);
-        } else if (p === 'denied' && typeof toast === 'function') {
-          toast('⚠️ الإشعارات مرفوضة — فعّلها من إعدادات الهاتف', 4000);
+        if (p === 'granted') {
+          if (typeof toast === 'function') toast('✅ تم تفعيل الإشعارات!', 3000);
+        } else if (p === 'denied') {
+          if (typeof toast === 'function') toast('⚠️ مرفوض — فعّل الإشعارات من إعدادات الهاتف', 5000);
         }
+      } else if (perm === 'denied') {
+        results.notification = 'denied';
+        // أظهر تعليمات التفعيل
+        setTimeout(() => {
+          if (typeof toast === 'function')
+            toast('⚠️ الإشعارات مغلقة — إعدادات الهاتف ← التطبيقات ← King AI ← إشعارات ← فعّل', 6000);
+        }, 1500);
       } else {
-        results.notification = Notification.permission;
-        if (Notification.permission === 'denied' && typeof toast === 'function') {
-          setTimeout(() => toast('⚠️ الإشعارات مرفوضة — فعّلها من: إعدادات التطبيق ← إشعارات', 5000), 1000);
-        }
+        results.notification = 'granted';
       }
     }
   } catch(e) { results.notification = 'error'; }
@@ -12913,50 +13174,79 @@ navigator.serviceWorker?.addEventListener('message', e => {
 });
 
 /* ─── طلب الأذونات عند أول فتح بعد التثبيت ─── */
-(async function _initPermissions() {
-  // انتظر حتى يتم التحميل الكامل
-  await new Promise(r => {
-    if (document.readyState === 'complete') { r(); return; }
-    window.addEventListener('load', r, { once: true });
-  });
+/* ════ تفعيل الإشعارات عند أول تفاعل ════ */
+let _permAsked = false;
 
-  // تأخير قصير ثم طلب الإذن
-  await new Promise(r => setTimeout(r, 1200));
-
-  // طلب الأذونات — مرة واحدة فقط أو إذا لم تُمنح بعد
-  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-    // أظهر toast للمستخدم قبل طلب الإذن
-    if (typeof toast === 'function') {
-      toast('🔔 نحتاج إذن الإشعارات لتشغيل المنبهات', 3000);
+async function _askPermOnce() {
+  if (_permAsked) return;
+  _permAsked = true;
+  if (typeof Notification === 'undefined') return;
+  if (Notification.permission !== 'default') {
+    // إذا كانت مرفوضة — أظهر تعليمات
+    if (Notification.permission === 'denied') {
+      setTimeout(() => {
+        if (typeof toast === 'function')
+          toast('⚠️ الإشعارات مغلقة — إعدادات الهاتف ← King AI ← إشعارات ← شغّل', 6000);
+      }, 500);
     }
-    await new Promise(r => setTimeout(r, 800));
+    await _syncRemindersToSW();
+    return;
   }
+  // طلب الإذن (يحتاج تفاعل المستخدم)
+  if (typeof toast === 'function') toast('🔔 فعّل الإشعارات للمنبهات', 2000);
   const perms = await _requestPermissions();
-  console.info('[App] Permissions:', perms);
-
-  // إشعار ترحيبي مرة واحدة فقط عند أول تثبيت
   if (perms.notification === 'granted') {
-    const _welcomeKey = 'king_ai_welcomed_v25';
-    if (!localStorage.getItem(_welcomeKey)) {
-      localStorage.setItem(_welcomeKey, '1');
+    if (typeof toast === 'function') toast('✅ الإشعارات مفعّلة — المنبه سيعمل!', 3000);
+    // إشعار ترحيبي مرة واحدة
+    const wKey = 'king_ai_welcomed_v25';
+    if (!localStorage.getItem(wKey)) {
+      localStorage.setItem(wKey, '1');
       try {
         const reg = await navigator.serviceWorker.ready;
-        await reg.showNotification('👑 King AI جاهز!', {
+        await reg.showNotification('👑 King AI', {
           body: 'المنبه سيعمل حتى عند إغلاق التطبيق ✅',
-          icon: './icon-512.png',
-          badge: './icon-192.png',
-          tag: 'welcome',
-          silent: true,
-          dir: 'rtl',
-          lang: 'ar',
-          requireInteraction: false,
+          icon: './icon-512.png', badge: './icon-192.png',
+          tag: 'welcome', silent: true, dir: 'rtl', lang: 'ar',
         });
       } catch(e) {}
     }
   }
-
-  // مزامنة التذكيرات للـ SW
   await _syncRemindersToSW();
+}
+
+(async function _initPermissions() {
+  // انتظر التحميل الكامل
+  await new Promise(r => {
+    if (document.readyState === 'complete') { r(); return; }
+    window.addEventListener('load', r, { once: true });
+  });
+  // انتظر SW
+  try { if ('serviceWorker' in navigator) await navigator.serviceWorker.ready; } catch(e) {}
+
+  // مزامنة التذكيرات فوراً
+  await _syncRemindersToSW();
+
+  // اطلب الإذن عند أول ضغطة في التطبيق
+  document.addEventListener('click', () => _askPermOnce(), { once: true });
+  document.addEventListener('touchstart', () => _askPermOnce(), { once: true });
+
+  // إذا الإذن ممنوح مسبقاً — لا تطلب شيء، فقط زامن
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    _permAsked = true;
+    await _syncRemindersToSW();
+    return;
+  }
+
+  // بعد 3 ثوانٍ أظهر تلميح
+  setTimeout(() => {
+    if (!_permAsked && typeof toast === 'function' && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      toast('🔔 اضغط في أي مكان لتفعيل المنبهات', 4000);
+    }
+  }, 3000);
+
+  // للحصول على perms (متغير مستخدم لاحقاً)
+  const perms = { notification: typeof Notification !== 'undefined' ? Notification.permission : 'unsupported' };
+  console.info('[App] Permissions init done');
 })();
 
 /* ─── saveReminders تحتوي مزامنة SW تلقائياً ─── */
