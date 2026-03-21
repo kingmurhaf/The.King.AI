@@ -6816,12 +6816,18 @@ try{reminders=JSON.parse(localStorage.getItem(RK)||'[]');}catch(e){}
 async function _syncFromIDB(){
   try{
     const raw=await idbGet(SK);if(!raw)return;
-    const p=JSON.parse(raw);if(!p||!p.knowledge)return;
+    const p=JSON.parse(raw);if(!p)return;
     const pTime=(p.meta&&p.meta.updated)||0;
     const dbTime=(DB.meta&&DB.meta.updated)||0;
-    if(pTime>dbTime){
+    if(pTime>=dbTime){
+      /* IDB أحدث أو مساوٍ — مصدر الحقيقة الوحيد */
       DB=migrate({...DEF_DB,...p});updateStats();
-      sysMsg('<i class="fas fa-database"></i> تم تحميل ذاكرة أحدث ('+Object.keys(DB.knowledge).length+' معلومة)');
+      if(Object.keys(DB.knowledge).length>0)
+        sysMsg('<i class="fas fa-database"></i> تم تحميل الذاكرة ('+Object.keys(DB.knowledge).length+' معلومة)');
+    } else if(!p.knowledge||Object.keys(p.knowledge).length===0){
+      /* IDB فارغ من المعرفة — انقل إليه من الذاكرة المحلية */
+      if(DB.knowledge&&Object.keys(DB.knowledge).length>0)
+        idbSet(SK,JSON.stringify(DB)).catch(()=>{});
     }
   }catch(e){}
 }
@@ -6835,7 +6841,7 @@ function saveDB(now=false){
 }
 function _doSave(){
   _saveT=null;
-  DB.meta.updated=Date.now(); // ← timestamp لمقارنة IDB vs localStorage
+  DB.meta.updated=Date.now();
   if(DB.history.length>S.maxMsgs)DB.history=DB.history.slice(-S.maxMsgs);
   if(DB.learnLog.length>500)DB.learnLog=DB.learnLog.slice(-500);
   if(S.maxKnowledge>0&&Object.keys(DB.knowledge).length>S.maxKnowledge){
@@ -6843,19 +6849,34 @@ function _doSave(){
     const toRemove=keys.slice(0,keys.length-S.maxKnowledge);
     toRemove.forEach(k=>delete DB.knowledge[k]);
   }
-  const data=JSON.stringify(DB);
-  idbSet(SK,data).catch(()=>{});
-  try{localStorage.setItem(SK,data);}catch(e){
-    if(e.name==='QuotaExceededError'||e.code===22){
-      DB.history=DB.history.slice(-100);DB.learnLog=DB.learnLog.slice(-50);
-      try{localStorage.setItem(SK,JSON.stringify(DB));}catch(e2){}
-      sysMsg('<i class="fas fa-exclamation-triangle"></i> مساحة محدودة — تم تقليص السجل');
-    }
-  }
+
+  /* ═══ IndexedDB: الحفظ الكامل — بلا حد عملي (مئات MB) ═══ */
+  idbSet(SK,JSON.stringify(DB)).catch(()=>{});
+
+  /* ═══ localStorage: نسخة خفيفة جداً — بدون knowledge/entities
+     الهدف: fallback سريع عند أول تحميل قبل IDB فقط
+     حجمها دائماً أقل من 200KB بغض النظر عن عدد الأسئلة
+  ════════════════════════════════════════════════════════════ */
+  try{
+    const lite=JSON.stringify({
+      meta:DB.meta, memory:DB.memory,
+      history:DB.history.slice(-50),
+      learnLog:DB.learnLog.slice(-100),
+      stats:DB.stats, flags:DB.flags,
+      entities:{}, knowledge:{}
+    });
+    localStorage.setItem(SK,lite);
+  }catch(e){ /* حتى لو فشل localStorage — IDB يكفي تماماً */ }
+
   showInd('saved');checkQuota();updateStats();
 }
 function checkQuota(){
-  try{const used=JSON.stringify(DB).length;const w=document.getElementById('quotaWarn');if(w)w.classList.toggle('on',used>4.5*1024*1024);}catch(e){}
+  /* IDB يدعم مئات MB — نحذّر فقط عند 500,000 إدخال (~1GB) */
+  try{
+    const kb=Object.keys(DB.knowledge||{}).length;
+    const w=document.getElementById('quotaWarn');
+    if(w) w.classList.toggle('on', kb>500000);
+  }catch(e){}
 }
 window.addEventListener('beforeunload',()=>{if(_saveT){clearTimeout(_saveT);_doSave();}});
 
@@ -12050,6 +12071,23 @@ function initEvents(){
       return rem===0?sign+w:sign+w+' '+rem+'/'+fd;
     }
     return sign+fn+'/'+fd;
+  }
+
+  /* حل بديل باستخدام math.js مباشرة */
+  function solveWithMathJS(expr) {
+    try {
+      const result = math.evaluate(expr.replace(/×/g,'*').replace(/÷/g,'/'));
+      if (result !== undefined && result !== null) {
+        if(exprSub) exprSub.textContent = expr + ' =';
+        if(exprEl) { exprEl.textContent = result; exprEl.className = 'mk-result'; }
+        lastResult = result;
+        if(typeof mkHistoryAdd === 'function') mkHistoryAdd(expr, result, 'calc');
+      } else {
+        _showCalcError('لم أستطع حساب هذه المعادلة');
+      }
+    } catch(e) {
+      _showCalcError('خطأ في الحساب: ' + e.message);
+    }
   }
 
   /* خطأ على الشاشة */
