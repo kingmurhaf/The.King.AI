@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; frame-src https://www.youtube-nocookie.com https://www.youtube.com; connect-src 'self' https:; worker-src 'self' blob:;"/>
+<meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
 <title>👑 The King AI</title>
 <meta name="description" content="The King AI — مساعدك الذكي المحلي | Developed by Murhaf Hassan"/>
 <meta name="author" content="Murhaf Hassan"/>
@@ -3091,7 +3094,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
     <div class="vid-island-title"><i class="fab fa-youtube" style="color:#ff3333;"></i><span id="vidIslandQ">نتائج الفيديو</span></div>
     <div style="display:flex;align-items:center;gap:6px;">
       <div id="vidIslandLoad" style="display:none;"><i class="fas fa-circle-notch fa-spin" style="color:var(--gold);font-size:13px;"></i></div>
-      <button id="vidIslandDl" onclick="if(window._currentVidId){const u='https://www.youtube.com/watch?v='+window._currentVidId;_viShowDlOptions(window._currentVidId,u);}else{toast('شغّل فيديو أولاً',1500);}" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fas fa-download"></i> تحميل</button>
+      <button id="vidIslandDl" onclick="if(window._currentVidId){_viShowShareOptions(window._currentVidId);}else{toast('شغّل فيديو أولاً',1500);}" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fas fa-download"></i> تحميل</button>
       <button class="vid-island-close" id="vidIslandClose"><i class="fas fa-times"></i></button>
     </div>
   </div>
@@ -5492,6 +5495,12 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
 
     <!-- ══ API ══ -->
     <div id="p-api" class="s-panel">
+      <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:11px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start">
+        <i class="fas fa-shield-alt" style="color:#fbbf24;margin-top:2px;flex-shrink:0"></i>
+        <div style="font-size:.74rem;color:var(--text2);line-height:1.7">
+          <strong style="color:#fbbf24">تنبيه أمني:</strong> المفاتيح مشفّرة ومخزّنة محلياً على جهازك فقط. لا تشارك الجهاز مع أشخاص غير موثوقين ولا تفتح هذه الإعدادات أمامهم. المفاتيح تُرسل مباشرة من متصفحك إلى خوادم AI.
+        </div>
+      </div>
       <div class="api-key-card">
         <div class="card-title"><i class="fas fa-robot"></i> مفتاح Claude (Anthropic)</div>
         <p style="font-size:.78rem;color:var(--text2);line-height:1.8;margin-bottom:8px">من <strong style="color:var(--gold)">console.anthropic.com</strong> — يبدأ بـ <code style="background:var(--surface3);padding:1px 5px;border-radius:4px">sk-ant-</code></p>
@@ -5536,6 +5545,34 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
           <button class="ai-btn ai-gemini" data-ai="gemini">✦ Gemini</button>
         </div>
         <p class="form-meta">تلقائي: Claude إن وُجد مفتاحه، وإلا Gemini</p>
+      </div>
+
+      <!-- ══ Gemini Nano ══ -->
+      <div class="card" id="nanoCard">
+        <div class="card-title"><i class="fas fa-microchip" style="color:#4ade80"></i> Gemini Nano <span style="font-size:.65rem;background:rgba(74,222,128,.12);color:#4ade80;padding:2px 8px;border-radius:8px;font-weight:600">على الجهاز</span></div>
+        <p style="font-size:.75rem;color:var(--text2);line-height:1.8;margin-bottom:10px">ذكاء اصطناعي يعمل <strong>بدون إنترنت</strong> مباشرة على جهازك. يتطلب Chrome 127+ أو Android Chrome.</p>
+        <div id="nanoStatus" style="font-size:.74rem;margin-bottom:10px;padding:8px 12px;border-radius:8px;background:var(--surface2)">
+          <i class="fas fa-circle-notch fa-spin"></i> جارٍ التحقق...
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:.8rem;font-weight:700">تفعيل Gemini Nano</span>
+          <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">
+            <input type="checkbox" id="nanoToggle" style="opacity:0;width:0;height:0">
+            <span id="nanoSlider" style="position:absolute;inset:0;background:var(--surface3);border-radius:24px;transition:.3s;cursor:pointer">
+              <span style="position:absolute;height:18px;width:18px;right:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;display:block" id="nanoThumb"></span>
+            </span>
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:.8rem;font-weight:700">استخدامه بدون نت فقط</span>
+          <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">
+            <input type="checkbox" id="nanoOfflineOnly" checked style="opacity:0;width:0;height:0">
+            <span style="position:absolute;inset:0;background:#4ade80;border-radius:24px;transition:.3s;cursor:pointer">
+              <span style="position:absolute;height:18px;width:18px;left:23px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;display:block"></span>
+            </span>
+          </label>
+        </div>
+        <p style="font-size:.68rem;color:var(--text3);margin-top:8px"><i class="fas fa-info-circle"></i> عند التفعيل يُستخدم Nano بدل الردود المحلية عندما لا يوجد اتصال</p>
       </div>
 
       <div class="card">
@@ -5717,7 +5754,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
 
       <!-- PIN -->
       <div class="card">
-        <div class="card-title"><i class="fas fa-lock"></i> قفل رمز PIN</div>
+        <div class="card-title"><i class="fas fa-lock"></i> قفل رمز PIN <span style="font-size:.65rem;color:#4ade80;font-weight:600;background:rgba(74,222,128,.1);padding:2px 7px;border-radius:8px;margin-right:6px"><i class="fas fa-shield-alt"></i> SHA-256</span></div>
         <div class="form-group">
           <label class="form-label"><input type="checkbox" id="chkLock"> تفعيل قفل PIN عند الفتح</label>
           <label class="form-label" style="flex-direction:column;align-items:flex-start">
@@ -5739,7 +5776,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
           <div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center;font-size:.75rem">
             <div style="font-size:1.4rem;margin-bottom:4px">🔒</div>
             <div style="font-weight:700;color:var(--text)">محلي 100%</div>
-            <div style="color:var(--text3)">لا إرسال للسيرفر</div>
+            <div style="color:var(--text3)">بياناتك محلية فقط</div>
           </div>
           <div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center;font-size:.75rem">
             <div style="font-size:1.4rem;margin-bottom:4px">💾</div>
@@ -5826,6 +5863,26 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
           <button class="btn" id="copyJsonBtn"><i class="fas fa-copy"></i> نسخ</button>
           <button class="btn" id="shareBtn"><i class="fas fa-share-alt"></i> مشاركة</button>
           <button class="btn" id="impBtn"><i class="fas fa-upload"></i> استيراد</button>
+        </div>
+      </div>
+
+      <!-- ══ تحديث قاعدة المعرفة السحابية ══ -->
+      <div class="card" id="cloudKbCard">
+        <div class="card-title"><i class="fas fa-cloud-download-alt" style="color:var(--gold)"></i> قاعدة المعرفة السحابية</div>
+        <p style="font-size:.77rem;color:var(--text2);line-height:1.8;margin-bottom:10px">
+          حمّل أحدث نسخة من قاعدة المعرفة العامة. يتم الدمج مع ذاكرتك الحالية دون حذف أي شيء.
+        </p>
+        <div id="cloudKbStatus" style="font-size:.74rem;color:var(--text3);margin-bottom:10px;min-height:18px;display:flex;align-items:center;gap:6px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn primary" id="cloudKbUpdateBtn" style="display:flex;align-items:center;gap:6px">
+            <i class="fas fa-sync-alt"></i> تحديث الآن
+          </button>
+          <button class="btn" id="cloudKbCheckBtn" style="display:flex;align-items:center;gap:6px">
+            <i class="fas fa-search"></i> تحقق من تحديثات
+          </button>
+        </div>
+        <div id="cloudKbInfo" style="margin-top:10px;font-size:.72rem;color:var(--text3);display:none">
+          <span id="cloudKbVersion"></span> · <span id="cloudKbCount"></span> · <span id="cloudKbDate"></span>
         </div>
       </div>
     </div>
@@ -6282,7 +6339,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
       <!-- مساحة التخزين -->
       <div id="ytproStorageBar" style="padding:10px 14px;background:rgba(255,0,0,.04);border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-          <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:700"><i class="fas fa-hdd" style="color:#ff4444;margin-left:5px"></i> التخزين المحلي</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:700"><i class="fas fa-hdd" style="color:#ff4444;margin-left:5px"></i> المكتبة المحلية</span>
           <span id="ytproStorageUsed" style="font-size:11px;color:rgba(255,255,255,.5);font-weight:700">0 MB</span>
         </div>
         <div style="height:4px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden">
@@ -6423,7 +6480,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
       <div class="ytpro-player-actions">
         <button class="ytpro-player-btn ytpro-player-btn-dl" id="ytproPlayerDlBtn"
           onclick="_ytproPlayerDownload()">
-          <i class="fas fa-download"></i> تنزيل أوف لاين
+          <i class="fas fa-share-alt"></i> مشاركة
         </button>
         <button class="ytpro-player-btn ytpro-player-btn-save" id="ytproPlayerSaveBtn"
           onclick="_ytproPlayerSave()">
@@ -6475,10 +6532,77 @@ let S={
 /* ═══ API KEY STORE ═══ */
 const AK='KAI_v24_API';
 let _apiKey='';
-function _obf(s){try{return btoa(s.split('').reverse().join(''));}catch(e){return s;}}
-function _deob(s){try{return atob(s).split('').reverse().join('');}catch(e){return s;}}
-function loadApiKey(){try{const v=localStorage.getItem(AK)||'';_apiKey=v?_deob(v):'';}catch(e){}finally{_updateApiStatus();}}
-function saveApiKey(k){try{if(k)localStorage.setItem(AK,_obf(k));else localStorage.removeItem(AK);_apiKey=k||'';}catch(e){}finally{_updateApiStatus();}}
+/* ── AES-GCM Encryption (256-bit, per-device key) ── */
+/* يستخدم Web Crypto API — تشفير حقيقي بدلاً من XOR */
+const _KAI_CK = '_KAI_CK2';
+let _cachedCryptoKey = null;
+
+function _getDeviceSalt(){
+  /* محتفظ به للـ _hashPin فقط */
+  try{
+    let s=localStorage.getItem('_KAI_DS');
+    if(!s){const arr=new Uint8Array(32);crypto.getRandomValues(arr);s=Array.from(arr,b=>b.toString(16).padStart(2,'0')).join('');localStorage.setItem('_KAI_DS',s);}
+    return s;
+  }catch(e){return 'KAI_static_fallback_salt_32chars_v1';}
+}
+
+async function _getAESKey(){
+  if(_cachedCryptoKey) return _cachedCryptoKey;
+  try{
+    const stored=localStorage.getItem(_KAI_CK);
+    if(stored){
+      const raw=Uint8Array.from(atob(stored),c=>c.charCodeAt(0));
+      _cachedCryptoKey=await crypto.subtle.importKey('raw',raw,{name:'AES-GCM'},false,['encrypt','decrypt']);
+      return _cachedCryptoKey;
+    }
+    const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+    const exported=await crypto.subtle.exportKey('raw',key);
+    localStorage.setItem(_KAI_CK,btoa(String.fromCharCode(...new Uint8Array(exported))));
+    _cachedCryptoKey=key;
+    return _cachedCryptoKey;
+  }catch(e){return null;}
+}
+
+/* تشفير — يعيد نص مشفر AES-GCM أو XOR fallback */
+async function _obf(s){
+  try{
+    const key=await _getAESKey();
+    if(!key) throw new Error('no-key');
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const enc=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(s));
+    const buf=new Uint8Array(12+enc.byteLength);
+    buf.set(iv); buf.set(new Uint8Array(enc),12);
+    return 'AES1:'+btoa(String.fromCharCode(...buf));
+  }catch(e){
+    /* XOR fallback */
+    const salt=_getDeviceSalt();
+    const xored=Array.from(s).map((c,i)=>String.fromCharCode(c.charCodeAt(0)^salt.charCodeAt(i%salt.length))).join('');
+    return btoa(unescape(encodeURIComponent(xored)));
+  }
+}
+
+/* فك التشفير — يدعم AES-GCM الجديد + XOR القديم تلقائياً */
+async function _deob(s){
+  try{
+    if(s.startsWith('AES1:')){
+      const key=await _getAESKey();
+      if(!key) throw new Error('no-key');
+      const buf=Uint8Array.from(atob(s.slice(5)),c=>c.charCodeAt(0));
+      const dec=await crypto.subtle.decrypt({name:'AES-GCM',iv:buf.slice(0,12)},key,buf.slice(12));
+      return new TextDecoder().decode(dec);
+    }
+    /* Legacy XOR */
+    const salt=_getDeviceSalt();
+    const raw=decodeURIComponent(escape(atob(s)));
+    return Array.from(raw).map((c,i)=>String.fromCharCode(c.charCodeAt(0)^salt.charCodeAt(i%salt.length))).join('');
+  }catch(e){try{return decodeURIComponent(escape(atob(s)));}catch(e2){return s;}}
+}
+/* ── PIN Hashing via WebCrypto SHA-256 ── */
+async function _hashPin(pin){
+  try{const salt=_getDeviceSalt();const data=new TextEncoder().encode(pin+salt);const buf=await crypto.subtle.digest('SHA-256',data);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){return btoa(pin+_getDeviceSalt().slice(0,8));}
+}
+async function loadApiKey(){try{const v=localStorage.getItem(AK)||'';_apiKey=v?(await _deob(v)):'';}catch(e){}finally{_updateApiStatus();}}
+async function saveApiKey(k){try{if(k)localStorage.setItem(AK,await _obf(k));else localStorage.removeItem(AK);_apiKey=k||'';}catch(e){}finally{_updateApiStatus();}}
 function getApiKey(){return _apiKey||'';}
 function _updateApiStatus(){
   const st=document.getElementById('apiKeyStatus');if(!st)return;
@@ -6496,8 +6620,8 @@ function _updateApiStatus(){
 /* ═══ GEMINI KEY STORE ═══ */
 const GK='KAI_v24_GEMINI';
 let _geminiKey='';
-function loadGeminiKey(){try{const v=localStorage.getItem(GK)||'';_geminiKey=v?_deob(v):'';}catch(e){}finally{_updateGeminiStatus();}}
-function saveGeminiKey(k){try{if(k)localStorage.setItem(GK,_obf(k));else localStorage.removeItem(GK);_geminiKey=k||'';}catch(e){}finally{_updateGeminiStatus();}}
+async function loadGeminiKey(){try{const v=localStorage.getItem(GK)||'';_geminiKey=v?(await _deob(v)):'';}catch(e){}finally{_updateGeminiStatus();}}
+async function saveGeminiKey(k){try{if(k)localStorage.setItem(GK,await _obf(k));else localStorage.removeItem(GK);_geminiKey=k||'';}catch(e){}finally{_updateGeminiStatus();}}
 function getGeminiKey(){return _geminiKey||'';}
 function _updateGeminiStatus(){
   const st=document.getElementById('geminiKeyStatus');if(!st)return;
@@ -6525,11 +6649,11 @@ function _syncAiEngineBtn(){
 /* ── مفتاح Serper.dev (Google Search مجاني) ── */
 const GGL_KEY_K = 'KAI_v24_SERPER';
 let _serperKey = '';
-function loadGoogleKey() {
-  try { _serperKey = localStorage.getItem(GGL_KEY_K) || ''; } catch(e) {}
+async function loadGoogleKey() {
+  try { const v=localStorage.getItem(GGL_KEY_K)||''; _serperKey=v?(await _deob(v)):''; } catch(e) {}
 }
-function saveGoogleKey(k) {
-  try { if(k) localStorage.setItem(GGL_KEY_K, k); else localStorage.removeItem(GGL_KEY_K); _serperKey = k||''; } catch(e) {}
+async function saveGoogleKey(k) {
+  try { if(k) localStorage.setItem(GGL_KEY_K,await _obf(k)); else localStorage.removeItem(GGL_KEY_K); _serperKey=k||''; } catch(e) {}
 }
 function getGoogleKey() { return _serperKey || ''; }
 function getGoogleCx()  { return ''; } // not used with Serper
@@ -8707,6 +8831,273 @@ function qtype(t){
   if(/^لماذا|^ليش|^ليه/.test(l))return'why';
   return'general';
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   👑 OccasionEngine — محرك المناسبات الذكي
+   يربط التاريخ الحالي بالمحادثة ويجيب عن أسئلة المناسبات
+═══════════════════════════════════════════════════════════════ */
+const OccasionEngine = (function() {
+  'use strict';
+
+  /* ── رسائل التهنئة ── */
+  const GREETINGS = {
+    eid_fitr:    ['عيد فطر مبارك! 🎉 كل عام وأنتم بخير — أعاده الله علينا باليُمن والبركات.',
+                  'تقبّل الله طاعاتكم وصيامكم، عيد فطر سعيد! 🌙'],
+    eid_adha:    ['عيد أضحى مبارك! 🎊 تقبّل الله منا ومنكم صالح الأعمال.',
+                  'كل عام وأنتم بخير بمناسبة عيد الأضحى المبارك! 🕌'],
+    ramadan:     ['رمضان كريم! 🌙 أعاده الله علينا وعليكم بالخير والبركة.',
+                  'مبارك عليكم شهر رمضان المبارك — شهر الرحمة والمغفرة 🌙✨'],
+    laylat:      ['ليلة القدر مباركة! 💫 خير من ألف شهر — اللهم اجعلنا من المقبولين.',
+                  'ليلة مباركة — أكثروا فيها من الدعاء والذكر 💫'],
+    mawlid:      ['بمناسبة المولد النبوي الشريف ⭐ — اللهم صلِّ وسلِّم على سيدنا محمد.',
+                  'ذكرى المولد النبوي الشريف — أكثروا من الصلاة على النبي ﷺ ⭐'],
+    isra:        ['بمناسبة الإسراء والمعراج المبارك ✨ — سبحان من أسرى بعبده ليلاً.',
+                  'ذكرى الإسراء والمعراج — ليلة عظيمة غيّرت مسار الإسلام ✨'],
+    muharram:    ['سنة هجرية جديدة مباركة! 🌙🗓 أعادها الله علينا وعليكم بالخير.',
+                  'رأس السنة الهجرية — كل عام والأمة الإسلامية بخير 🌙'],
+    ashura:      ['يوم عاشوراء المبارك 🕌 — يوم صيام وعبادة وذكر.',
+                  'اليوم العاشر من المحرم — يوم مبارك عظيم 🕌'],
+    arafah:      ['يوم وقفة عرفة المبارك 🕌 — أعظم أيام السنة، ادعوا الله كثيراً.',
+                  'يوم عرفة — يوم المغفرة والعتق من النار، أكثروا من الدعاء 🕌'],
+    newyear:     ['كل عام وأنتم بخير! 🎆 سنة ميلادية جديدة مباركة.',
+                  'عام جديد سعيد! أتمنى لكم سنة مليئة بالخير والنجاح 🎆'],
+    arab_mothers:['كل عام وأمهاتنا بألف خير! 🌹 عيد الأم العربي مبارك — الجنة تحت أقدامهن.',
+                  'بمناسبة عيد الأم 🌹 — أغلى إنسانة في الحياة، كل عام وهي بخير وعافية.',
+                  'يوم الأم العربي 🌹 21 مارس — لا تنسى تهنئ أمك اليوم!'],
+    mothers:     ['عيد الأم الدولي مبارك! 💐 كل عام وأمهاتنا بألف خير وعافية.',
+                  'بمناسبة عيد الأم الدولي 💐 — الأم مدرسة إذا أعددتها أعددت شعباً.'],
+    fathers:     ['عيد الأب مبارك! 👨 كل عام والآباء بخير وصحة وعافية.',
+                  'بمناسبة عيد الأب 👨 — شكراً لكل أب يبذل ويعطي بلا حدود.'],
+    christmas:   ['عيد ميلاد مجيد! 🎄 كل عام وأنتم بخير.',
+                  'مبارك عيد الميلاد المجيد 🌟 — أتمنى لكم أعياداً سعيدة.'],
+    ksa_natl:    ['اليوم الوطني السعودي 🇸🇦 — كل عام والمملكة في تقدم وازدهار!',
+                  'تحيا المملكة العربية السعودية! 🇸🇦 يوم وطني مبارك.'],
+    uae_natl:    ['اليوم الوطني الإماراتي 🇦🇪 — كل عام والإمارات شامخة!',
+                  'مبارك اليوم الوطني للإمارات العربية المتحدة 🇦🇪'],
+    kw_natl:     ['اليوم الوطني الكويتي 🇰🇼 — كل عام والكويت بخير وأمان!'],
+    ksa_found:   ['يوم التأسيس السعودي 🟢 — ذكرى تأسيس المملكة العربية السعودية المجيدة.'],
+  };
+
+  /* ── الحصول على المناسبات الحالية واليوم التالي ── */
+  function _getTodayOccasions() {
+    const now = new Date(); now.setHours(0,0,0,0);
+    const gy = now.getFullYear(), gm = now.getMonth()+1, gd = now.getDate();
+    const results = [];
+
+    // فحص الإسلامية
+    try {
+      let hy = 1447;
+      const fmt = new Intl.DateTimeFormat('en-u-ca-islamic',{year:'numeric',timeZone:'UTC'});
+      const parts = {}; fmt.formatToParts(new Date(Date.UTC(gy,gm-1,gd))).forEach(({type,value})=>{parts[type]=value;});
+      hy = parseInt(parts.year)||1447;
+      if(typeof _getIslamicOccasions==='function') {
+        [hy, hy+1].forEach(hyy => {
+          _getIslamicOccasions(hyy).forEach(o => {
+            try {
+              const g = _hijriToGreg(o.hy||hyy, o.hm, o.hd);
+              if(g.y===gy && g.m===gm && g.d===gd) results.push({...o,type:'islamic'});
+            } catch(e){}
+          });
+        });
+      }
+    } catch(e){}
+
+    // فحص الميلادية
+    try {
+      if(typeof _getGregOccasions==='function') {
+        _getGregOccasions(gy).forEach(o => {
+          const oy = o.y||gy, om = o.m, od = o.d;
+          if(oy===gy && om===gm && od===gd) results.push({...o,type:'gregorian'});
+        });
+      }
+    } catch(e){}
+
+    return results;
+  }
+
+  /* ── تهنئة اليوم ── */
+  function getTodayGreeting() {
+    const occasions = _getTodayOccasions();
+    if(!occasions.length) return null;
+    const o = occasions[0];
+    const msgs = GREETINGS[o.key];
+    if(!msgs) return `${o.icon||'🎉'} ${o.name}`;
+    return msgs[Math.floor(Math.random()*msgs.length)];
+  }
+
+  /* ── تهنئة عند فتح التطبيق ── */
+  function getStartupGreeting() {
+    const occasions = _getTodayOccasions();
+    if(!occasions.length) return null;
+    const o = occasions[0];
+    const msgs = GREETINGS[o.key];
+    const msg = msgs ? msgs[0] : `${o.name} مبارك!`;
+    return { icon: o.icon||'🎉', name: o.name, msg, key: o.key };
+  }
+
+  /* ── أقرب مناسبة قادمة ── */
+  function getNextOccasion() {
+    const now = new Date(); now.setHours(0,0,0,0);
+    const gy = now.getFullYear();
+    const allOcc = [];
+
+    // إسلامية
+    try {
+      let hy = 1447;
+      const fmt = new Intl.DateTimeFormat('en-u-ca-islamic',{year:'numeric',timeZone:'UTC'});
+      const parts = {}; fmt.formatToParts(new Date(Date.UTC(gy,now.getMonth(),now.getDate()))).forEach(({type,value})=>{parts[type]=value;});
+      hy = parseInt(parts.year)||1447;
+      for(let hyy=hy;hyy<=hy+2;hyy++) {
+        if(typeof _getIslamicOccasions==='function') {
+          _getIslamicOccasions(hyy).forEach(o => {
+            try {
+              const g = _hijriToGreg(o.hy||hyy, o.hm, o.hd);
+              const d = new Date(g.y, g.m-1, g.d); d.setHours(0,0,0,0);
+              const diff = Math.round((d-now)/86400000);
+              if(diff>0) allOcc.push({...o,diff,date:d,gregStr:`${g.d} ${typeof AR_MONTHS!=='undefined'?AR_MONTHS[g.m-1]:(g.m+'/')} ${g.y}`});
+            } catch(e){}
+          });
+        }
+      }
+    } catch(e){}
+
+    // ميلادية
+    try {
+      if(typeof _getGregOccasions==='function') {
+        [gy,gy+1].forEach(y2 => {
+          _getGregOccasions(y2).forEach(o => {
+            const d = new Date(o.y||y2, o.m-1, o.d); d.setHours(0,0,0,0);
+            const diff = Math.round((d-now)/86400000);
+            if(diff>0) allOcc.push({...o,diff,date:d,gregStr:`${d.getDate()} ${typeof AR_MONTHS!=='undefined'?AR_MONTHS[d.getMonth()]:(d.getMonth()+1+'/')} ${d.getFullYear()}`});
+          });
+        });
+      }
+    } catch(e){}
+
+    allOcc.sort((a,b)=>a.diff-b.diff);
+    const next = allOcc[0];
+    if(!next) return null;
+    return `${next.icon||'📅'} **${next.name}** — بعد **${next.diff}** يوم (${next.gregStr})`;
+  }
+
+  /* ── قائمة المناسبات القادمة ── */
+  function getUpcomingList(count=5) {
+    const now = new Date(); now.setHours(0,0,0,0);
+    const gy = now.getFullYear();
+    const allOcc = [];
+
+    try {
+      let hy=1447;
+      const fmt=new Intl.DateTimeFormat('en-u-ca-islamic',{year:'numeric',timeZone:'UTC'});
+      const parts={}; fmt.formatToParts(new Date(Date.UTC(gy,now.getMonth(),now.getDate()))).forEach(({type,value})=>{parts[type]=value;});
+      hy=parseInt(parts.year)||1447;
+      for(let hyy=hy;hyy<=hy+2;hyy++){
+        if(typeof _getIslamicOccasions==='function'){
+          _getIslamicOccasions(hyy).forEach(o=>{
+            try{
+              const g=_hijriToGreg(o.hy||hyy,o.hm,o.hd);
+              const d=new Date(g.y,g.m-1,g.d);d.setHours(0,0,0,0);
+              const diff=Math.round((d-now)/86400000);
+              if(diff>=0) allOcc.push({...o,diff,date:d,gy:g.y,gm:g.m,gd:g.d});
+            }catch(e){}
+          });
+        }
+      }
+    }catch(e){}
+
+    try{
+      if(typeof _getGregOccasions==='function'){
+        [gy,gy+1].forEach(y2=>{
+          _getGregOccasions(y2).forEach(o=>{
+            const d=new Date(o.y||y2,o.m-1,o.d);d.setHours(0,0,0,0);
+            const diff=Math.round((d-now)/86400000);
+            if(diff>=0) allOcc.push({...o,diff,date:d,gy:d.getFullYear(),gm:d.getMonth()+1,gd:d.getDate()});
+          });
+        });
+      }
+    }catch(e){}
+
+    allOcc.sort((a,b)=>a.diff-b.diff);
+    const seen=new Set();
+    return allOcc.filter(o=>{if(seen.has(o.key))return false;seen.add(o.key);return true;}).slice(0,count);
+  }
+
+  /* ── جواب سؤال "مناسبة اليوم" ── */
+  function answerWhatIsToday() {
+    const occasions = _getTodayOccasions();
+    if(!occasions.length){
+      return 'لا توجد مناسبة خاصة اليوم 📅';
+    }
+    return occasions.map(o=>{
+      const msgs = GREETINGS[o.key];
+      const greeting = msgs ? msgs[0] : '';
+      return `${o.icon||'🎉'} **${o.name}**${greeting?'\n'+greeting:''}`;
+    }).join('\n\n');
+  }
+
+  /* ── جواب سؤال "متى عيد الأم" ── */
+  function findOccasionDate(query) {
+    const q = query.replace(/[أإآ]/g,'ا').replace(/[ةه]/g,'ه').toLowerCase();
+    const now = new Date(); now.setHours(0,0,0,0);
+    const gy = now.getFullYear();
+    const allOcc = [];
+
+    try{
+      let hy=1447;
+      const fmt=new Intl.DateTimeFormat('en-u-ca-islamic',{year:'numeric',timeZone:'UTC'});
+      const parts={}; fmt.formatToParts(new Date(Date.UTC(gy,now.getMonth(),now.getDate()))).forEach(({type,value})=>{parts[type]=value;});
+      hy=parseInt(parts.year)||1447;
+      for(let hyy=hy;hyy<=hy+1;hyy++){
+        if(typeof _getIslamicOccasions==='function'){
+          _getIslamicOccasions(hyy).forEach(o=>{
+            try{
+              const g=_hijriToGreg(o.hy||hyy,o.hm,o.hd);
+              const d=new Date(g.y,g.m-1,g.d);d.setHours(0,0,0,0);
+              const diff=Math.round((d-now)/86400000);
+              allOcc.push({...o,diff,date:d,gy:g.y,gm:g.m,gd:g.d});
+            }catch(e){}
+          });
+        }
+      }
+    }catch(e){}
+
+    try{
+      if(typeof _getGregOccasions==='function'){
+        [gy,gy+1].forEach(y2=>{
+          _getGregOccasions(y2).forEach(o=>{
+            const d=new Date(o.y||y2,o.m-1,o.d);d.setHours(0,0,0,0);
+            const diff=Math.round((d-now)/86400000);
+            allOcc.push({...o,diff,date:d,gy:d.getFullYear(),gm:d.getMonth()+1,gd:d.getDate()});
+          });
+        });
+      }
+    }catch(e){}
+
+    const found = allOcc.filter(o=>{
+      const name = (o.name||'').replace(/[أإآ]/g,'ا').replace(/[ةه]/g,'ه').toLowerCase();
+      return name.includes(q.slice(0,6)) || q.includes(name.slice(0,5));
+    }).sort((a,b)=>Math.abs(a.diff)-Math.abs(b.diff));
+
+    if(!found.length) return null;
+    const o = found[0];
+    const AR_MON = typeof AR_MONTHS!=='undefined' ? AR_MONTHS : ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const dateStr = `${o.gd} ${AR_MON[o.gm-1]} ${o.gy}`;
+    const diff = o.diff;
+    const diffStr = diff===0?'🎉 اليوم!':diff>0?`بعد ${diff} يوم`:diff>=-3?`مضى منذ ${Math.abs(diff)} يوم`:'';
+    return `${o.icon||'📅'} **${o.name}**\n📆 ${dateStr} ${diffStr}`;
+  }
+
+  return {
+    getTodayGreeting,
+    getStartupGreeting,
+    answerWhatIsToday,
+    getNextOccasion,
+    getUpcomingList,
+    findOccasionDate,
+    getTodayOccasions: _getTodayOccasions,
+  };
+})();
+
 function greeting(s){
   const l=s.trim();
   const ln=l.replace(/[أإآ]/g,'ا').replace(/[ةه]/g,'ه').replace(/[يى]/g,'ي').toLowerCase();
@@ -8716,11 +9107,25 @@ function greeting(s){
   if(/(?:^|[\s،,])سلا[مه](?:[\s!؟?.,،]|$)/.test(ln))return'أهلاً وسهلاً! كيف أخدمك؟';
   if(ln.includes('كيف حالك')||ln.includes('كيفك')||ln.includes('كيف الحال')||ln.includes('عامل ايه'))return'بخير وعافية، شكراً! كيف أخدمك؟';
   if(ln.includes('شكرا')||ln.includes('مشكور'))return'العفو، دائماً في الخدمة 😊';
+  // ── تهاني المناسبات ──
+  if(/عيد.*مبارك|مبارك.*عيد|رمضان.*كريم|كل.*عام|عساكم.*بخير|عساك.*بخير|تقبل.*الله/.test(ln)){
+    try{
+      const g=OccasionEngine.getTodayGreeting();
+      if(g) return g;
+    }catch(e){}
+    return 'وأنتم بخير! كل عام وأنتم بصحة وسعادة 🎉';
+  }
   if(ln.includes('ما اسمك')||ln.includes('من انت')||ln.includes('مين انت')||ln.includes('عرفني بنفسك'))return'أنا The King AI v24.2 ♛ — مساعدك الذكي المحلي مع دعم Claude وGemini وويكيبيديا!';
   if(ln.includes('مع السلامه')||ln.includes('باي')||ln.includes('وداعا'))return'مع السلامة، أتمنى لك يوماً رائعاً ♛';
-  if(ln.includes('صباح الخير'))return'صباح النور والسعادة 🌅';
+  if(ln.includes('صباح الخير')){
+    try{ const g=OccasionEngine.getTodayGreeting(); if(g) return 'صباح النور! 🌅\n\n'+g; }catch(e){}
+    return 'صباح النور والسعادة 🌅';
+  }
   if(/مساء الخير|مساء النور/.test(ln)||ln==='مساء')return'مساء النور 🌙';
-  if(ln.includes('اهلا')||ln.includes('مرحبا')||ln.includes('هلا'))return'أهلاً وسهلاً! 😊 كيف أقدر أساعدك؟';
+  if(ln.includes('اهلا')||ln.includes('مرحبا')||ln.includes('هلا')){
+    try{ const g=OccasionEngine.getTodayGreeting(); if(g) return 'أهلاً وسهلاً! 😊\n\n'+g+'\n\nكيف أقدر أساعدك؟'; }catch(e){}
+    return 'أهلاً وسهلاً! 😊 كيف أقدر أساعدك؟';
+  }
   if(ln.includes('ماذا تفعل')||ln.includes('ايش تسوي')||ln.includes('وش تسوي'))return'أنا هنا لمساعدتك! اسألني أي سؤال أو علّمني معلومة جديدة ♛';
   if((ln==='نعم'||ln==='اه'||ln==='اوك'||ln==='ok'||ln==='okay')&&DB.history.length>0)return'حسناً، أخبرني كيف أساعدك 😊';
   return null;
@@ -8795,6 +9200,47 @@ function respond(orig){
     if(ans){setKB(_lastUnanswered,ans,.98,'answer-after');upsertEnt(ans,ans,{});updateCtx(_lastUnanswered,ans,ans);_lastUnanswered=null;return{text:'تعلمت الإجابة',mainAns:'"'+ans+'"',ansType:'تعلم',ansClass:'learn',_util:true};}
   }
   const intr=introspect(lc);if(intr)return intr;
+  /* ══ أوامر المناسبات الذكية ══ */
+  if(/مناسبة.*اليوم|اليوم.*مناسبة|في.*مناسبة|هل.*مناسبة|مناسب.*اليوم/.test(lc)){
+    try{
+      const ans=OccasionEngine.answerWhatIsToday();
+      return{text:'مناسبة اليوم',mainAns:ans,ansType:'مناسبة',ansClass:'fact',_util:true};
+    }catch(e){}
+  }
+  if(/أقرب.*مناسبة|اقرب.*مناسبة|القادم.*مناسبة|مناسبة.*قادمة|أقرب.*عيد|اقرب.*عيد|شو.*مناسبة|وش.*مناسبة/.test(lc)){
+    try{
+      const next=OccasionEngine.getNextOccasion();
+      if(next) return{text:'أقرب مناسبة',mainAns:next,ansType:'مناسبة',ansClass:'fact',_util:true};
+    }catch(e){}
+  }
+  if(/قائمة.*مناسبات|المناسبات.*القادمة|قادم.*مناسبات|مناسبات.*قريبة|عندنا.*مناسبات/.test(lc)){
+    try{
+      const list=OccasionEngine.getUpcomingList(7);
+      if(list.length){
+        const AR_MON=typeof AR_MONTHS!=='undefined'?AR_MONTHS:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+        const txt=list.map(o=>{
+          const diff=o.diff===0?'🎉 اليوم':o.diff===1?'⏰ غداً':`بعد ${o.diff} يوم`;
+          return `${o.icon||'📅'} **${o.name}** — ${o.gd} ${AR_MON[o.gm-1]} ${o.gy} (${diff})`;
+        }).join('\n');
+        return{text:'المناسبات القادمة',mainAns:txt,ansType:'مناسبة',ansClass:'fact',_util:true};
+      }
+    }catch(e){}
+  }
+  /* ── متى عيد الأم / رمضان / ... ── */
+  if(/متى.*عيد|عيد.*متى|موعد.*عيد|متى.*رمضان|متى.*مناسبة|إمتى.*عيد|وقت.*عيد/.test(lc)){
+    const q2=lc.replace(/متى|موعد|إمتى|وقت|عيد|هو|هي/g,'').trim();
+    try{
+      const ans=OccasionEngine.findOccasionDate(q2||lc);
+      if(ans) return{text:'موعد المناسبة',mainAns:ans,ansType:'مناسبة',ansClass:'fact',_util:true};
+    }catch(e){}
+  }
+  /* ── عيد الأم اليوم / مبروك عيد الأم ── */
+  if(/عيد.*الام|عيد.*الأم|ام.*عيد|أم.*عيد/.test(lc)){
+    try{
+      const ans=OccasionEngine.findOccasionDate('عيد الأم');
+      if(ans) return{text:'عيد الأم',mainAns:ans,ansType:'مناسبة',ansClass:'fact',_util:true};
+    }catch(e){}
+  }
   /* ── اعتراض طلبات الترجمة ── */
   if(/^(?:ترجم|ترجمة|translate)\b/i.test(lc)){
     const _trM = orig.trim().match(/^(?:ترجم|ترجمة|translate)\s+(.+)$/i);
@@ -8846,6 +9292,128 @@ function respond(orig){
       return{text:'✓ تذكير مضاف',mainAns:'"'+txt+'" الساعة '+ts,ansType:'تذكير',ansClass:'fact',_util:true};
     }
   }
+
+  /* ════════════════════════════════════════════════════════
+     🤖 الأوامر الذكية — يتحكم الذكاء بمميزات التطبيق
+  ════════════════════════════════════════════════════════ */
+
+  // ── افتح الحاسبة / الرياضيات ──
+  if(/افتح.*حاسب|شغّل.*حاسب|اريد.*حاسب|ابي.*حاسب|حاسبة|حاسب.*علمي|المصفوفات|آلة.*حاسبة/.test(lc)){
+    setTimeout(()=>{
+      try{
+        const tab=document.querySelector('[data-mkt="sci"]');
+        if(tab){tab.click();const p=document.getElementById('mathPanel');if(p)p.classList.add('on');}
+        const mathBtn=document.getElementById('mathKbBtn');if(mathBtn)mathBtn.click();
+      }catch(e){}
+    },300);
+    return{text:'✓ فتح الحاسبة',mainAns:'📱 جارٍ فتح الحاسبة...',ansType:'أمر',ansClass:'fact',_util:true};
+  }
+
+  // ── ارسم دالة 2D ──
+  const draw2dMatch = orig.match(/(?:ارسم|ارسم لي|اريني|أرني|plot|رسم)\s+(?:دالة\s+)?(?:المعادلة\s+)?(.+)/i);
+  if(draw2dMatch && !/3d|ثلاثي|ثلاث/i.test(lc)){
+    const expr = draw2dMatch[1].trim().replace(/\s+/g,' ');
+    setTimeout(()=>{
+      try{
+        if(typeof showScreen==='function') showScreen('chat');
+        // افتح تبويب الرسم
+        const tab=document.querySelector('[data-mkt="graph"]');
+        if(tab) tab.click();
+        // ضع المعادلة
+        setTimeout(()=>{
+          const inp=document.getElementById('gph-input');
+          if(inp){inp.value=expr;}
+          if(typeof gphPlot==='function') gphPlot();
+          else if(typeof window.gphPlot==='function') window.gphPlot();
+        },400);
+      }catch(e){}
+    },300);
+    return{text:'✓ رسم الدالة',mainAns:`📈 جارٍ رسم: **${expr}**`,ansType:'أمر',ansClass:'fact',_util:true};
+  }
+
+  // ── ارسم 3D ──
+  const draw3dMatch = orig.match(/(?:ارسم|plot|رسم)\s+(?:ثلاثي|3d|3D)\s*(?:معادلة\s+)?(.+)/i) ||
+                      ((/(?:ارسم|plot|رسم).+3d|3d.+(?:ارسم|plot)/i.test(lc)) ? orig.match(/(?:ارسم|plot|رسم)\s*(.+?)\s*(?:3d|3D)/i) : null);
+  if(draw3dMatch){
+    const expr3d = (draw3dMatch[1]||'sin(sqrt(x*x+y*y))').trim().replace(/3d|3D/gi,'').trim();
+    setTimeout(()=>{
+      try{
+        const tab=document.querySelector('[data-mkt="graph3d"]');
+        if(tab) tab.click();
+        setTimeout(()=>{
+          if(typeof window._g3dSet==='function') window._g3dSet(expr3d);
+          else{
+            const inp=document.getElementById('g3d-input');
+            if(inp){inp.value=expr3d;}
+            if(typeof window._g3dPlot==='function') window._g3dPlot();
+          }
+        },400);
+      }catch(e){}
+    },300);
+    return{text:'✓ رسم 3D',mainAns:`🌐 جارٍ رسم ثلاثي الأبعاد: **${expr3d}**`,ansType:'أمر',ansClass:'fact',_util:true};
+  }
+
+  // ── افتح تبويب محدد ──
+  const tabMap = {
+    'تحويل|وحدات|وحده':   'units',
+    'تاريخ|هجري|ميلادي|مناسبات': 'date',
+    'مالية|عملة|صرف|فائدة': 'finance',
+    'برمج|كود|برمجي|شيفرة': 'program',
+    'فيزياء|فيزيا':         'physics',
+    'كيمياء|كيميا':         'chem',
+    'صحة|بمي|bmi|سعرات':   'health',
+    'ثوابت|ثابت|constants':  'const',
+    'احصاء|إحصاء|احتمال':  'stats',
+    'مثلثات|تريج|sin|cos|tan': 'trig',
+    'جبر|معادلة':           'algebra',
+    'تفاضل|تكامل|مشتقة':    'calc',
+    'هندسة|مساحة|محيط':     'geo',
+    'أعداد|عوامل|أولي':      'number',
+    'مصفوفة|مصفوفات':        'matrix',
+    'عقدية|مركبة|complex':   'complex',
+    'احتمالات|تنافيق':       'prob',
+    'انحدار|regression':    'regress',
+    'منظومة|نظام.*معادلات':  'syssolve',
+  };
+  const openTabPtn = /افتح|شغّل|اذهب|اريد|ابي|روحني|خذني/;
+  if(openTabPtn.test(lc)){
+    for(const[keywords,tabId] of Object.entries(tabMap)){
+      if(new RegExp(keywords).test(lc)){
+        setTimeout(()=>{
+          try{
+            const tab=document.querySelector(`[data-mkt="${tabId}"]`);
+            if(tab){tab.click();}
+          }catch(e){}
+        },300);
+        return{text:'✓ فتح القسم',mainAns:`📂 جارٍ فتح قسم **${tabId}**...`,ansType:'أمر',ansClass:'fact',_util:true};
+      }
+    }
+  }
+
+  // ── افتح التذكيرات / أضف تذكير ──
+  if(/(?:افتح|روحني|اريد|ابي).*(?:تذكيرات|تذكير|منبه)/.test(lc) && !/ذكرني|تذكير\s+بـ|تذكير:/.test(lc)){
+    setTimeout(()=>{
+      try{ if(typeof showScreen==='function') showScreen('reminders'); }catch(e){}
+    },300);
+    return{text:'✓',mainAns:'🔔 جارٍ فتح التذكيرات...',ansType:'أمر',ansClass:'fact',_util:true};
+  }
+
+  // ── افتح الذاكرة ──
+  if(/(?:افتح|روحني|ابي).*(?:ذاكرة|معلومات.*محفوظة)/.test(lc)){
+    setTimeout(()=>{
+      try{ if(typeof showScreen==='function') showScreen('memory'); }catch(e){}
+    },300);
+    return{text:'✓',mainAns:'🧠 جارٍ فتح الذاكرة...',ansType:'أمر',ansClass:'fact',_util:true};
+  }
+
+  // ── افتح الإعدادات ──
+  if(/(?:افتح|روحني|ابي|اريد).*(?:إعدادات|اعدادات|settings)/.test(lc)){
+    setTimeout(()=>{
+      try{ if(typeof showScreen==='function') showScreen('settings'); }catch(e){}
+    },300);
+    return{text:'✓',mainAns:'⚙️ جارٍ فتح الإعدادات...',ansType:'أمر',ansClass:'fact',_util:true};
+  }
+
   /* ── الرياضيات — محرك شامل v3 ── */
   const mathTriggerWords = /^(احسب|حساب|كم يساوي|ما هو ناتج|ناتج|اوجد|جذر|تربيع|مثلث|زاوية|مساحة|محيط|حل|معادلة|متوسط|وسيط|منوال|مدى|انحراف|تباين|مجموع|ترتيب|توافيق|اشتق|تكامل|sin|cos|tan|log|ln|sqrt)/i;
   const isMathExpr = /[0-9+\-*/^().]/.test(orig) && /\d/.test(orig) && !/عمر|سنة|عام|كم\s+[^0-9]/.test(lc);
@@ -10588,21 +11156,171 @@ function initLock(){
   function tryUnlock(){
     const now=Date.now();
     if(now<_lockUntil){if(msg)msg.textContent='مقفل '+Math.ceil((_lockUntil-now)/1000)+' ثانية...';pinInp.value='';return;}
-    if(pinInp.value===S.pin){
-      _lockAttempts=0;overlay.classList.remove('on');if(msg)msg.textContent='';pinInp.value='';
-    }else{
-      _lockAttempts++;
-      pinInp.style.animation='none';void pinInp.offsetWidth;pinInp.style.animation='lockShake .4s ease';pinInp.value='';
-      if(_lockAttempts>=5){
-        _lockUntil=Date.now()+30000;_lockAttempts=0;
-        if(msg)msg.textContent='5 محاولات خاطئة — مقفل 30 ثانية!';
-        const cd=setInterval(()=>{const s=Math.ceil((_lockUntil-Date.now())/1000);if(s<=0){clearInterval(cd);if(msg)msg.textContent='';}else if(msg)msg.textContent='مقفل '+s+' ثانية...';},1000);
-      }else{if(msg)msg.textContent='رمز خاطئ — '+(5-_lockAttempts)+' محاولة متبقية';}
-    }
+    const _enteredPin=pinInp.value;
+    _hashPin(_enteredPin).then(_hashedEntered=>{
+      const _match=S.pinHashed?(_hashedEntered===S.pin):(_enteredPin===S.pin);
+      if(_match){
+        if(!S.pinHashed){_hashPin(S.pin).then(h=>{S.pin=h;S.pinHashed=true;saveSettings();});}
+        _lockAttempts=0;overlay.classList.remove('on');if(msg)msg.textContent='';pinInp.value='';
+      }else{
+        _lockAttempts++;
+        pinInp.style.animation='none';void pinInp.offsetWidth;pinInp.style.animation='lockShake .4s ease';pinInp.value='';
+        if(_lockAttempts>=5){
+          _lockUntil=Date.now()+30000;_lockAttempts=0;
+          if(msg)msg.textContent='5 محاولات خاطئة — مقفل 30 ثانية!';
+          const cd=setInterval(()=>{const s=Math.ceil((_lockUntil-Date.now())/1000);if(s<=0){clearInterval(cd);if(msg)msg.textContent='';}else if(msg)msg.textContent='مقفل '+s+' ثانية...';},1000);
+        }else{if(msg)msg.textContent='رمز خاطئ — '+(5-_lockAttempts)+' محاولة متبقية';}
+      }
+    });
   }
   btn.addEventListener('click',tryUnlock);
   pinInp.addEventListener('keypress',e=>{if(e.key==='Enter')tryUnlock();});
 }
+
+/* ═══ CLOUD KNOWLEDGE BASE ═══ */
+(function(){
+  const CLOUD_KB_URL      = 'king_ai_db.json';
+  const LINKVERTISE_URL   = 'https://link-target.net/4436197/sL2rryVVDJ1G';
+  const CLOUD_KB_LAST_KEY = 'KAI_cloudKb_lastUpdate';
+  const CLOUD_KB_VER_KEY  = 'KAI_cloudKb_version';
+  let _cdInterval = null;
+
+  function _setStatus(msg, color){
+    const el = document.getElementById('cloudKbStatus');
+    if(el) el.innerHTML = '<span style="color:'+(color||'var(--text3)')+'">'+msg+'</span>';
+  }
+
+  function _setBtn(loading){
+    const btn = document.getElementById('cloudKbUpdateBtn');
+    if(!btn) return;
+    btn.disabled = loading;
+    btn.innerHTML = loading
+      ? '<i class="fas fa-circle-notch fa-spin"></i> جارٍ التحميل...'
+      : '<i class="fas fa-sync-alt"></i> تحديث الآن';
+  }
+
+  async function _fetchDB(){
+    const url = CLOUD_KB_URL + '?v=' + Date.now();
+    const res = await fetch(url, {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  }
+
+  function _mergeKB(remoteKB){
+    if(!remoteKB || typeof remoteKB !== 'object') return 0;
+    let added = 0;
+    for(const [k, v] of Object.entries(remoteKB)){
+      if(!DB.knowledge[k]){ DB.knowledge[k] = v; added++; }
+    }
+    return added;
+  }
+
+  function _startCountdown(sec, onDone){
+    if(_cdInterval) clearInterval(_cdInterval);
+    let s = sec;
+    _setStatus('<i class="fas fa-hourglass-half"></i> سيبدأ التحميل خلال <strong>'+s+'</strong> ثانية... (أكمل الإعلان في التبويب الآخر)', '#fbbf24');
+    _cdInterval = setInterval(async ()=>{
+      s--;
+      if(s > 0){
+        _setStatus('<i class="fas fa-hourglass-half"></i> سيبدأ التحميل خلال <strong>'+s+'</strong> ثانية...', '#fbbf24');
+      } else {
+        clearInterval(_cdInterval);
+        _cdInterval = null;
+        _setStatus('<i class="fas fa-circle-notch fa-spin"></i> جارٍ تحميل قاعدة المعرفة...');
+        await onDone();
+      }
+    }, 1000);
+  }
+
+  async function _doFetchAndMerge(){
+    _setBtn(true);
+    try{
+      const remote = await _fetchDB();
+      if(!remote.knowledge) throw new Error('تنسيق غير صحيح');
+      const added = _mergeKB(remote.knowledge);
+      saveDB();
+      try{ LocalAI.resetIndex(); }catch(e){} // أعد بناء فهرس TF-IDF
+      const now = Date.now();
+      localStorage.setItem(CLOUD_KB_LAST_KEY, now);
+      localStorage.setItem(CLOUD_KB_VER_KEY, remote.version || '?');
+      const info = document.getElementById('cloudKbInfo');
+      if(info){
+        info.style.display = '';
+        const ver = document.getElementById('cloudKbVersion');
+        const cnt = document.getElementById('cloudKbCount');
+        const dt  = document.getElementById('cloudKbDate');
+        if(ver) ver.textContent = 'الإصدار ' + (remote.version||'?');
+        if(cnt) cnt.textContent = Object.keys(remote.knowledge).length + ' إدخال';
+        if(dt)  dt.textContent  = 'آخر تحديث: ' + new Date(now).toLocaleDateString('ar');
+      }
+      _setStatus('<i class="fas fa-check-circle"></i> تم التحديث — أُضيف <strong>'+added+'</strong> إدخال جديد', '#4ade80');
+      toast('<i class="fas fa-cloud-download-alt"></i> تحديث مكتمل: +'+added+' إدخال', 3000);
+    }catch(err){
+      _setStatus('<i class="fas fa-exclamation-triangle"></i> فشل التحديث: ' + err.message, '#f87171');
+    }finally{
+      _setBtn(false);
+    }
+  }
+
+  function doUpdate(){
+    /* open Linkvertise in new tab, then start countdown */
+    window.open(LINKVERTISE_URL, '_blank', 'noopener,noreferrer');
+    _startCountdown(20, _doFetchAndMerge);
+  }
+
+  async function doCheck(){
+    _setStatus('<i class="fas fa-circle-notch fa-spin"></i> جارٍ التحقق...');
+    try{
+      const remote = await _fetchDB();
+      const localVer  = localStorage.getItem(CLOUD_KB_VER_KEY) || '—';
+      const remoteVer = remote.version || '?';
+      const remoteCount = remote.knowledge ? Object.keys(remote.knowledge).length : 0;
+      const localCount  = DB.knowledge ? Object.keys(DB.knowledge).length : 0;
+
+      if(localVer === remoteVer){
+        _setStatus('<i class="fas fa-check-circle"></i> أنت على أحدث إصدار ('+remoteVer+')', '#4ade80');
+      }else{
+        _setStatus(
+          '<i class="fas fa-arrow-up"></i> تحديث متاح: <strong>'+remoteVer+'</strong> ('+remoteCount+' إدخال) — نسختك: '+localVer,
+          '#fbbf24'
+        );
+      }
+
+      const info = document.getElementById('cloudKbInfo');
+      if(info){
+        info.style.display = '';
+        const cnt = document.getElementById('cloudKbCount');
+        const ver = document.getElementById('cloudKbVersion');
+        if(cnt) cnt.textContent = remoteCount + ' إدخال في السيرفر';
+        if(ver) ver.textContent = 'الإصدار ' + remoteVer;
+      }
+    }catch(err){
+      _setStatus('<i class="fas fa-exclamation-triangle"></i> تعذّر الاتصال: ' + err.message, '#f87171');
+    }
+  }
+
+  /* init on DOM ready */
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.getElementById('cloudKbUpdateBtn')?.addEventListener('click', doUpdate);
+    /* init Gemini Nano */
+    try{ _nano.init(); }catch(e){}
+    document.getElementById('cloudKbCheckBtn')?.addEventListener('click', doCheck);
+
+    /* show last update time if exists */
+    const last = localStorage.getItem(CLOUD_KB_LAST_KEY);
+    const ver  = localStorage.getItem(CLOUD_KB_VER_KEY);
+    if(last){
+      const info = document.getElementById('cloudKbInfo');
+      if(info){
+        info.style.display = '';
+        const dt = document.getElementById('cloudKbDate');
+        const v  = document.getElementById('cloudKbVersion');
+        if(dt) dt.textContent  = 'آخر تحديث: ' + new Date(+last).toLocaleDateString('ar');
+        if(v)  v.textContent   = ver ? 'الإصدار '+ver : '';
+      }
+    }
+  });
+})();
 
 /* ═══ SCREENS ═══ */
 function showScreen(id){
@@ -11076,7 +11794,7 @@ function initEvents(){
       if(sec) sec.style.display='';
       tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
       if(tab.dataset.mkt==='date' && typeof _dtBuildOccasions==='function'){
-        setTimeout(_dtBuildOccasions, 80);
+        setTimeout(()=>{ _dtBuildOccasions(); _dtBuildGregOccasions(); }, 80);
       }
     });
   });
@@ -12439,7 +13157,7 @@ function initEvents(){
     const c=document.getElementById('pinConfirm')?.value.trim();
     if(!p||p.length<4){toast('<i class="fas fa-exclamation-triangle"></i> الرمز يجب أن يكون 4 أرقام على الأقل');return;}
     if(p!==c){toast('<i class="fas fa-exclamation-triangle"></i> الرمزان غير متطابقين');return;}
-    S.pin=p;saveSettings();toast('<i class="fas fa-lock"></i> تم حفظ رمز PIN');
+    _hashPin(p).then(hashed=>{S.pin=hashed;S.pinHashed=true;saveSettings();toast('<i class="fas fa-lock"></i> تم حفظ رمز PIN بأمان 🔐');});
     document.getElementById('pinInput').value='';document.getElementById('pinConfirm').value='';
   });
 
@@ -13280,6 +13998,31 @@ function _showErr(msg, cc) {
    🌐 SMART MULTI-SOURCE SEARCH ENGINE
    يبحث في: DuckDuckGo + الطقس + العملات + الصلاة + ويكيبيديا
    ═══════════════════════════════════════════════ */
+
+/* 🧠 بحث ذكي بدون مفتاح — DDG + Nano */
+async function smartSearchNoKey(q) {
+  let ddgResult = null;
+  let nanoResult = null;
+
+  // DDG Instant Answer
+  try {
+    ddgResult = await _fetchDDG(q);
+  } catch(e) {}
+
+  // Nano summary if enabled and offline
+  if (_nano.isEnabled()) {
+    try {
+      const prompt = ddgResult
+        ? 'المعلومات التالية من بحث الإنترنت:\n' + ddgResult + '\n\nالسؤال: ' + q + '\nأجب بالعربية باختصار.'
+        : 'أجب على السؤال التالي بالعربية: ' + q;
+      nanoResult = await _nano.ask(prompt);
+    } catch(e) {}
+  }
+
+  if (nanoResult) return { text: nanoResult, source: '⚡ Nano + بحث ذكي', engine: 'nano' };
+  if (ddgResult)  return { text: ddgResult,  source: '🦆 DuckDuckGo',      engine: 'ddg'  };
+  return null;
+}
 
 /* كشف نوع السؤال */
 function _detectQueryType(q) {
@@ -14406,137 +15149,375 @@ async function _callGemini(prompt) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   🧠 محرك الذكاء المحلي القابل للتعلم — King Local AI v2
+   👑 King Local AI v3 — TF-IDF · Markov · Context · Synthesis
    يعمل 100% بدون إنترنت أو API — يتطور مع كل محادثة
 ══════════════════════════════════════════════════════════ */
-const LocalAI = (function(){
-'use strict';
-var KB=[
-  ['فيثاغورس|الوتر','في المثلث القائم: a²+b²=c²\nمثال: 3²+4²=5²'],
-  ['نيوتن|قوانين الحركة','1. القصور الذاتي\n2. F=m·a\n3. لكل فعل ردّ فعل مساوٍ ومعاكس'],
-  ['اينشتاين|النسبية','E=mc² — الكتلة والطاقة متكافئتان\nالزمن يتباطأ عند السرعات العالية'],
-  ['مشتقة|اشتقاق|d/dx','قواعد الاشتقاق:\n• xⁿ → nxⁿ⁻¹\n• sin(x) → cos(x)\n• cos(x) → -sin(x)\n• eˣ → eˣ\n• ln(x) → 1/x\n• قاعدة السلسلة: f(g(x)) → f\'(g)·g\''],
-  ['تكامل|integral|∫','قواعد التكامل:\n• ∫xⁿdx = xⁿ⁺¹/(n+1)+C\n• ∫sin(x)dx = -cos(x)+C\n• ∫cos(x)dx = sin(x)+C\n• ∫eˣdx = eˣ+C\n• ∫(1/x)dx = ln|x|+C'],
-  ['معادلة تربيعية|quadratic','ax²+bx+c=0\nالحل: x=(-b±√(b²-4ac))/2a\nΔ>0: حلان | Δ=0: حل واحد | Δ<0: لا حل حقيقي'],
-  ['باي|π|pi','π≈3.14159265358979...\nمحيط الدائرة=2πr\nمساحة الدائرة=πr²'],
-  ['مثلثات|sin cos tan|زوايا شهيرة','الزوايا الشهيرة:\n• 30°: sin=1/2, cos=√3/2, tan=1/√3\n• 45°: sin=√2/2, cos=√2/2, tan=1\n• 60°: sin=√3/2, cos=1/2, tan=√3\n• 90°: sin=1, cos=0'],
-  ['الجاذبية|gravity','F=G·m₁·m₂/r²\nG=6.674×10⁻¹¹ N·m²/kg²\ng=9.8 م/ث² على الأرض'],
-  ['الكهرباء|أوم','قانون أوم: V=I·R\nالطاقة: P=V·I=I²R\nمتسلسلة: R=R₁+R₂\nمتوازية: 1/R=1/R₁+1/R₂'],
-  ['الضوء|موجات','c=3×10⁸ م/ث\nطيف المرئي: أحمر→أصفر→أخضر→أزرق→بنفسجي\nطبيعة مزدوجة: موجة وجسيم'],
-  ['الجدول الدوري|عناصر','118 عنصراً\nعناصر نبيلة: He,Ne,Ar,Kr,Xe,Rn\nأكثر في الكون: H, He'],
-  ['الإسلام|أركان|قرآن','أركان الإسلام:\n1.الشهادة 2.الصلاة 3.الزكاة 4.الصوم 5.الحج\nالقرآن: 114 سورة، 6236 آية'],
-  ['الحضارة الإسلامية|الخوارزمي|ابن سينا','العصر الذهبي 750-1258م:\n• الخوارزمي: الجبر والخوارزميات\n• ابن سينا: القانون في الطب\n• ابن الهيثم: أبو علم البصريات'],
-  ['ذكاء اصطناعي|AI|ChatGPT|Claude','الذكاء الاصطناعي:\n• تعلم آلي: يتعلم من البيانات\n• شبكات عصبية: تحاكي المخ\nنماذج: GPT-4, Claude, Gemini\nأنا مبني على Claude من Anthropic'],
-  ['برمجة|Python|JavaScript|coding','أشهر اللغات:\n• Python: ذكاء اصطناعي وبيانات\n• JavaScript: ويب وتطبيقات\n• Java: أنظمة كبيرة\n• C++: أداء عالٍ\n• SQL: قواعد البيانات'],
-  ['الاقتصاد|عرض وطلب|تضخم','العرض والطلب يحددان الأسعار\nGDP: الناتج المحلي الإجمالي\nالتضخم: ارتفاع مستمر للأسعار'],
-  ['DNA|وراثة|جينات','DNA: دي أوكسي ريبو نيوكليك أسيد\nقواعد: A-T وG-C\nالجينوم البشري: ~3 مليار زوج'],
-  ['المناعة|خلايا','خلايا T: تقتل المصابة\nخلايا B: تنتج أجساماً مضادة\nاللقاحات تدرّب الجهاز المناعي'],
-  ['القلب|ضغط الدم','4 حجرات | 60-100 نبضة/دقيقة\nضغط طبيعي: 120/80\nLDL: ضار  HDL: نافع'],
-  ['الأهرامات|مصر القديمة','أهرامات الجيزة: خوفو(138م)،خفرع،منقرع\nبُنيت ~2560 ق.م — من عجائب الدنيا السبع'],
-  ['النوم|صحة','الكبار: 7-9 ساعات/يوم\nمراحل: NREM(عميق) + REM(أحلام)\nقلة النوم: ضعف تركيز ومناعة'],
-  ['التغذية|فيتامينات','كربوهيدرات: 4kcal/g | بروتين: 4kcal/g | دهون: 9kcal/g\nA:بصر B12:أعصاب C:مناعة D:عظام K:تخثر'],
-  ['إدارة الوقت|بومودورو','بومودورو: 25 عمل + 5 استراحة\nقاعدة 80/20: 20% الجهد → 80% النتائج'],
-  ['الفلسفة|سقراط|ديكارت','سقراط: "اعرف نفسك"\nأفلاطون: نظرية المُثُل\nأرسطو: المنطق\nديكارت: "أنا أفكر إذن أنا موجود"'],
-  ['احتمالات|probability','P(A)=مواتية/إجمالي\nP(A∪B)=P(A)+P(B)-P(A∩B)\nمستقلان: P(A∩B)=P(A)·P(B)'],
-  ['مصفوفات|matrix','المحدد 2×2: ad-bc\nجمع: عنصراً بعنصر\nضرب: صف × عمود'],
-];
-var CHAT=[
-  {p:/^(هاي|هلا|مرحبا|السلام|أهلاً|هلو|hi\b|hey\b|صباح|مساء)/i,
-   r:function(){return _p(['هلا وغلا! 😊 كيف أقدر أساعدك؟','أهلاً! 😊 شو في خدمة؟','مرحباً! 😊 وش تبي تعرف؟']);}},
-  {p:/كيف حالك|كيف الحال|عامل إيه|شو اخبارك|ايش اخبارك/i,
-   r:function(){return _p(['بخير الحمد لله 😊 وأنت كيف حالك؟','تمام والحمد لله 😊 مستعد أساعدك. كيفك؟']);}},
-  {p:/شكرا|شكراً|مشكور|يسلمو|thank|احسنت|برافو/i,
-   r:function(){return _p(['العفو 😊 يسعدني أساعدك دائماً.','لا شكر على واجب 😊 هل تحتاج شيئاً آخر؟']);}},
-  {p:/من انت|ايش انت|مين انت|ما اسمك|عرفني/i,
-   r:function(){return 'أنا "الملك" — مساعدك الذكي 🧠\n\nأستطيع:\n• حل المسائل الرياضية والعلمية خطوة بخطوة\n• الإجابة على أي سؤال معرفي\n• الدردشة والمساعدة في المشاكل\n• التذكيرات والتنظيم\n\nاسألني أي شيء 😊';}},
-  {p:/ايش تقدر|شو تقدر|ماذا تعرف|قدراتك/i,
-   r:function(){return 'أقدر أساعدك في 💡\n\n🔢 الرياضيات: تفاضل، جبر، إحصاء، هندسة\n🔬 العلوم: فيزياء، كيمياء، أحياء\n📚 معرفة عامة: تاريخ، جغرافيا، دين، فلسفة\n💻 التقنية: برمجة، ذكاء اصطناعي\n💬 محادثة ومشاكل شخصية\n⏰ تذكيرات وتنظيم';}},
-  {p:/نكتة|اضحكني|joke/i,
-   r:function(){return _p(['لماذا لا يحب المبرمج الطبيعة؟ لأنها مليئة بالـ bugs 🐛😄','ما الفرق بين مبرمج وبيتزا؟ البيتزا تطعم عائلة 😄','قال طالب للأستاذ: ما هو جذر 144؟ قال: هذا سؤال مربع 😄']);}},
-  {p:/أحبك|صديقي|صاحبي|انت كويس|بحبك/i,
-   r:function(){return _p(['وأنا أقدّر محادثاتنا 😊','هذا يسعدني جداً 😊 أنا هنا دائماً لك.']);}},
-  {p:/زعلان|حزين|تعبان|مش كويس|محبط/i,
-   r:function(){return _p(['😔 أسمعك. ما الذي يضايقك؟ أنا هنا.','لا تقلق 💙 كل مشكلة لها حل. حدثني.']);}},
-  {p:/ساعدني|مساعدة|help/i,
-   r:function(){return 'بكل سرور 😊 حدثني عن ما تحتاجه:\n• سؤال علمي أو رياضي\n• مشكلة تريد حلها\n• معلومة تريد معرفتها\nأنا هنا 🎯';}},
-];
-function _p(a){return a[Math.floor(Math.random()*a.length)];}
-function _searchKB(q){
-  var lq=q.toLowerCase(),best=null,bs=0;
-  for(var i=0;i<KB.length;i++){
-    var pats=KB[i][0].split('|'),sc=0;
-    for(var j=0;j<pats.length;j++){
-      var p=pats[j].toLowerCase();
-      if(lq===p){sc=200;break;}
-      if(lq.includes(p))sc=Math.max(sc,p.length*4);
-      else if(p.includes(lq)&&lq.length>2)sc=Math.max(sc,lq.length*3);
-      else{
-        var pw=p.split(/\s+/),qw=lq.split(/\s+/).filter(function(w){return w.length>1;});
-        for(var k=0;k<qw.length;k++)for(var m=0;m<pw.length;m++)
-          if(pw[m].includes(qw[k])||qw[k].includes(pw[m]))sc+=6;
+/* ══════════════════════════════════════════════════════════════════
+   👑 King Local AI — v3  (TF-IDF · Markov · Context · Synthesis)
+   يعمل 100% بدون إنترنت أو API
+══════════════════════════════════════════════════════════════════ */
+const LocalAI = (function () {
+  'use strict';
+
+  /* ─── ثوابت ─── */
+  const MAX_CTX   = 6;   // عدد أدوار المحادثة المحفوظة
+  const MAX_GEN   = 60;  // أقصى كلمات في الجواب المُولَّد
+  const MIN_SCORE = 0.08; // حد الـ TF-IDF
+
+  /* ─── بيانات الحوار الجاهزة ─── */
+  var CHAT = [
+    { p:/^(هاي|هلا|مرحبا|السلام|أهلا|أهلاً|هلو|hi\b|hey\b|صباح|مساء)/i,
+      r:()=>_p(['هلا وغلا! 😊 كيف أقدر أساعدك؟','أهلاً! 😊 شو في خدمة؟','مرحباً بك! 😊']) },
+    { p:/كيف حالك|كيف الحال|عامل إيه|شو اخبارك|ايش اخبارك/i,
+      r:()=>_p(['بخير الحمد لله 😊 وأنت؟','تمام 😊 مستعد أساعدك!']) },
+    { p:/شكرا|شكراً|مشكور|يسلمو|thank|احسنت|برافو|عظيم/i,
+      r:()=>_p(['العفو 😊 يسعدني دائماً.','لا شكر على واجب 😊']) },
+    { p:/^من انت|ايش انت|مين انت|ما اسمك|عرفني نفسك/i,
+      r:()=>'أنا "الملك" — مساعدك الذكي 👑\n\nأتعلم من كل محادثة وأولّد إجابات بدون إنترنت.\nاسألني أي شيء 😊' },
+    { p:/ايش تقدر|شو تقدر|ماذا تعرف|قدراتك|ميزاتك/i,
+      r:()=>'أقدر أساعدك في 💡\n\n🔢 الرياضيات والعلوم\n📚 المعرفة العامة\n💻 البرمجة والتقنية\n💬 المحادثة والأسئلة\n🧠 أتعلم وأتذكر كل ما تعلّمني إياه' },
+    { p:/نكتة|اضحكني|joke/i,
+      r:()=>_p(['لماذا لا يحب المبرمج الطبيعة؟ لأنها مليئة بالـ bugs 🐛😄',
+                'ما الفرق بين مبرمج وبيتزا؟ البيتزا تطعم عائلة 😄',
+                'قال طالب: ما جذر 144؟ قال الأستاذ: هذا سؤال مربع 😄']) },
+    { p:/أحبك|صديقي|صاحبي|أنت كويس|بحبك/i,
+      r:()=>_p(['أنا أقدّر محادثاتنا 😊','هذا يسعدني 😊 أنا هنا دائماً لك.']) },
+    { p:/زعلان|حزين|تعبان|مش كويس|محبط/i,
+      r:()=>'😔 أسمعك.\nكل مشكلة لها حل. حدثني عن ما يضايقك 💙' },
+  ];
+
+  /* ─── stop words عربية ─── */
+  var STOP = new Set(['في','من','إلى','على','عن','هو','هي','هم','أن','لا',
+    'ما','كل','مع','عند','إن','كان','يكون','وهو','وهي','الذي','التي','لم',
+    'قد','فإن','أو','ثم','حتى','لكن','بين','بعد','قبل','منذ','فقط','كيف',
+    'ماذا','متى','أين','لماذا','من','ما','كم','هل','الـ','ال','و','ف','ب','ك','ل']);
+
+  /* ─── قاعدة المعرفة المدمجة ─── */
+  var KB_BUILT = [
+    ['فيثاغورس|الوتر|المثلث القائم','في المثلث القائم: a²+b²=c²\nمثال: 3²+4²=5²\nالوتر دائماً أكبر ضلع.'],
+    ['نيوتن|قوانين الحركة|القصور الذاتي','قوانين نيوتن للحركة:\n1. القصور الذاتي: الجسم يبقى في حالته\n2. F=m·a\n3. لكل فعل ردّ فعل مساوٍ ومعاكس'],
+    ['اينشتاين|النسبية|E=mc2','E=mc² — الكتلة والطاقة متكافئتان\nالزمن يتمدد عند السرعات العالية\nأينشتاين: 1879-1955'],
+    ['مشتقة|اشتقاق|d/dx|تفاضل','قواعد الاشتقاق:\n• xⁿ → nxⁿ⁻¹\n• sin(x) → cos(x)\n• cos(x) → -sin(x)\n• eˣ → eˣ\n• ln(x) → 1/x\n• قاعدة الجداء: (fg)′=f′g+fg′'],
+    ['تكامل|integral|∫','قواعد التكامل:\n• ∫xⁿdx = xⁿ⁺¹/(n+1)+C\n• ∫sin(x)dx = -cos(x)+C\n• ∫eˣdx = eˣ+C\n• ∫(1/x)dx = ln|x|+C'],
+    ['معادلة تربيعية|quadratic|حل المعادلة','ax²+bx+c=0\nالحل: x=(-b±√(b²-4ac))/2a\nΔ>0: حلان | Δ=0: حل | Δ<0: لا حل حقيقي'],
+    ['باي|π|pi|محيط دائرة','π≈3.14159\nمحيط=2πr | مساحة=πr²\nحجم كرة=4/3πr³'],
+    ['مثلثات|sin cos tan|زوايا','30°: sin=1/2, cos=√3/2\n45°: sin=√2/2, cos=√2/2\n60°: sin=√3/2, cos=1/2\n90°: sin=1, cos=0'],
+    ['جاذبية|gravity|نيوتن الجاذبية','F=G·m₁·m₂/r²\nG=6.674×10⁻¹¹ N·m²/kg²\ng≈9.8 م/ث² على سطح الأرض'],
+    ['أوم|كهرباء|مقاومة|تيار','V=I·R (قانون أوم)\nالقدرة: P=V·I=I²R\nمتسلسل: R=R₁+R₂\nمتوازي: 1/R=1/R₁+1/R₂'],
+    ['ضوء|موجات|طيف','c=3×10⁸ م/ث\nطيف: أحمر→برتقالي→أصفر→أخضر→أزرق→بنفسجي\nالضوء له طبيعة مزدوجة: موجة وجسيم'],
+    ['جدول دوري|عناصر كيمياء','118 عنصراً — H(هيدروجين) He(هيليوم) O(أكسجين)\nدورات: 7 | مجموعات: 18\nأكثر العناصر في الكون: H, He'],
+    ['DNA|جينات|وراثة|كروموسوم','DNA: دي أوكسي ريبو نيوكليك أسيد\nقواعد: A-T وG-C\nالإنسان: 46 كروموسوم\nالجينوم البشري: ~3 مليار زوج'],
+    ['مناعة|خلايا T|خلايا B','خلايا T: تهاجم الخلايا المصابة\nخلايا B: تنتج أجساماً مضادة\nاللقاحات تدرّب جهاز المناعة مسبقاً'],
+    ['قلب|ضغط الدم|دورة دموية','4 حجرات | 60-100 نبضة/دقيقة\nضغط طبيعي: 120/80\nالدم يدور كاملاً كل دقيقة'],
+    ['إسلام|أركان الإسلام|القرآن','أركان الإسلام الخمسة:\n1.الشهادة 2.الصلاة 3.الزكاة 4.الصوم 5.الحج\nالقرآن: 114 سورة | 6236 آية'],
+    ['حضارة إسلامية|الخوارزمي|ابن سينا|عصر ذهبي','العصر الذهبي 750-1258م:\n• الخوارزمي: مؤسس الجبر والخوارزميات\n• ابن سينا: القانون في الطب\n• ابن الهيثم: أبو البصريات'],
+    ['ذكاء اصطناعي|AI|تعلم آلي|شبكات عصبية','الذكاء الاصطناعي:\n• تعلم آلي: يتعلم من البيانات\n• شبكات عصبية عميقة: تحاكي المخ\n• نماذج: GPT-4, Claude, Gemini\nالتطبيقات: طب، مركبات، لغات'],
+    ['برمجة|Python|JavaScript|لغات برمجة','أشهر اللغات:\n• Python: AI وتحليل بيانات\n• JavaScript: ويب وتطبيقات\n• C++: أداء عالٍ وألعاب\n• SQL: قواعد بيانات\n• Java: أنظمة كبيرة'],
+    ['for loop|حلقة|loop|تكرار برمجة','في Python:\nfor i in range(10):\n    print(i)\n\nفي JavaScript:\nfor(let i=0;i<10;i++){\n  console.log(i);\n}'],
+    ['function|دالة|def|برمجة دوال','في Python:\ndef my_func(x):\n    return x * 2\n\nفي JavaScript:\nfunction myFunc(x){\n  return x * 2;\n}'],
+    ['قائمة|list|array|مصفوفة برمجة','في Python: my_list = [1, 2, 3]\nإضافة: my_list.append(4)\nفي JS: let arr = [1,2,3]\nإضافة: arr.push(4)'],
+    ['اقتصاد|عرض وطلب|GDP|تضخم','العرض والطلب يحددان السعر\nGDP: الناتج المحلي الإجمالي\nالتضخم: ارتفاع مستمر للأسعار\nالبنك المركزي يضبط الاقتصاد'],
+    ['الأهرامات|مصر قديمة|الفراعنة','أهرامات الجيزة: خوفو(138م)، خفرع، منقرع\nبُنيت ~2560 ق.م\nعجيبة من عجائب الدنيا السبع'],
+    ['نوم|صحة النوم|ساعات النوم','الكبار: 7-9 ساعات/يوم\nمراحل: NREM(عميق)+REM(أحلام)\nقلة النوم: ضعف تركيز ومناعة'],
+    ['تغذية|سعرات|فيتامينات|بروتين','كربوهيدرات: 4kcal/g\nبروتين: 4kcal/g\nدهون: 9kcal/g\nفيتامين A:بصر | C:مناعة | D:عظام'],
+    ['فلسفة|سقراط|أفلاطون|ديكارت','سقراط: "اعرف نفسك"\nأفلاطون: عالم المُثُل\nأرسطو: أبو المنطق\nديكارت: "أنا أفكر إذن أنا موجود"'],
+    ['احتمالات|probability','P(A)=مواتية/إجمالي\nP(A∪B)=P(A)+P(B)-P(A∩B)\nمستقلان: P(A∩B)=P(A)·P(B)'],
+    ['إدارة وقت|بومودورو|تركيز|إنتاجية','بومودورو: 25 دقيقة عمل + 5 استراحة\nقاعدة 80/20: 20% الجهد → 80% النتيجة\nالمهام الصعبة: افعلها صباحاً'],
+    ['حرب عالمية|تاريخ|نازية','الحرب العالمية الثانية: 1939-1945\nنتج عنها الأمم المتحدة 1945\nضحايا: ~70-85 مليون\nانتهت بهزيمة ألمانيا واليابان'],
+    ['مناخ|احترار|كربون','الاحترار العالمي سبب: CO₂ وغازات دفيئة\nالاتفاقيات: كيوتو 1997 / باريس 2015\nارتفاع الحرارة: +1.1°C منذ الصناعية'],
+  ];
+
+  /* ─── تحليل نص: تحويل إلى كلمات مفيدة ─── */
+  function _tokenize(text) {
+    return text.toLowerCase()
+      .replace(/[^\u0600-\u06FFa-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 1 && !STOP.has(w));
+  }
+
+  /* ─── TF-IDF بسيط ─── */
+  var _idfCache = null;
+  var _allDocs  = null;
+
+  function _buildIDF() {
+    if (_idfCache) return;
+    _allDocs = [];
+    // دمج KB_BUILT + ذاكرة المستخدم
+    KB_BUILT.forEach(e => {
+      var tokens = _tokenize(e[0].replace(/\|/g,' ') + ' ' + e[1]);
+      _allDocs.push({ tokens, answer: e[1], key: e[0].split('|')[0] });
+    });
+    if (window.DB && DB.knowledge) {
+      Object.entries(DB.knowledge).forEach(([k, v]) => {
+        var ans = v && (v.ans || (typeof v === 'string' ? v : null));
+        if (ans && ans.length > 2) {
+          var tokens = _tokenize(k + ' ' + ans);
+          _allDocs.push({ tokens, answer: ans, key: k });
+        }
+      });
+    }
+    var df = {};
+    _allDocs.forEach(doc => {
+      new Set(doc.tokens).forEach(t => { df[t] = (df[t] || 0) + 1; });
+    });
+    var N = _allDocs.length;
+    _idfCache = {};
+    Object.entries(df).forEach(([t, f]) => {
+      _idfCache[t] = Math.log((N + 1) / (f + 1)) + 1;
+    });
+  }
+
+  function _tfidfVec(tokens) {
+    var tf = {};
+    tokens.forEach(t => { tf[t] = (tf[t] || 0) + 1; });
+    var vec = {};
+    Object.entries(tf).forEach(([t, c]) => {
+      vec[t] = (c / tokens.length) * (_idfCache[t] || 1);
+    });
+    return vec;
+  }
+
+  function _cosine(v1, v2) {
+    var dot = 0, n1 = 0, n2 = 0;
+    Object.entries(v1).forEach(([k, w]) => {
+      dot += w * (v2[k] || 0);
+      n1  += w * w;
+    });
+    Object.values(v2).forEach(w => { n2 += w * w; });
+    return n1 && n2 ? dot / (Math.sqrt(n1) * Math.sqrt(n2)) : 0;
+  }
+
+  function _findBest(query, topN) {
+    topN = topN || 3;
+    _buildIDF();
+    var qToks = _tokenize(query);
+    if (!qToks.length) return [];
+    var qVec = _tfidfVec(qToks);
+    var scored = _allDocs.map(doc => ({
+      doc,
+      score: _cosine(qVec, _tfidfVec(doc.tokens))
+    })).filter(x => x.score >= MIN_SCORE)
+       .sort((a, b) => b.score - a.score)
+       .slice(0, topN);
+    return scored;
+  }
+
+  /* ─── Markov Chain ─── */
+  var _markov = null;
+
+  function _buildMarkov() {
+    if (_markov) return;
+    _markov = {};
+    var corpus = KB_BUILT.map(e => e[1]).join(' ');
+    if (window.DB && DB.knowledge) {
+      Object.values(DB.knowledge).forEach(v => {
+        var a = v && (v.ans || (typeof v === 'string' ? v : ''));
+        if (a) corpus += ' ' + a;
+      });
+    }
+    var words = corpus.split(/\s+/).filter(w => w.length > 0);
+    for (var i = 0; i < words.length - 2; i++) {
+      var key = words[i] + ' ' + words[i+1];
+      if (!_markov[key]) _markov[key] = [];
+      _markov[key].push(words[i+2]);
+    }
+  }
+
+  function _markovGenerate(seed, maxWords) {
+    _buildMarkov();
+    var keys = Object.keys(_markov);
+    if (!keys.length) return '';
+    // ابحث عن بداية مناسبة من الـ seed
+    var startKey = null;
+    if (seed) {
+      var sToks = _tokenize(seed);
+      for (var t of sToks) {
+        var match = keys.find(k => k.includes(t));
+        if (match) { startKey = match; break; }
       }
     }
-    if(sc>bs){bs=sc;best={key:pats[0],val:KB[i][1],score:sc};}
-  }
-  return bs>=6?best:null;
-}
-function _searchUserKB(q){
-  if(!window.DB||!DB.knowledge)return null;
-  var lq=q.toLowerCase(),best=null,bs=0,keys=Object.keys(DB.knowledge);
-  for(var i=0;i<keys.length;i++){
-    var k=keys[i].toLowerCase(),sc=0;
-    if(lq===k)sc=100;
-    else if(lq.includes(k)||k.includes(lq))sc=50+k.length;
-    else{
-      var qw=lq.split(/\s+/).filter(function(w){return w.length>2;}),kw=k.split(/\s+/);
-      for(var j=0;j<qw.length;j++)for(var m=0;m<kw.length;m++)
-        if(kw[m].includes(qw[j])||qw[j].includes(kw[m]))sc+=8;
+    if (!startKey) startKey = keys[Math.floor(Math.random() * keys.length)];
+    var result = startKey.split(' ');
+    var cur = startKey;
+    for (var i = 0; i < (maxWords || MAX_GEN); i++) {
+      var next = _markov[cur];
+      if (!next || !next.length) break;
+      var w = next[Math.floor(Math.random() * next.length)];
+      result.push(w);
+      var arr = cur.split(' ');
+      cur = arr[1] + ' ' + w;
     }
-    if(sc>bs){var e=DB.knowledge[keys[i]],a=e&&(e.ans||(typeof e==='string'?e:null));
-      if(a&&a.length>2){bs=sc;best={key:keys[i],ans:a,score:sc};}}
+    return result.join(' ');
   }
-  return bs>=14?best:null;
-}
-function _answer(q){
-  var t=q.trim();
-  for(var i=0;i<CHAT.length;i++)if(CHAT[i].p.test(t))return{answer:CHAT[i].r(),isChat:true,confidence:95};
-  var kb=_searchKB(t);if(kb)return{answer:kb.val,source:'معرفة مدمجة',topic:kb.key,confidence:Math.min(95,60+kb.score)};
-  var ukb=_searchUserKB(t);if(ukb)return{answer:ukb.ans,source:'ذاكرة مكتسبة',topic:ukb.key,confidence:Math.min(92,ukb.score)};
-  return null;
-}
-function _esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function _fmt(r){
-  if(!r)return '';
-  var a=r.answer||'';
-  if(r.isChat)return '<div style="font-size:.92rem;line-height:1.85">'+_esc(a).replace(/\n/g,'<br>')+'</div>';
-  var lines=a.split('\n').filter(function(l){return l.trim();});
-  var isList=lines.some(function(l){return /^[•\-\*]|^\d+[.)]\s/.test(l.trim());});
-  var html='';
-  if(r.topic)html+='<div style="font-size:.62rem;font-weight:900;color:var(--gold);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px"><span style="background:var(--gold-dim);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.6rem">🧠</span>'+_esc(r.topic)+'<span style="margin-right:auto;background:rgba(34,197,94,.12);color:#4ade80;padding:1px 8px;border-radius:8px;font-size:.57rem">'+_esc(r.source||'معرفة')+'</span></div>';
-  if(isList){
-    html+='<div style="display:flex;flex-direction:column;gap:3px">';
-    lines.forEach(function(l){
-      if(/^[•\-\*]|^\d+[.)]\s/.test(l.trim()))
-        html+='<div style="display:flex;gap:6px;align-items:flex-start;padding:3px 6px;background:rgba(201,149,42,.04);border-radius:7px;border-right:2px solid rgba(201,149,42,.2)"><span style="color:var(--gold);font-size:.7rem;margin-top:2px;flex-shrink:0">◆</span><span style="font-size:.86rem;line-height:1.65">'+_esc(l.replace(/^[•\-\*]\s*|^\d+[.)]\s*/,''))+'</span></div>';
-      else html+='<p style="font-size:.88rem;line-height:1.7;margin:2px 0">'+_esc(l)+'</p>';
-    });
-    html+='</div>';
-  }else html+='<p style="font-size:.9rem;line-height:1.78">'+_esc(a).replace(/\n/g,'<br>')+'</p>';
-  var c=r.confidence||75,col=c>=85?'#4ade80':c>=70?'#e8b84b':'#f87171';
-  html+='<div style="display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)"><span style="font-size:.57rem;color:var(--text3)">ثقة:</span><div style="flex:1;max-width:55px;height:3px;background:var(--surface3);border-radius:3px;overflow:hidden"><div style="width:'+c+'%;height:100%;background:'+col+'"></div></div><span style="font-size:.6rem;color:'+col+';font-weight:800">'+c+'%</span><span style="margin-right:auto;font-size:.6rem;color:var(--text3)">🧠 ذكاء محلي</span></div>';
-  return html;
-}
-function _learn(q,a){
-  if(!q||!a||a.length<3)return;
-  var k=q.toLowerCase().trim().substring(0,80);
-  if(window.DB&&DB.knowledge&&!DB.knowledge[k])try{setKB(k,a.substring(0,300),0.82,'local-ai');}catch(e){}
-}
-return{
-  answer:function(q){return _answer(q);},
-  learn:_learn,
-  _formatHTML:function(r){return _fmt(r);},
-  knowledgeSize:function(){return KB.length+Object.keys((window.DB&&DB.knowledge)||{}).length;}
-};
+
+  /* ─── سياق المحادثة ─── */
+  var _ctx = []; // [{q, a}]
+
+  function _addCtx(q, a) {
+    _ctx.push({ q, a });
+    if (_ctx.length > MAX_CTX) _ctx.shift();
+  }
+
+  function _ctxSummary() {
+    return _ctx.slice(-3).map(c => 'س: ' + c.q + '\nج: ' + c.a.substring(0, 100)).join('\n');
+  }
+
+  /* ─── تركيب إجابة من عدة مصادر ─── */
+  function _synthesize(query, results) {
+    if (!results.length) return null;
+    if (results.length === 1) {
+      return { answer: results[0].doc.answer, confidence: Math.round(results[0].score * 100), source: 'معرفة مباشرة', key: results[0].doc.key };
+    }
+    // دمج ذكي — خذ المعلومات الأساسية من الأفضل ثم أضف تفاصيل من الثاني
+    var main = results[0].doc.answer;
+    var extra = results[1].doc.answer.split('\n').slice(0, 2).join('\n');
+    var combined = main;
+    if (extra && !main.includes(extra.split('\n')[0])) {
+      combined += '\n\n📌 معلومة مرتبطة:\n' + extra;
+    }
+    return {
+      answer: combined,
+      confidence: Math.round(results[0].score * 85),
+      source: 'تركيب ذكي',
+      key: results[0].doc.key
+    };
+  }
+
+  /* ─── توليد إجابة للأسئلة المجهولة ─── */
+  function _generateAnswer(query) {
+    // استخدم الماركوف لتوليد نص مرتبط بالسؤال
+    var generated = _markovGenerate(query, 30);
+    if (!generated || generated.length < 10) return null;
+    // أضف مقدمة مناسبة
+    var intro = _detectQuestionType(query);
+    return {
+      answer: intro + '\n' + generated,
+      confidence: 35,
+      source: 'توليد ذكي',
+      generated: true
+    };
+  }
+
+  function _detectQuestionType(q) {
+    if (/كيف|طريقة|خطوات|أشرح/i.test(q)) return 'بناءً على ما تعلمته، إليك ما أعرفه:';
+    if (/ما هو|ما هي|ما هم|تعريف|يعني/i.test(q)) return 'بناءً على معلوماتي:';
+    if (/لماذا|سبب|لأن/i.test(q)) return 'السبب المحتمل بناءً على معرفتي:';
+    if (/متى|تاريخ|سنة/i.test(q)) return 'بناءً على البيانات التاريخية:';
+    if (/من هو|من هي|مين/i.test(q)) return 'من معلوماتي عن هذا الموضوع:';
+    return 'إجابتي بناءً على ما تعلمته:';
+  }
+
+  /* ─── التعلم من المحادثة ─── */
+  function _learn(q, a) {
+    if (!q || !a || a.length < 4) return;
+    // أعد بناء الفهرس عند الإضافة التالية
+    _idfCache = null;
+    _allDocs  = null;
+    _markov   = null;
+    // احفظ في ذاكرة المستخدم
+    var k = q.toLowerCase().trim().substring(0, 80);
+    if (window.DB && DB.knowledge && !DB.knowledge[k]) {
+      try { setKB(k, a.substring(0, 300), 0.82, 'local-ai-v3'); } catch(e) {}
+    }
+  }
+
+  /* ─── الدالة الرئيسية ─── */
+  function _answer(query) {
+    var q = (query || '').trim();
+    if (!q) return null;
+
+    // 1. محادثة جاهزة
+    for (var i = 0; i < CHAT.length; i++) {
+      if (CHAT[i].p.test(q)) {
+        var ans = CHAT[i].r();
+        _addCtx(q, ans);
+        return { answer: ans, isChat: true, confidence: 98 };
+      }
+    }
+
+    // 2. فحص سياق المحادثة (هل السؤال ضمير؟)
+    var hasPronouns = /هو|هي|هم|هذا|هذه|اللي ذكرته|نفس الموضوع/i.test(q);
+    var searchQ = hasPronouns && _ctx.length
+      ? _ctx[_ctx.length - 1].q + ' ' + q
+      : q;
+
+    // 3. TF-IDF search
+    var results = _findBest(searchQ, 3);
+
+    var result;
+    if (results.length > 0) {
+      result = _synthesize(searchQ, results);
+    } else {
+      // 4. لا نتيجة — ولّد إجابة
+      result = _generateAnswer(q);
+    }
+
+    if (result) {
+      _addCtx(q, result.answer);
+      return result;
+    }
+
+    return null;
+  }
+
+  /* ─── HTML format ─── */
+  function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function _fmt(r) {
+    if (!r) return '';
+    var a = r.answer || '';
+    if (r.isChat) return '<div style="font-size:.92rem;line-height:1.85">' + _esc(a).replace(/\n/g,'<br>') + '</div>';
+
+    var lines = a.split('\n').filter(l => l.trim());
+    var isList = lines.some(l => /^[•\-\*]|^\d+[.)]\s/.test(l.trim()));
+    var html = '';
+
+    if (r.key) {
+      html += '<div style="font-size:.62rem;font-weight:900;color:var(--gold);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px">'
+        + '<span style="background:var(--gold-dim);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.6rem">🧠</span>'
+        + _esc(r.key)
+        + '<span style="margin-right:auto;background:rgba(34,197,94,.12);color:#4ade80;padding:1px 8px;border-radius:8px;font-size:.57rem">'
+        + _esc(r.source || 'معرفة') + '</span></div>';
+    }
+
+    if (r.generated) {
+      html += '<div style="font-size:.7rem;color:#fbbf24;background:rgba(251,191,36,.08);padding:5px 10px;border-radius:8px;margin-bottom:8px"><i class="fas fa-magic"></i> إجابة مُولَّدة — قد لا تكون دقيقة 100%</div>';
+    }
+
+    if (isList) {
+      html += '<div style="display:flex;flex-direction:column;gap:3px">';
+      lines.forEach(l => {
+        if (/^[•\-\*]|^\d+[.)]\s/.test(l.trim()))
+          html += '<div style="display:flex;gap:6px;align-items:flex-start;padding:3px 6px;background:rgba(201,149,42,.04);border-radius:7px;border-right:2px solid rgba(201,149,42,.2)"><span style="color:var(--gold);font-size:.7rem;margin-top:2px;flex-shrink:0">◆</span><span style="font-size:.86rem;line-height:1.65">' + _esc(l.replace(/^[•\-\*]\s*|^\d+[.)]\s*/,'')) + '</span></div>';
+        else html += '<p style="font-size:.88rem;line-height:1.7;margin:2px 0">' + _esc(l) + '</p>';
+      });
+      html += '</div>';
+    } else {
+      html += '<p style="font-size:.9rem;line-height:1.78">' + _esc(a).replace(/\n/g,'<br>') + '</p>';
+    }
+
+    var c = r.confidence || 50;
+    var col = c >= 80 ? '#4ade80' : c >= 55 ? '#e8b84b' : '#f87171';
+    html += '<div style="display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
+      + '<span style="font-size:.57rem;color:var(--text3)">ثقة:</span>'
+      + '<div style="flex:1;max-width:55px;height:3px;background:var(--surface3);border-radius:3px;overflow:hidden">'
+      + '<div style="width:' + c + '%;height:100%;background:' + col + '"></div></div>'
+      + '<span style="font-size:.6rem;color:' + col + ';font-weight:800">' + c + '%</span>'
+      + '<span style="margin-right:auto;font-size:.6rem;color:var(--text3)">🧠 v3 محلي</span></div>';
+    return html;
+  }
+
+  function _p(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  /* ─── Public API ─── */
+  return {
+    answer:       q  => _answer(q),
+    learn:        _learn,
+    _formatHTML:  r  => _fmt(r),
+    resetIndex:   () => { _idfCache = null; _allDocs = null; _markov = null; },
+    knowledgeSize:() => KB_BUILT.length + Object.keys((window.DB && DB.knowledge) || {}).length,
+    getContext:   () => _ctxSummary(),
+  };
 })();
 
 
@@ -14563,8 +15544,117 @@ function _buildSystem(withWiki) {
     '• إذا طُلب تذكير رد بـ: "✓ سأضيف تذكير [النص] الساعة [الوقت]"\n' +
     '• نظّم الإجابات الطويلة بنقاط وعناوين\n' +
     '• إذا لم تعرف شيئاً قل ذلك بصدق ولا تختلق معلومات' +
+    (()=>{ try{ const occ=OccasionEngine.getTodayOccasions(); if(occ&&occ.length) return '\n• اليوم مناسبة: '+occ.map(o=>o.name).join('، ')+'— هنئ المستخدم بها إذا ناسب السياق'; }catch(e){} return ''; })() +
     (ctx ? '\n\nسياق المحادثة:\n' + ctx : '');
 }
+
+/* ═══ GEMINI NANO — ON-DEVICE AI ═══ */
+const _nano = (function(){
+  let _session = null;
+  let _enabled = false;
+  let _offlineOnly = true;
+  let _available = 'unknown'; // 'yes'|'no'|'unknown'
+
+  /* ── detect availability ── */
+  async function detect(){
+    const st = document.getElementById('nanoStatus');
+    function setStatus(html, color){
+      if(st) st.innerHTML = '<span style="color:'+(color||'var(--text2)')+'">'+html+'</span>';
+    }
+
+    // Chrome 127+ uses window.LanguageModel, older uses window.ai.languageModel
+    const api = window.LanguageModel || window.ai?.languageModel;
+    if(!api){ 
+      _available='no';
+      setStatus('<i class="fas fa-times-circle"></i> غير مدعوم — يحتاج Chrome 127+ أو Android Chrome', '#f87171');
+      const tog = document.getElementById('nanoToggle');
+      if(tog){ tog.disabled=true; }
+      return;
+    }
+    try{
+      const cap = await api.availability();
+      // cap can be: 'readily', 'after-download', 'no', or boolean in older API
+      if(cap === 'readily' || cap === true){
+        _available = 'yes';
+        setStatus('<i class="fas fa-check-circle"></i> متاح وجاهز للاستخدام ✅', '#4ade80');
+      } else if(cap === 'after-download'){
+        _available = 'download';
+        setStatus('<i class="fas fa-download"></i> يحتاج تحميل النموذج أولاً — سيتم عند التفعيل', '#fbbf24');
+      } else {
+        _available = 'no';
+        setStatus('<i class="fas fa-times-circle"></i> غير متاح على هذا الجهاز', '#f87171');
+        const tog = document.getElementById('nanoToggle');
+        if(tog) tog.disabled = true;
+      }
+    }catch(e){
+      _available = 'no';
+      setStatus('<i class="fas fa-exclamation-triangle"></i> خطأ في الفحص: '+e.message, '#f87171');
+    }
+  }
+
+  /* ── create session ── */
+  async function _getSession(){
+    if(_session) return _session;
+    const api = window.LanguageModel || window.ai?.languageModel;
+    if(!api) throw new Error('API غير موجود');
+    _session = await api.create({
+      systemPrompt: 'أنت مساعد ذكي اسمك King AI. أجب بالعربية دائماً. كن مختصراً ومفيداً.'
+    });
+    return _session;
+  }
+
+  /* ── generate answer ── */
+  async function ask(question){
+    if(!_enabled) return null;
+    if(_offlineOnly && navigator.onLine) return null; // skip if online
+    try{
+      const session = await _getSession();
+      const result = await session.prompt(question);
+      return result || null;
+    }catch(e){
+      _session = null; // reset on error
+      console.warn('Nano error:', e);
+      return null;
+    }
+  }
+
+  /* ── toggle ── */
+  function setEnabled(v){
+    _enabled = v;
+    const slider = document.getElementById('nanoSlider');
+    const thumb  = document.getElementById('nanoThumb');
+    if(slider) slider.style.background = v ? '#4ade80' : 'var(--surface3)';
+    if(thumb)  thumb.style.transform = v ? 'translateX(-20px)' : '';
+    if(v && _available === 'unknown') detect();
+    // destroy session if disabled to free memory
+    if(!v && _session){ try{ _session.destroy(); }catch(e){} _session = null; }
+    lsSet('KAI_nanoEnabled', v);
+    lsSet('KAI_nanoOfflineOnly', _offlineOnly);
+  }
+
+  /* ── init ── */
+  function init(){
+    _enabled     = lsGet('KAI_nanoEnabled') ?? false;
+    _offlineOnly = lsGet('KAI_nanoOfflineOnly') ?? true;
+
+    const tog = document.getElementById('nanoToggle');
+    const ool = document.getElementById('nanoOfflineOnly');
+    if(tog){
+      tog.checked = _enabled;
+      tog.addEventListener('change', e => setEnabled(e.target.checked));
+    }
+    if(ool){
+      ool.checked = _offlineOnly;
+      ool.addEventListener('change', e => { _offlineOnly = e.target.checked; lsSet('KAI_nanoOfflineOnly', e.target.checked); });
+    }
+
+    // apply slider visual state
+    setEnabled(_enabled);
+    detect();
+  }
+
+  return { ask, init, isEnabled:()=>_enabled };
+})();
 
 /* المعالج الرئيسي */
 async function _aiProcess(question, rawData) {
@@ -14597,6 +15687,24 @@ async function _aiProcess(question, rawData) {
       return { text: null, engine: 'gemini', err: r.err };
     }
   }
+  /* ── Smart search + Nano fallback (no key needed) ── */
+  if (navigator.onLine && S.webSearch !== false) {
+    try {
+      const smart = await smartSearchNoKey(question);
+      if (smart && smart.text && smart.text.trim().length > 10) {
+        return { ok: true, text: smart.text, engine: smart.engine || 'nano', source: smart.source };
+      }
+    } catch(e) {}
+  }
+  /* ── Gemini Nano offline fallback ── */
+  if (_nano.isEnabled()) {
+    try {
+      const nanoAns = await _nano.ask(question);
+      if (nanoAns && nanoAns.trim().length > 3) {
+        return { ok: true, text: nanoAns, engine: 'nano' };
+      }
+    } catch(e) {}
+  }
   return { text: null, engine: 'local', err: null };
 }
 
@@ -14621,7 +15729,8 @@ async function webSearch(q) {
   }
 
   const engineLabel = aiResult.engine === 'gemini' ? 'Gemini AI'
-    : aiResult.engine === 'claude' ? 'Claude AI' : null;
+    : aiResult.engine === 'claude' ? 'Claude AI'
+    : aiResult.engine === 'nano' ? '⚡ Gemini Nano' : null;
 
   if (aiResult.ok && aiResult.text) {
     const result = {
@@ -14921,165 +16030,47 @@ async function respondWithSearch(orig) {
 
 /* ══ INLINE VIDEO PLAYER ══ */
 /* ── مربع خيارات التحميل ── */
-function _viShowDlOptions(vid, ytUrl){
+function _viShowShareOptions(vid){
+  const ytUrl='https://www.youtube.com/watch?v='+vid;
   const existing=document.getElementById('vi-dl-modal');
   if(existing)existing.remove();
   const modal=document.createElement('div');
   modal.id='vi-dl-modal';
   modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .18s ease';
   modal.innerHTML=
-    '<div id="vi-dl-sheet" style="background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;animation:slideUp .22s ease">'+
+    '<div style="background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:520px;max-height:80vh;overflow-y:auto;animation:slideUp .22s ease">'+
       '<div style="position:sticky;top:0;background:var(--surface);padding:16px 16px 12px;border-bottom:1px solid var(--border);z-index:1">'+
         '<div style="width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 12px"></div>'+
         '<div style="display:flex;align-items:center;justify-content:space-between">'+
-          '<div style="font-size:1rem;font-weight:900">⬇️ تحميل الفيديو</div>'+
-          '<button onclick="var m=document.getElementById(\'vi-dl-modal\');if(m)m.remove();" style="background:var(--surface2);border:none;color:var(--text3);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>'+
-        '</div>'+
-        '<div id="vi-dl-status" style="font-size:.75rem;color:var(--text3);margin-top:8px;display:flex;align-items:center;gap:6px">'+
-          '<i class="fas fa-circle-notch fa-spin" style="color:var(--gold)"></i> جاري جلب الجودات...'+
+          '<div style="font-size:1rem;font-weight:900">🔗 مشاركة الفيديو</div>'+
+          '<button onclick="document.getElementById(\'vi-dl-modal\').remove()" style="background:var(--surface2);border:none;color:var(--text3);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>'+
         '</div>'+
       '</div>'+
-      '<div id="vi-dl-list" style="padding:12px 16px 20px"></div>'+
+      '<div style="padding:14px 16px 20px">'+
+        '<div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:10px 13px;margin-bottom:14px;font-size:.74rem;color:var(--text2);line-height:1.7">'+
+          '<i class="fas fa-info-circle" style="color:#fbbf24;margin-left:5px"></i>'+
+          '<strong style="color:#fbbf24">تنبيه قانوني:</strong> تنزيل مقاطع YouTube قد يخالف شروط الخدمة وقوانين حقوق النشر. يُسمح فقط بمشاهدة المحتوى الذي تملك حقوق تنزيله.'+
+        '</div>'+
+        '<a href="'+ytUrl+'" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;text-decoration:none">'+
+          '<div style="width:38px;height:38px;border-radius:10px;background:#ff333322;border:1px solid #ff333344;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fab fa-youtube" style="color:#ff3333;font-size:.9rem"></i></div>'+
+          '<div style="flex:1"><div style="font-size:.88rem;font-weight:800;color:var(--text)">فتح في YouTube</div><div style="font-size:.68rem;color:var(--text3);margin-top:2px">شاهد الفيديو على الموقع الرسمي</div></div>'+
+          '<i class="fas fa-external-link-alt" style="color:var(--text3);font-size:.7rem"></i>'+
+        '</a>'+
+        '<div onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+ytUrl+'\').then(()=>toast(\'✅ تم نسخ الرابط\'));document.getElementById(\'vi-dl-modal\').remove();" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;cursor:pointer">'+
+          '<div style="width:38px;height:38px;border-radius:10px;background:#4ade8022;border:1px solid #4ade8044;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-link" style="color:#4ade80;font-size:.85rem"></i></div>'+
+          '<div style="flex:1"><div style="font-size:.88rem;font-weight:800;color:var(--text)">نسخ الرابط</div><div style="font-size:.68rem;color:var(--text3);margin-top:2px">انسخ رابط الفيديو للمشاركة</div></div>'+
+        '</div>'+
+      '</div>'+
     '</div>';
   modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
   document.body.appendChild(modal);
-  _viFetchQualities(vid).then(qualities=>{
-    const statusEl=document.getElementById('vi-dl-status');
-    const listEl=document.getElementById('vi-dl-list');
-    if(!statusEl||!listEl)return;
-    if(!qualities||!qualities.length){
-      statusEl.innerHTML='<i class="fas fa-exclamation-triangle" style="color:#f87171"></i> <span style="color:#f87171">تعذّر جلب الروابط — جرّب:</span>';
-      listEl.innerHTML=[
-        {label:'cobalt.tools',url:'https://cobalt.tools/#'+encodeURIComponent(ytUrl),color:'#4ade80',desc:'مجاني — HD + صوت فقط'},
-        {label:'y2mate.nu',url:'https://y2mate.nu/youtube/'+vid+'/',color:'#7eb8f7',desc:'جودات متعددة'},
-      ].map(o=>'<a href="'+o.url+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;text-decoration:none"><div style="width:8px;height:8px;border-radius:50%;background:'+o.color+';flex-shrink:0"></div><div><div style="font-size:.85rem;font-weight:700;color:var(--text)">'+o.label+'</div><div style="font-size:.68rem;color:var(--text3)">'+o.desc+'</div></div><i class="fas fa-external-link-alt" style="margin-right:auto;color:var(--text3);font-size:.7rem"></i></a>').join('');
-      return;
-    }
-    statusEl.innerHTML='<i class="fas fa-check-circle" style="color:#4ade80"></i> <span style="color:#4ade80">'+qualities.length+' جودة متاحة — اضغط للتحميل</span>';
-    listEl.innerHTML=qualities.map(q=>{
-      const isAudio=!q.hasAudio||q.label.includes('صوت');
-      const icon=isAudio?'fa-music':'fa-film';
-      const color=isAudio?'#a78bfa':q.quality>=1080?'#f59e0b':q.quality>=720?'#4ade80':'#7eb8f7';
-      return '<div onclick="_viStartDownload(\''+encodeURIComponent(q.url)+'\',\''+encodeURIComponent(q.label||'video')+'\',this)" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:.15s" onmouseenter="this.style.borderColor=\''+color+'\'" onmouseleave="this.style.borderColor=\'var(--border)\'"><div style="width:38px;height:38px;border-radius:10px;background:'+color+'22;border:1px solid '+color+'44;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas '+icon+'" style="color:'+color+';font-size:.85rem"></i></div><div style="flex:1"><div style="font-size:.88rem;font-weight:800;color:var(--text)">'+q.label+'</div><div style="font-size:.68rem;color:var(--text3);margin-top:2px">'+(q.size?q.size+' · ':'')+(q.hasAudio?'🔊 فيديو + صوت':'🔇 فيديو فقط')+'</div></div><div style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#4ade80;padding:5px 12px;border-radius:8px;font-size:.7rem;font-weight:700"><i class="fas fa-download"></i> تحميل</div></div>';
-    }).join('');
-  }).catch(()=>{
-    const s=document.getElementById('vi-dl-status');
-    if(s)s.innerHTML='<i class="fas fa-times-circle" style="color:#f87171"></i> <span style="color:#f87171">خطأ في الاتصال</span>';
-  });
 }
-
-
-async function _viFetchQualities(videoId){
-  const hosts=_viGetInvHosts();
-  for(const host of hosts){
-    try{
-      const r=await fetch(host+'/api/v1/videos/'+videoId,{
-        signal:_makeSignal(8000), mode:'cors',
-        headers:{'Accept':'application/json'}
-      });
-      if(!r.ok)continue;
-      const d=await r.json();
-      if(!d)continue;
-
-      const results=[];
-
-      /* formatStreams: فيديو+صوت مدمج (الأفضل للتحميل) */
-      const fmts=(d.formatStreams||[]).filter(f=>f.url&&f.type&&f.type.includes('video'));
-      fmts.sort((a,b)=>(parseInt(b.resolution)||0)-(parseInt(a.resolution)||0));
-      fmts.forEach(f=>{
-        const res=f.resolution||f.qualityLabel||'?';
-        const ext=f.type.includes('mp4')?'mp4':'webm';
-        const sz=f.size?_fmtSize(f.size):'';
-        results.push({url:f.url,label:res+' ('+ext+')',size:sz,hasAudio:true,ext,quality:parseInt(res)||0});
-      });
-
-      /* adaptiveFormats: جودات عالية (فيديو فقط) */
-      const adaptive=(d.adaptiveFormats||[])
-        .filter(f=>f.url&&f.type&&f.type.includes('video/mp4'))
-        .sort((a,b)=>(parseInt(b.resolution||b.qualityLabel)||0)-(parseInt(a.resolution||a.qualityLabel)||0));
-      adaptive.slice(0,3).forEach(f=>{
-        const res=f.resolution||f.qualityLabel||'عالي';
-        const sz=f.size?_fmtSize(f.size):(f.contentLength?_fmtSize(f.contentLength):'');
-        if(!results.find(r=>r.label.startsWith(res)))
-          results.push({url:f.url,label:res+' (mp4 — فيديو فقط)',size:sz,hasAudio:false,ext:'mp4',quality:parseInt(res)||0});
-      });
-
-      /* صوت فقط mp4a */
-      const audioFmts=(d.adaptiveFormats||[])
-        .filter(f=>f.url&&f.type&&(f.type.includes('audio/mp4')||f.type.includes('audio/webm')))
-        .sort((a,b)=>(parseInt(b.bitrate)||0)-(parseInt(a.bitrate)||0));
-      if(audioFmts.length){
-        const af=audioFmts[0];
-        const sz=af.contentLength?_fmtSize(af.contentLength):'';
-        const ext=af.type.includes('mp4')?'m4a':'webm';
-        results.push({url:af.url,label:'صوت فقط ('+ext+')',size:sz,hasAudio:true,ext,quality:-1});
-      }
-
-      if(results.length)return results;
-    }catch(e){}
-  }
-  return null;
-}
-
-/* تنسيق حجم الملف */
-function _fmtSize(bytes){
-  const b=parseInt(bytes)||0;
-  if(!b)return '';
-  if(b>1e9)return (b/1e9).toFixed(1)+' GB';
-  if(b>1e6)return (b/1e6).toFixed(1)+' MB';
-  return (b/1e3).toFixed(0)+' KB';
-}
-
-/* تشغيل التحميل */
+function _viShowDlOptions(vid, ytUrl){ _viShowShareOptions(vid); }
 function _viStartDownload(encodedUrl, encodedName, el){
-  const url=decodeURIComponent(encodedUrl);
-  const name=decodeURIComponent(encodedName);
-  if(!url)return;
-
-  /* تعديل زر */
-  if(el){
-    el.style.opacity='0.6';
-    el.style.pointerEvents='none';
-    const ico=el.querySelector('.fa-download');
-    if(ico){ico.className='fas fa-circle-notch fa-spin';ico.style.color='var(--gold)';}
-    setTimeout(()=>{if(el){el.style.opacity='1';el.style.pointerEvents='auto';const i=el.querySelector('.fa-circle-notch');if(i){i.className='fas fa-check';i.style.color='#4ade80';}}},2000);
-  }
-
-  /* الطريقة 1: fetch + Blob → أكثر موثوقية للحفظ الحقيقي */
-  toast('<i class="fas fa-circle-notch fa-spin"></i> جاري التحميل...',3000);
-
-  /* جرّب fetch أولاً (يعمل مع روابط CORS-enabled) */
-  fetch(url,{mode:'cors',cache:'no-store'})
-    .then(r=>{
-      if(!r.ok)throw new Error(r.status);
-      return r.blob();
-    })
-    .then(blob=>{
-      const ext=url.includes('.webm')?'.webm':url.includes('audio')&&url.includes('webm')?'.webm':url.includes('m4a')||url.includes('audio/mp4')?'.m4a':'.mp4';
-      const fn=name.replace(/[^\w\u0600-\u06ff\s\-_]/g,'').substring(0,60)+(name.includes('.')?'':ext);
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob);
-      a.download=fn;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},3000);
-      toast('<i class="fas fa-check-circle"></i> تم التحميل!',2500);
-    })
-    .catch(()=>{
-      /* Fallback: فتح الرابط مباشرة في tab جديد */
-      const a=document.createElement('a');
-      a.href=url;
-      a.target='_blank';
-      a.rel='noopener';
-      a.download=name||'video.mp4';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      toast('<i class="fas fa-external-link-alt"></i> تم فتح رابط التحميل',2000);
-    });
+  /* Direct download removed for legal compliance */
+  try{const url=decodeURIComponent(encodedUrl);window.open(url,'_blank','noopener,noreferrer');}catch(e){}
+  toast('<i class="fas fa-external-link-alt"></i> فُتح الرابط في تبويب جديد',2000);
 }
-
-
 function _ytIdFromStr(s){
   const m=s.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
   return m?m[1]:null;
@@ -19190,6 +20181,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // عرض المناسبات الإسلامية والميلادية ديناميكياً
   _dtBuildOccasions();
   _dtBuildGregOccasions();
+
+  // ── بانر مناسبة اليوم في المحادثة ──
+  setTimeout(()=>{
+    try{
+      const greet=OccasionEngine.getStartupGreeting();
+      if(greet){
+        const banner=document.createElement('div');
+        banner.id='occasion-banner';
+        banner.style.cssText='margin:10px 12px 4px;padding:13px 16px;background:linear-gradient(135deg,rgba(201,149,42,.13),rgba(167,139,250,.09));border:1px solid rgba(201,149,42,.35);border-radius:15px;text-align:center;animation:fadeIn .6s ease';
+        banner.innerHTML=
+          '<div style="font-size:1.6rem;margin-bottom:4px">'+greet.icon+'</div>'+
+          '<div style="font-weight:900;color:var(--gold);font-size:.9rem;margin-bottom:5px">'+greet.name+'</div>'+
+          '<div style="font-size:.8rem;color:var(--text2);line-height:1.75">'+greet.msg+'</div>'+
+          '<button onclick="this.parentElement.remove()" style="margin-top:8px;background:transparent;border:1px solid var(--border);color:var(--text3);padding:3px 14px;border-radius:8px;cursor:pointer;font-size:.65rem;font-family:inherit">✕ إغلاق</button>';
+        const chatList=document.getElementById('chatContainer')||document.querySelector('.chat-list');
+        if(chatList) chatList.prepend(banner);
+      }
+    }catch(e){}
+  },1000);
+
+  // ── تحديث تلقائي عند تغيُّر اليوم ──
+  (function _autoRefreshOccasions(){
+    const today=new Date().toDateString();
+    setInterval(()=>{
+      if(new Date().toDateString()!==today){
+        location.reload();
+      }
+    },60*60*1000); // فحص كل ساعة
+  })();
 });
 
 /* ══ بناء المناسبات الإسلامية ديناميكياً — 1447هـ + 1448هـ + 1449هـ ══ */
@@ -19232,7 +20252,7 @@ function _dtBuildOccasions() {
     .slice(0, 12);
 
   if (lbl) {
-    lbl.textContent = `🕌 المناسبات الإسلامية — ${curHijriY}هـ/${curHijriY+1}هـ`;
+    lbl.innerHTML = `🕌 المناسبات الإسلامية — ${curHijriY}هـ/${curHijriY+1}هـ <button onclick="_dtBuildOccasions();_dtBuildGregOccasions();" title="تحديث" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:.75rem;padding:0 4px">↻</button>`;
   }
 
   const CAT_COLORS_ISL = {
@@ -19384,9 +20404,11 @@ function _getGregOccasions(y) {
   const easterDate = new Date(easter.y, easter.m - 1, easter.d);
   const goodFriday = new Date(easterDate); goodFriday.setDate(goodFriday.getDate() - 2);
   const pentecost  = new Date(easterDate); pentecost.setDate(pentecost.getDate() + 49);
-  // عيد الأم: ثاني أحد مايو | عيد الأب: ثالث أحد يونيو
+  // عيد الأم الدولي: ثاني أحد مايو | عيد الأب: ثالث أحد يونيو
   const mothersDay = _nthWeekday(y, 5, 0, 2);
   const fathersDay = _nthWeekday(y, 6, 0, 3);
+  // عيد الأم العربي: 21 مارس (ثابت)
+  // عيد الأم المصري: 21 مارس | السوري | اللبناني | الأردني | السعودي... ثابت 21 مارس
 
   return [
     // ════════ 🌐 مناسبات دولية ════════
@@ -19404,7 +20426,8 @@ function _getGregOccasions(y) {
     { key:'earthday',      cat:'intl', name:'يوم الأرض',                        icon:'🌍', y, m:4,  d:22,  country:'دولي' },
     { key:'laborday',      cat:'intl', name:'عيد العمال',                       icon:'⚒️', y, m:5,  d:1,   country:'دولي' },
     { key:'pressday',      cat:'intl', name:'يوم حرية الصحافة',                icon:'📰', y, m:5,  d:3,   country:'دولي' },
-    { key:'mothers',       cat:'intl', name:'عيد الأم',                         icon:'💐', y, m:mothersDay.m, d:mothersDay.d, country:'دولي' },
+    { key:'arab_mothers',  cat:'arab', name:'عيد الأم العربي 💐',               icon:'🌹', y, m:3, d:21, country:'الوطن العربي' },
+    { key:'mothers',       cat:'intl', name:'عيد الأم الدولي',                  icon:'💐', y, m:mothersDay.m, d:mothersDay.d, country:'دولي' },
     { key:'nosmoke',       cat:'intl', name:'يوم الامتناع عن التدخين',         icon:'🚭', y, m:5,  d:31,  country:'دولي' },
     { key:'children',      cat:'intl', name:'يوم الطفل العالمي',                icon:'🧒', y, m:6,  d:1,   country:'دولي' },
     { key:'envday',        cat:'intl', name:'يوم البيئة العالمي',               icon:'🌱', y, m:6,  d:5,   country:'دولي' },
@@ -19440,6 +20463,12 @@ function _getGregOccasions(y) {
     { key:'uae_natl',      cat:'arab', name:'اليوم الوطني الإماراتي',           icon:'🇦🇪', y, m:12, d:2,   country:'الإمارات' },
     { key:'qatar_natl',    cat:'arab', name:'اليوم الوطني القطري',              icon:'🇶🇦', y, m:12, d:18,  country:'قطر' },
     { key:'lib_ind',       cat:'arab', name:'استقلال ليبيا',                    icon:'🇱🇾', y, m:12, d:24,  country:'ليبيا' },
+    { key:'palestine_day', cat:'arab', name:'يوم التضامن مع فلسطين',            icon:'🇵🇸', y, m:11, d:29,  country:'دولي' },
+    { key:'arab_lang',     cat:'arab', name:'يوم اللغة العربية',                 icon:'📖', y, m:12, d:18,  country:'دولي' },
+    { key:'syr_ind',       cat:'arab', name:'الاستقلال السوري',                  icon:'🇸🇾', y, m:4,  d:17,  country:'سوريا' },
+    { key:'eg_rev',        cat:'arab', name:'ثورة 23 يوليو',                     icon:'🇪🇬', y, m:7,  d:23,  country:'مصر' },
+    { key:'pak_ind',       cat:'arab', name:'استقلال باكستان',                   icon:'🇵🇰', y, m:8,  d:14,  country:'باكستان' },
+    { key:'mor_ind',       cat:'arab', name:'استقلال المغرب',                    icon:'🇲🇦', y, m:11, d:18,  country:'المغرب' },
 
     // ════════ ✝️ مناسبات مسيحية ════════
     { key:'orthodox_xmas', cat:'christian', name:'عيد الميلاد الأرثوذكسي',     icon:'⛪', y, m:1,  d:7,   country:'الكنيسة الشرقية' },
@@ -19462,8 +20491,8 @@ function _getGregOccasions(y) {
 
     // ════════ 🏆 رياضية ════════
     { key:'olympicsday',   cat:'sport', name:'يوم الأولمبياد العالمي',          icon:'🏅', y, m:6,  d:23,  country:'دولي' },
-    { key:'worldcup',      cat:'sport', name:'انطلاق كأس العالم 2026',          icon:'⚽', y:2026, m:6, d:11, country:'أمريكا/كندا/المكسيك' },
-  ].filter(o => !o.y || o.y === y);
+    { key:'worldcup26',    cat:'sport', name:'كأس العالم 2026',                  icon:'⚽', y:2026, m:6, d:11, country:'أمريكا/كندا/المكسيك' },
+  ].filter(o => !o.y || o.y === y || o.y > y);
 }
 
 
@@ -19504,7 +20533,7 @@ function _dtBuildGregOccasions() {
     .filter(o => o.diff >= -3)
     .sort((a, b) => a.diff - b.diff);
 
-  if (lbl) lbl.textContent = `🌍 المناسبات الميلادية — ${y}`;
+  if (lbl) lbl.innerHTML = `🌍 المناسبات الميلادية — ${y} <button onclick="_dtBuildGregOccasions()" title="تحديث" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:.75rem;padding:0 4px">↻</button>`;
 
   const CAT_COLORS = {
     intl:      { bg:'rgba(59,130,246,.1)',   bd:'rgba(59,130,246,.3)',  c:'#60a5fa', label:'🌐 دولية'    },

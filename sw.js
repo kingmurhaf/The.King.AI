@@ -120,6 +120,50 @@ async function _checkBgAlarms() {
         headers: { 'Content-Type': 'application/json' }
       })
     );
+
+    /* ═══ فحص قائمة Snooze ═══ */
+    try {
+      const snoozeResp = await cache.match('snooze-queue');
+      if (snoozeResp) {
+        let snoozes = await snoozeResp.json();
+        const pending = [];
+
+        for (const s of snoozes) {
+          if (Date.now() >= s.fireAt) {
+            /* حان وقت الإطلاق */
+            await self.registration.showNotification('⏰ King AI — تذكير (مؤجل)', {
+              body:    s.text || 'حان وقت تذكيرك!',
+              icon:    SCOPE + 'icon-512.png',
+              badge:   SCOPE + 'icon-192.png',
+              tag:     s.id || ('snooze-fire-' + Date.now()),
+              renotify: true,
+              requireInteraction: true,
+              vibrate: [400, 150, 400, 150, 800],
+              dir:     'rtl',
+              lang:    'ar',
+              actions: [
+                { action: 'open',     title: '📱 فتح'       },
+                { action: 'snooze5',  title: '😴 5 دقائق'   },
+                { action: 'snooze10', title: '💤 10 دقائق'  },
+                { action: 'dismiss',  title: '✕ إغلاق'      },
+              ],
+              data: { text: s.text }
+            });
+          } else {
+            pending.push(s); /* لم يحن وقته بعد */
+          }
+        }
+
+        /* احفظ الـ pending فقط */
+        await cache.put('snooze-queue',
+          new Response(JSON.stringify(pending), {
+            headers: { 'Content-Type': 'application/json' }
+          })
+        );
+      }
+    } catch(se) {
+      console.warn('[SW] snooze-queue check error:', se);
+    }
   } catch(e) {
     console.warn('[SW] _checkBgAlarms error:', e);
   }
@@ -304,27 +348,37 @@ self.addEventListener('notificationclick', e => {
   const data       = e.notification.data || {};
   const reminderId = data.reminderId;
 
-  /* ─ تأجيل 5 أو 10 دقائق ─ */
+  /* ─ تأجيل 5 أو 10 دقائق — يحفظ في الكاش ويُطلق عبر _checkBgAlarms ─ */
   if (action === 'snooze5' || action === 'snooze10') {
     const mins = action === 'snooze5' ? 5 : 10;
     e.waitUntil(
       (async () => {
-        await new Promise(r => setTimeout(r, mins * 60 * 1000));
-        await self.registration.showNotification('⏰ King AI — تذكير (مؤجل)', {
-          body:    (data.text || 'حان وقت تذكيرك!') + ` — بعد ${mins} دقائق`,
-          icon:    SCOPE + 'icon-512.png',
-          badge:   SCOPE + 'icon-192.png',
-          tag:     'reminder-snooze-' + Date.now(),
-          requireInteraction: true,
-          vibrate: [400, 200, 400],
-          dir:     'rtl',
-          lang:    'ar',
-          actions: [
-            { action: 'open',    title: '📱 فتح' },
-            { action: 'dismiss', title: '✕ إغلاق' },
-          ],
-          data
-        });
+        try {
+          const fireAt = Date.now() + mins * 60 * 1000;
+          const cache  = await caches.open('king-ai-alarms');
+
+          let snoozes = [];
+          try {
+            const r = await cache.match('snooze-queue');
+            if (r) snoozes = await r.json();
+          } catch(_) {}
+
+          snoozes.push({
+            id:     'snooze-' + Date.now(),
+            fireAt,
+            text:   data.text || 'تذكير مؤجل',
+            mins
+          });
+
+          await cache.put('snooze-queue',
+            new Response(JSON.stringify(snoozes), {
+              headers: { 'Content-Type': 'application/json' }
+            })
+          );
+          console.info('[SW] Snooze saved → fires in', mins, 'min');
+        } catch(err) {
+          console.warn('[SW] snooze save error:', err);
+        }
       })()
     );
     return;
