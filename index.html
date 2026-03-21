@@ -3146,10 +3146,8 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
     <div class="header-actions">
       <span class="save-ind" id="saveInd"></span>
       <button class="icon-btn" id="installBtn" title="تثبيت" style="display:none"><i class="fas fa-download"></i></button>
-      <button class="icon-btn mode-auto" id="aiEngineBtn" title="محرك AI" style="font-size:10px;font-weight:800;min-width:auto;padding:0 6px;width:auto;gap:2px"><span id="aiEngineLbl">⚡ Auto</span></button>
-      <button class="icon-btn" id="offlineModeHeaderBtn" title="وضع عدم الاتصال"><i class="fas fa-plug"></i></button>
-      <button class="icon-btn" id="themeToggleBtn" title="الثيم"><i class="fas fa-moon"></i></button>
-      <button class="icon-btn" id="speakToggleBtn" title="قراءة/إيقاف"><i class="fas fa-volume-up"></i></button>
+      <button class="icon-btn mode-auto" id="aiEngineBtn" title="محرك AI" style="font-size:9px;font-weight:800;min-width:auto;padding:0 5px;width:auto;height:28px;gap:2px;border-radius:7px"><span id="aiEngineLbl">⚡ Auto</span></button>
+      <button class="icon-btn" id="appUpdateBtn" title="تحديث التطبيق" style="font-size:9px;font-weight:800;min-width:auto;padding:0 5px;width:auto;height:28px;gap:2px;border-radius:7px;display:flex;align-items:center;gap:3px"><i class="fas fa-sync-alt" style="font-size:10px"></i><span>تحديث</span></button>
       <button class="icon-btn" id="memBtn" title="الذاكرة"><i class="fas fa-brain"></i></button>
     </div>
   </div>
@@ -5850,19 +5848,19 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
           </label>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-          <button class="btn" id="snapBtn"><i class="fas fa-camera"></i> نسخة الآن</button>
+          <button class="btn" id="snapBtn2"><i class="fas fa-camera"></i> نسخة الآن</button>
           <button class="btn" id="restoreBtn"><i class="fas fa-undo-alt"></i> استعادة</button>
         </div>
       </div>
       <div class="card">
         <div class="card-title"><i class="fas fa-exchange-alt"></i> تصدير واستيراد</div>
         <div class="btn-row">
-          <button class="btn" id="expJsonBtn2"><i class="fas fa-download"></i> JSON</button>
-          <button class="btn" id="expCsvBtn2"><i class="fas fa-download"></i> CSV</button>
-          <button class="btn" id="expTxtMemBtn"><i class="fas fa-file-alt"></i> نص</button>
-          <button class="btn" id="copyJsonBtn"><i class="fas fa-copy"></i> نسخ</button>
-          <button class="btn" id="shareBtn"><i class="fas fa-share-alt"></i> مشاركة</button>
-          <button class="btn" id="impBtn"><i class="fas fa-upload"></i> استيراد</button>
+          <button class="btn" id="expJsonBtn3"><i class="fas fa-download"></i> JSON</button>
+          <button class="btn" id="expCsvBtn3"><i class="fas fa-download"></i> CSV</button>
+          <button class="btn" id="expTxtBtn2"><i class="fas fa-file-alt"></i> نص</button>
+          <button class="btn" id="copyJsonBtn2"><i class="fas fa-copy"></i> نسخ</button>
+          <button class="btn" id="shareBtn2"><i class="fas fa-share-alt"></i> مشاركة</button>
+          <button class="btn" id="impBtn2"><i class="fas fa-upload"></i> استيراد</button>
         </div>
       </div>
 
@@ -5906,9 +5904,9 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
         <div class="card-title"><i class="fas fa-database"></i> إدارة الذاكرة</div>
         <div class="btn-row" style="flex-wrap:wrap">
           <button class="btn" id="mergeBtn"><i class="fas fa-compress-alt"></i> دمج المتشابهات</button>
-          <button class="btn" id="expJsonBtn"><i class="fas fa-download"></i> تصدير كامل</button>
-          <button class="btn" id="expTxtBtn"><i class="fas fa-file-alt"></i> تصدير نص</button>
-          <button class="btn" id="expCsvBtn"><i class="fas fa-table"></i> CSV</button>
+          <button class="btn" id="expJsonBtn4"><i class="fas fa-download"></i> تصدير كامل</button>
+          <button class="btn" id="expTxtBtn3"><i class="fas fa-file-alt"></i> تصدير نص</button>
+          <button class="btn" id="expCsvBtn4"><i class="fas fa-table"></i> CSV</button>
         </div>
       </div>
       <div class="card" style="border-color:rgba(201,149,42,.25);background:linear-gradient(135deg,rgba(201,149,42,.05),rgba(124,58,237,.05))">
@@ -11180,7 +11178,6 @@ function initLock(){
 /* ═══ CLOUD KNOWLEDGE BASE ═══ */
 (function(){
   const CLOUD_KB_URL      = 'king_ai_db.json';
-  const LINKVERTISE_URL   = 'https://link-target.net/4436197/sL2rryVVDJ1G';
   const CLOUD_KB_LAST_KEY = 'KAI_cloudKb_lastUpdate';
   const CLOUD_KB_VER_KEY  = 'KAI_cloudKb_version';
   let _cdInterval = null;
@@ -11263,9 +11260,8 @@ function initLock(){
   }
 
   function doUpdate(){
-    /* open Linkvertise in new tab, then start countdown */
-    window.open(LINKVERTISE_URL, '_blank', 'noopener,noreferrer');
-    _startCountdown(20, _doFetchAndMerge);
+    /* تحديث مباشر بدون إعلان */
+    _doFetchAndMerge();
   }
 
   async function doCheck(){
@@ -12599,14 +12595,27 @@ function initEvents(){
     if(_isOnline()){_updateNetBadge();toast('<i class="fas fa-wifi"></i> الاتصال متاح',2000);}
     else{toast('<i class="fas fa-wifi-slash"></i> لا يزال منقطعاً',2500);}
   });
-  document.getElementById('speakToggleBtn')?.addEventListener('click', function() {
-    var btn = document.getElementById('speakToggleBtn');
-    if (KingTTS.isActive()) {
-      KingTTS.stop();
-      if(btn){btn.innerHTML='<i class="fas fa-volume-up"></i>';btn.classList.remove('active');}
-    } else {
-      KingTTS.speakLast();
-      if(btn){btn.innerHTML='<i class="fas fa-stop" style="color:var(--gold)"></i>';btn.classList.add('active');}
+  document.getElementById('appUpdateBtn')?.addEventListener('click', async function() {
+    const btn = document.getElementById('appUpdateBtn');
+    if(btn){ btn.innerHTML='<i class="fas fa-circle-notch fa-spin" style="font-size:10px"></i><span>جارٍ...</span>'; btn.disabled=true; }
+    try{
+      if('serviceWorker' in navigator){
+        const reg = await navigator.serviceWorker.getRegistration();
+        if(reg){
+          await reg.update();
+          const w = reg.waiting || reg.installing;
+          if(w){ w.postMessage('SKIP_WAITING'); toast('<i class="fas fa-sync-alt"></i> تم تحديث التطبيق ✓', 2500); }
+          else { toast('<i class="fas fa-check-circle"></i> أنت على أحدث إصدار', 2000); }
+        }
+      }
+      /* تحديث الكاش أيضاً */
+      if('caches' in window){
+        const keys = await caches.keys();
+        await Promise.all(keys.filter(k=>k!=='king-ai-alarms').map(k=>caches.delete(k)));
+      }
+    }catch(e){ toast('<i class="fas fa-exclamation-triangle"></i> تعذّر التحديث', 2000); }
+    finally{
+      if(btn){ btn.innerHTML='<i class="fas fa-sync-alt" style="font-size:10px"></i><span>تحديث</span>'; btn.disabled=false; }
     }
   });
   document.getElementById('stopSpeakBtn')?.addEventListener('click', () => KingTTS.stop());
@@ -13322,11 +13331,15 @@ function initEvents(){
   document.getElementById('expJsonBtn')?.addEventListener('click',exportJSON);
   document.getElementById('expJsonBtn2')?.addEventListener('click',exportJSON);
   document.getElementById('expJsonBtn3')?.addEventListener('click',exportJSON);
+  document.getElementById('expJsonBtn4')?.addEventListener('click',exportJSON);
   document.getElementById('expTxtMemBtn')?.addEventListener('click',exportTxt);
   document.getElementById('expTxtMemBtn2')?.addEventListener('click',exportTxt);
+  document.getElementById('expTxtBtn2')?.addEventListener('click',exportChatTxt);
+  document.getElementById('expTxtBtn3')?.addEventListener('click',exportChatTxt);
   document.getElementById('expCsvBtn')?.addEventListener('click',exportCsv);
   document.getElementById('expCsvBtn2')?.addEventListener('click',exportCsv);
   document.getElementById('expCsvBtn3')?.addEventListener('click',exportCsv);
+  document.getElementById('expCsvBtn4')?.addEventListener('click',exportCsv);
   document.getElementById('expTxtBtn')?.addEventListener('click',exportChatTxt);
   document.getElementById('copyJsonBtn')?.addEventListener('click',copyJsonToClipboard);
   document.getElementById('shareBtn')?.addEventListener('click',shareData);
@@ -13469,6 +13482,8 @@ if(cc){
     '<span class="welcome-chip" data-fill="ما آخر الأخبار؟"><i class="fas fa-globe" style="color:#38bdf8"></i> ابحث في الإنترنت</span>'+
     '<span class="welcome-chip" data-fill="شغّل فيديو عن الفضاء"><i class="fab fa-youtube" style="color:#ff3333"></i> بحث فيديو</span>'+
     '<span class="welcome-chip" data-fill="احفظ أن العاصمة السعودية هي الرياض"><i class="fas fa-save" style="color:var(--green)"></i> علّمني معلومة</span>'+
+    '<span class="welcome-chip" data-fill="احسب 15% من 2500"><i class="fas fa-calculator" style="color:#a78bfa"></i> حاسبة</span>'+
+    '<span class="welcome-chip" data-action="reminders"><i class="fas fa-bell" style="color:#fb923c"></i> تذكير</span>'+
     '</div>'+
     '<div style="font-size:.7rem;color:var(--text3);background:var(--surface2);border-radius:var(--radius-sm);padding:9px 14px;text-align:right;border:1px solid var(--border);width:100%;max-width:320px;line-height:2">'+
     '<span style="font-weight:800;color:var(--text2);display:block;margin-bottom:5px"><i class="fas fa-graduation-cap" style="color:var(--gold);margin-left:5px"></i> أوامر مفيدة</span>'+
@@ -13480,6 +13495,12 @@ if(cc){
     el.addEventListener('click',function(){
       var inp=document.getElementById('userInput');
       if(inp){inp.value=el.dataset.fill;inp.focus();}
+    });
+  });
+  cc.querySelectorAll('.welcome-chip[data-action]').forEach(function(el){
+    el.addEventListener('click',function(){
+      var act=el.dataset.action;
+      if(act==='reminders') showScreen('reminders');
     });
   });
 }
