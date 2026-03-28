@@ -679,9 +679,10 @@ body.fs-xl  { font-size:19px; }
 
 /* ─ شاشة العرض ─ */
 #mk-screen {
-  flex-shrink:0; padding:8px 14px 12px;
-  background:linear-gradient(180deg,rgba(201,149,42,.06) 0%,transparent 100%);
-  border-bottom:1px solid rgba(201,149,42,.12);
+  flex-shrink:0; padding:10px 14px 14px;
+  background:var(--surface,#0f1117);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  position:relative;
 }
 #mk-screen-hdr {
   display:flex; align-items:center; justify-content:space-between;
@@ -701,20 +702,58 @@ body.fs-xl  { font-size:19px; }
 .mk-screen-act:active { background:rgba(201,149,42,.18); color:var(--gold); border-color:rgba(201,149,42,.4); }
 /* سطر التعبير الفرعي */
 #mkExprSub {
-  font-size:.68rem; color:rgba(201,149,42,.45); font-family:'Courier New',monospace;
-  direction:ltr; text-align:right; min-height:14px;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.4;
+  font-size:.7rem; color:rgba(201,149,42,.6); font-family:"SF Mono","Courier New",monospace;
+  direction:ltr; text-align:right; min-height:16px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.5;
+  letter-spacing:.02em;
 }
 /* سطر القيمة الرئيسي */
 #mkExpr {
-  font-size:2.4rem; font-weight:900; font-family:'Courier New',monospace;
+  font-size:2.6rem; font-weight:900; font-family:"SF Mono","Courier New",monospace;
   direction:ltr; text-align:right;
-  color:rgba(255,255,255,.92);
+  color:#ffffff;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  line-height:1.1; transition:color .15s, font-size .12s;
-  min-height:40px;
-  text-shadow:0 0 30px rgba(201,149,42,.15);
+  line-height:1.15; transition:color .25s, font-size .15s;
+  min-height:52px;
+  text-shadow:0 0 24px rgba(201,149,42,.5), 0 2px 12px rgba(0,0,0,.8);
   display:flex; align-items:center; justify-content:flex-end;
+  letter-spacing:.01em;
+  padding-right:2px;
+}
+
+
+
+
+
+
+
+
+
+}
+#mkExpr.mk-lim-expr {
+  white-space:normal; overflow:visible; text-overflow:unset;
+  justify-content:center; align-items:center;
+  line-height:1.4; min-height:64px; max-height:90px;
+  font-size:2.1rem !important;
+}
+/* تنسيق النهاية كالكتاب */
+.mk-lim-wrap {
+  display:inline-flex; align-items:center; gap:8px; direction:ltr;
+}
+.mk-lim-sym {
+  display:inline-flex; flex-direction:column; align-items:center; gap:0;
+}
+.mk-lim-sym-lim {
+  font-size:1em; font-weight:900; line-height:1;
+  font-family:'Times New Roman',serif; letter-spacing:.03em;
+}
+.mk-lim-sym-sub {
+  font-size:.44em; color:#f0c84e; white-space:nowrap;
+  font-family:"SF Mono","Courier New",monospace; line-height:1.3; font-weight:800;
+  text-shadow:0 0 8px rgba(240,200,78,.5);
+}
+.mk-lim-fn {
+  font-size:.9em; font-weight:700;
 }
 /* الكسر المرئي */
 .mk-frac {
@@ -746,6 +785,55 @@ body.fs-xl  { font-size:19px; }
   padding:0;
 }
 #mk-cat-bar::-webkit-scrollbar { display:none; }
+
+/* ── ألوان التبويبات الرياضية - مرئية دائماً ── */
+.mk-tab[data-mkt="trig"]    { color:rgba(96,217,250,.45); }
+.mk-tab[data-mkt="algebra"] { color:rgba(167,139,250,.45); }
+.mk-tab[data-mkt="calc"]    { color:rgba(52,211,153,.45); }
+.mk-tab[data-mkt="stats"]   { color:rgba(251,146,60,.45); }
+.mk-tab[data-mkt="geo"]     { color:rgba(244,114,182,.45); }
+.mk-tab[data-mkt="number"]  { color:rgba(250,204,21,.45); }
+.mk-tab[data-mkt="matrix"]  { color:rgba(56,189,248,.45); }
+.mk-tab[data-mkt="complex"] { color:rgba(192,132,252,.45); }
+.mk-tab[data-mkt="prob"]    { color:rgba(74,222,128,.45); }
+.mk-tab[data-mkt="regress"] { color:rgba(248,113,113,.45); }
+.mk-tab[data-mkt="syssolve"]{ color:rgba(34,211,238,.45); }
+.mk-tab[data-mkt="physics"] { color:rgba(251,113,133,.45); }
+.mk-tab[data-mkt="chem"]    { color:rgba(134,239,172,.45); }
+.mk-tab[data-mkt="basic"]   { color:rgba(245,208,96,.45); }
+.mk-tab[data-mkt="sci"]     { color:rgba(245,208,96,.45); }
+.mk-tab[data-mkt="convert"] { color:rgba(245,208,96,.45); }
+.mk-tab[data-mkt="history"] { color:rgba(245,208,96,.45); }
+.mk-tab[data-mkt="settings"]{ color:rgba(245,208,96,.45); }
+.mk-tab[data-mkt="units"]   { color:rgba(251,146,60,.45); }
+.mk-tab[data-mkt="finance"] { color:rgba(74,222,128,.45); }
+/* active: لون كامل */
+.mk-tab[data-mkt="trig"].on    { color:#60d9fa !important; border-bottom-color:#60d9fa; background:linear-gradient(180deg,rgba(96,217,250,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(96,217,250,.5); }
+.mk-tab[data-mkt="algebra"].on { color:#a78bfa !important; border-bottom-color:#a78bfa; background:linear-gradient(180deg,rgba(167,139,250,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(167,139,250,.5); }
+.mk-tab[data-mkt="calc"].on    { color:#34d399 !important; border-bottom-color:#34d399; background:linear-gradient(180deg,rgba(52,211,153,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(52,211,153,.5); }
+.mk-tab[data-mkt="stats"].on   { color:#fb923c !important; border-bottom-color:#fb923c; background:linear-gradient(180deg,rgba(251,146,60,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(251,146,60,.5); }
+.mk-tab[data-mkt="geo"].on     { color:#f472b6 !important; border-bottom-color:#f472b6; background:linear-gradient(180deg,rgba(244,114,182,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(244,114,182,.5); }
+.mk-tab[data-mkt="number"].on  { color:#facc15 !important; border-bottom-color:#facc15; background:linear-gradient(180deg,rgba(250,204,21,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(250,204,21,.5); }
+.mk-tab[data-mkt="matrix"].on  { color:#38bdf8 !important; border-bottom-color:#38bdf8; background:linear-gradient(180deg,rgba(56,189,248,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(56,189,248,.5); }
+.mk-tab[data-mkt="complex"].on { color:#c084fc !important; border-bottom-color:#c084fc; background:linear-gradient(180deg,rgba(192,132,252,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(192,132,252,.5); }
+.mk-tab[data-mkt="prob"].on    { color:#4ade80 !important; border-bottom-color:#4ade80; background:linear-gradient(180deg,rgba(74,222,128,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(74,222,128,.5); }
+.mk-tab[data-mkt="regress"].on { color:#f87171 !important; border-bottom-color:#f87171; background:linear-gradient(180deg,rgba(248,113,113,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(248,113,113,.5); }
+.mk-tab[data-mkt="syssolve"].on{ color:#22d3ee !important; border-bottom-color:#22d3ee; background:linear-gradient(180deg,rgba(34,211,238,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(34,211,238,.5); }
+.mk-tab[data-mkt="physics"].on { color:#fb7185 !important; border-bottom-color:#fb7185; background:linear-gradient(180deg,rgba(251,113,133,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(251,113,133,.5); }
+.mk-tab[data-mkt="chem"].on    { color:#86efac !important; border-bottom-color:#86efac; background:linear-gradient(180deg,rgba(134,239,172,.1) 0%,transparent 100%); text-shadow:0 0 12px rgba(134,239,172,.5); }
+/* عند الضغط: أغمق */
+.mk-tab[data-mkt="trig"]:active    { color:rgba(96,217,250,.6)  !important; background:rgba(96,217,250,.18); }
+.mk-tab[data-mkt="algebra"]:active { color:rgba(167,139,250,.6) !important; background:rgba(167,139,250,.18); }
+.mk-tab[data-mkt="calc"]:active    { color:rgba(52,211,153,.6)  !important; background:rgba(52,211,153,.18); }
+.mk-tab[data-mkt="stats"]:active   { color:rgba(251,146,60,.6)  !important; background:rgba(251,146,60,.18); }
+.mk-tab[data-mkt="geo"]:active     { color:rgba(244,114,182,.6) !important; background:rgba(244,114,182,.18); }
+.mk-tab[data-mkt="number"]:active  { color:rgba(250,204,21,.6)  !important; background:rgba(250,204,21,.18); }
+.mk-tab[data-mkt="matrix"]:active  { color:rgba(56,189,248,.6)  !important; background:rgba(56,189,248,.18); }
+.mk-tab[data-mkt="complex"]:active { color:rgba(192,132,252,.6) !important; background:rgba(192,132,252,.18); }
+.mk-tab[data-mkt="prob"]:active    { color:rgba(74,222,128,.6)  !important; background:rgba(74,222,128,.18); }
+.mk-tab[data-mkt="regress"]:active { color:rgba(248,113,113,.6) !important; background:rgba(248,113,113,.18); }
+.mk-tab[data-mkt="syssolve"]:active{ color:rgba(34,211,238,.6)  !important; background:rgba(34,211,238,.18); }
+
 .mk-cat-btn {
   flex-shrink:0; padding:7px 14px;
   font-size:.62rem; font-weight:800;
@@ -766,21 +854,22 @@ body.fs-xl  { font-size:19px; }
 #mk-tabs-wrap {
   flex-shrink:0;
   display:flex; gap:0; overflow-x:auto; scrollbar-width:none;
-  background:rgba(0,0,0,.25); border-bottom:1px solid rgba(255,255,255,.06);
-  padding:0 6px; min-height:34px;
+  background:rgba(8,6,2,.85); border-bottom:1px solid rgba(201,149,42,.2);
+  padding:0 4px; min-height:38px;
 }
 #mk-tabs-wrap::-webkit-scrollbar { display:none; }
 .mk-tab {
-  flex-shrink:0; padding:7px 12px; font-size:.6rem; font-weight:700;
+  flex-shrink:0; padding:8px 13px; font-size:.62rem; font-weight:800;
   background:transparent; border:none; border-bottom:2px solid transparent;
-  color:rgba(255,255,255,.3); cursor:pointer; font-family:inherit;
-  white-space:nowrap; transition:.13s; touch-action:manipulation;
-  letter-spacing:.2px;
+  color:rgba(255,255,255,.35); cursor:pointer; font-family:inherit;
+  white-space:nowrap; transition:.18s; touch-action:manipulation;
+  letter-spacing:.3px; text-shadow:none;
 }
 .mk-tab:active { color:rgba(255,255,255,.65); }
 .mk-tab.on {
-  color:#e8b84b; border-bottom-color:#e8b84b;
-  background:rgba(232,184,75,.05);
+  color:#f5d060; border-bottom-color:#f5d060;
+  background:linear-gradient(180deg,rgba(245,208,96,.12) 0%,transparent 100%);
+  text-shadow:0 0 14px rgba(245,208,96,.6);
 }
 
 /* ─ منطقة الأزرار القابلة للتمرير ─ */
@@ -1444,6 +1533,17 @@ body.fs-xl  { font-size:19px; }
 .ai-btn.ai-claude.on{background:rgba(124,58,237,.15);border-color:#7c3aed;color:#a78bfa;}
 .ai-btn.ai-gemini.on{background:rgba(66,133,244,.15);border-color:#4285f4;color:#4285f4;}
 .ai-btn.ai-auto.on{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+.ai-btn.ai-deepseek.on{background:rgba(0,150,255,.15);border-color:#0096ff;color:#4db8ff;}
+.ai-btn.ai-local.on{background:rgba(74,222,128,.12);border-color:#4ade80;color:#4ade80;}
+#aiEngineBtn.mode-local{background:rgba(74,222,128,.15);border-color:#4ade80;color:#4ade80;}
+#aiEngineBtn.mode-deepseek{background:rgba(0,150,255,.18);border-color:#0096ff;color:#4db8ff;}
+.deepseek-card{background:linear-gradient(135deg,rgba(0,150,255,.07),rgba(0,200,255,.05));border:1px solid rgba(0,150,255,.25);border-radius:var(--radius);padding:15px;margin-bottom:13px;}
+.deepseek-key-input{width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-size:.875rem;font-family:monospace;outline:none;transition:var(--trans);margin-top:6px;}
+.deepseek-key-input:focus{border-color:#0096ff;}
+.deepseek-status{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;margin-top:7px;padding:4px 10px;border-radius:10px;}
+.deepseek-status.ok{background:rgba(0,150,255,.12);color:#4db8ff;}
+.deepseek-status.err{background:rgba(234,67,53,.09);color:#ea4335;}
+.ans-badge.deepseek{background:linear-gradient(135deg,rgba(0,150,255,.15),rgba(0,200,255,.1));color:#4db8ff;border:1px solid rgba(0,150,255,.2);}
 /* ─── AI ENGINE HEADER BTN ─── */
 #aiEngineBtn{gap:2px;transition:var(--trans);font-size:10px;font-weight:800;min-width:auto;padding:0 6px;width:auto;}
 #aiEngineBtn.mode-claude{background:rgba(124,58,237,.18);border-color:#7c3aed;color:#a78bfa;}
@@ -3630,22 +3730,71 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
                 <span style="font-size:1rem">lim f(x)</span>
                 <span style="font-size:.6rem;opacity:.6">حد عند x→?</span>
               </button>
-              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد sin(x)/x عند x=0"
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد sin(x)/x عند x→0"
                 style="height:50px;flex-direction:column;gap:2px">
                 <span style="font-size:.9rem">lim sin(x)/x</span>
                 <span style="font-size:.6rem;opacity:.6">x→0 = 1</span>
               </button>
             </div>
             <div class="mk-grid g2" style="margin-bottom:5px">
-              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد (x^2-1)/(x-1) عند x=1"
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد (x^2-1)/(x-1) عند x→1"
                 style="flex-direction:column;height:46px;gap:1px">
                 <span style="font-size:.85rem">(x²-1)/(x-1)</span>
-                <span style="font-size:.55rem;opacity:.6">x→1</span>
+                <span style="font-size:.55rem;opacity:.6">x→1 = 2</span>
               </button>
-              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد (1+1/x)^x عند x=1000000"
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد (1+1/x)^x عند x→∞"
                 style="flex-direction:column;height:46px;gap:1px">
                 <span style="font-size:.85rem">(1+1/x)ˣ</span>
                 <span style="font-size:.55rem;opacity:.6">x→∞ = e</span>
+              </button>
+            </div>
+            <div class="mk-grid g2" style="margin-bottom:5px">
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد x^2 عند x→∞"
+                style="flex-direction:column;height:46px;gap:1px">
+                <span style="font-size:.85rem">x²</span>
+                <span style="font-size:.55rem;opacity:.6">x→∞ = ∞</span>
+              </button>
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد 1/x عند x→∞"
+                style="flex-direction:column;height:46px;gap:1px">
+                <span style="font-size:.85rem">1/x</span>
+                <span style="font-size:.55rem;opacity:.6">x→∞ = 0</span>
+              </button>
+            </div>
+            <div class="mk-grid g2" style="margin-bottom:5px">
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد sqrt(x) عند x→∞"
+                style="flex-direction:column;height:46px;gap:1px">
+                <span style="font-size:.85rem">√x</span>
+                <span style="font-size:.55rem;opacity:.6">x→∞ = ∞</span>
+              </button>
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد (x^3-2*x)/(5*x^3+3) عند x→∞"
+                style="flex-direction:column;height:46px;gap:1px">
+                <span style="font-size:.7rem">(x³-2x)/(5x³+3)</span>
+                <span style="font-size:.55rem;opacity:.6">x→∞ = 1/5</span>
+              </button>
+            </div>
+            <!-- ── نهايات x→-∞ (مضافة) ── -->
+            <div class="mk-grid g2" style="margin-bottom:5px">
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد 1/x عند x→-∞"
+                style="flex-direction:column;height:46px;gap:1px">
+                <span style="font-size:.85rem">1/x</span>
+                <span style="font-size:.55rem;opacity:.6">x→-∞ = 0</span>
+              </button>
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد x^2 عند x→-∞"
+                style="flex-direction:column;height:46px;gap:1px">
+                <span style="font-size:.85rem">x²</span>
+                <span style="font-size:.55rem;opacity:.6">x→-∞ = ∞</span>
+              </button>
+            </div>
+            <div class="mk-grid g2" style="margin-bottom:5px">
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد sin(x) عند x→∞"
+                style="flex-direction:column;height:46px;gap:1px">
+                <span style="font-size:.85rem">sin(x)</span>
+                <span style="font-size:.55rem;opacity:.6">x→∞ = لا توجد</span>
+              </button>
+              <button class="mk-btn fn" onmousedown="event.preventDefault()" data-ins="حد (e^x) عند x→-∞"
+                style="flex-direction:column;height:46px;gap:1px">
+                <span style="font-size:.85rem">eˣ</span>
+                <span style="font-size:.55rem;opacity:.6">x→-∞ = 0</span>
               </button>
             </div>
 
@@ -5486,7 +5635,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
         <div class="card-title"><i class="fas fa-comments"></i> حجم المحادثة</div>
         <label class="form-label" style="flex-direction:column;align-items:flex-start">
           أقصى رسائل في الشاشة:
-          <input type="number" id="maxMsgs" min="20" max="1000" value="200" step="10" class="form-input">
+          <input type="number" id="maxMsgs" min="20" max="2000" value="500" step="50" class="form-input">
         </label>
       </div>
     </div>
@@ -5541,11 +5690,25 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
           <button class="ai-btn ai-auto on" data-ai="auto">⚡ تلقائي</button>
           <button class="ai-btn ai-claude" data-ai="claude"><i class="fas fa-robot"></i> Claude</button>
           <button class="ai-btn ai-gemini" data-ai="gemini">✦ Gemini</button>
+          <button class="ai-btn ai-deepseek" data-ai="deepseek">🐋 DeepSeek</button>
+          <button class="ai-btn ai-local" data-ai="local">🧠 محلي</button>
         </div>
-        <p class="form-meta">تلقائي: Claude إن وُجد مفتاحه، وإلا Gemini</p>
+        <p class="form-meta">تلقائي: Claude ← DeepSeek ← Gemini (حسب المفاتيح المتاحة)<br><span style="font-size:.7rem;color:var(--text3)">🧠 محلي: يعمل بدون إنترنت ودون مفتاح API</span></p>
       </div>
 
-      <!-- ══ Gemini Nano ══ -->
+      <div class="deepseek-card">
+        <div class="card-title"><i class="fas fa-water" style="color:#0096ff"></i> مفتاح DeepSeek</div>
+        <p style="font-size:.78rem;color:var(--text2);line-height:1.8;margin-bottom:8px">من <strong style="color:#0096ff">platform.deepseek.com</strong> — يبدأ بـ <code style="background:var(--surface3);padding:1px 5px;border-radius:4px">sk-</code><br><span style="font-size:.72rem;color:var(--text3)">نموذج قوي وسريع بتكلفة منخفضة جداً</span></p>
+        <input type="password" class="deepseek-key-input" id="deepseekKeyInput" placeholder="sk-..." autocomplete="off" spellcheck="false"/>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn primary" id="saveDeepSeekKeyBtn" style="background:#0096ff;border-color:#0096ff"><i class="fas fa-save"></i> حفظ</button>
+          <button class="btn" id="showDeepSeekKeyBtn"><i class="fas fa-eye"></i> إظهار</button>
+          <button class="btn danger" id="clearDeepSeekKeyBtn"><i class="fas fa-trash-alt"></i> مسح</button>
+        </div>
+        <div id="deepseekKeyStatus" class="deepseek-status err"><i class="fas fa-exclamation-circle"></i> لم يتم تعيين مفتاح</div>
+      </div>
+
+            <!-- ══ Gemini Nano ══ -->
       <div class="card" id="nanoCard">
         <div class="card-title"><i class="fas fa-microchip" style="color:#4ade80"></i> Gemini Nano <span style="font-size:.65rem;background:rgba(74,222,128,.12);color:#4ade80;padding:2px 8px;border-radius:8px;font-weight:600">على الجهاز</span></div>
         <p style="font-size:.75rem;color:var(--text2);line-height:1.8;margin-bottom:10px">ذكاء اصطناعي يعمل <strong>بدون إنترنت</strong> مباشرة على جهازك. يتطلب Chrome 127+ أو Android Chrome.</p>
@@ -5586,6 +5749,11 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
           <option value="gemini-2.0-flash">Gemini 2.0 Flash ⭐ مُوصى</option>
           <option value="gemini-2.5-pro">Gemini 2.5 Pro — أقوى</option>
           <option value="gemini-1.5-flash">Gemini 1.5 Flash — اقتصادي</option>
+        </select>
+        <div style="font-size:.75rem;color:var(--text3);margin-bottom:4px;margin-top:10px">نموذج DeepSeek:</div>
+        <select id="deepseekModelSel" class="form-select" style="border-color:rgba(0,150,255,.3)">
+          <option value="deepseek-chat">DeepSeek Chat V3 ⭐ مُوصى</option>
+          <option value="deepseek-reasoner">DeepSeek Reasoner R1 — تفكير عميق</option>
         </select>
       </div>
     </div>
@@ -6513,12 +6681,13 @@ let S={
   fontSize:'md',timezone:'auto',theme:'default',darkMode:true,
   autoBackup:false,backupInterval:60,
   lockEnabled:false,pin:'',
-  speechRate:1,animations:true,compact:false,maxMsgs:200,
+  speechRate:1,animations:true,compact:false,maxMsgs:500,
   ctxSize:5,mergeThresh:92,verbose:false,
   autoSpeak:false,showTs:false,showSugBar:true,autoFocus:true,
   enterSend:true,soundNotif:true,maxKnowledge:0,replyDelay:200,
   model:'claude-sonnet-4-6',
   geminiModel:'gemini-2.0-flash',
+  deepseekModel:'deepseek-chat',
   aiEngine:'auto',
   /* layout */
   layout:'normal', navPos:'bottom',
@@ -6639,10 +6808,30 @@ function _syncAiEngineBtn(){
   if(!btn||!lbl)return;
   const e=S.aiEngine||'auto';
   btn.className='icon-btn mode-'+e;
-  lbl.textContent=e==='claude'?'Claude':e==='gemini'?'✦ Gemini':'⚡ Auto';
+  lbl.textContent=e==='claude'?'Claude':e==='gemini'?'✦ Gemini':e==='deepseek'?'🐋 Deep':e==='local'?'🧠 محلي':'⚡ Auto';
   document.querySelectorAll('.ai-btn').forEach(b=>b.classList.toggle('on',b.dataset.ai===e));
 }
 
+
+
+/* ═══ DEEPSEEK KEY STORE ═══ */
+const DK='KAI_v24_DEEPSEEK';
+let _deepseekKey='';
+async function loadDeepSeekKey(){try{const v=localStorage.getItem(DK)||'';_deepseekKey=v?(await _deob(v)):'';}catch(e){}finally{_updateDeepSeekStatus();}}
+async function saveDeepSeekKey(k){try{if(k)localStorage.setItem(DK,await _obf(k));else localStorage.removeItem(DK);_deepseekKey=k||'';}catch(e){}finally{_updateDeepSeekStatus();}}
+function getDeepSeekKey(){return _deepseekKey||'';}
+function _updateDeepSeekStatus(){
+  const st=document.getElementById('deepseekKeyStatus');if(!st)return;
+  const k=_deepseekKey;
+  if(k&&k.startsWith('sk-')){st.className='deepseek-status ok';st.innerHTML='<i class="fas fa-check-circle"></i> DeepSeek نشط: ...'+k.slice(-6);}
+  else if(k){st.className='deepseek-status err';st.innerHTML='<i class="fas fa-exclamation-triangle"></i> مفتاح غير صحيح (يبدأ بـ sk-)';}
+  else{st.className='deepseek-status err';st.innerHTML='<i class="fas fa-exclamation-circle"></i> لم يتم تعيين مفتاح';}
+  const inp=document.getElementById('deepseekKeyInput');
+  if(inp&&_deepseekKey&&!inp.value)inp.placeholder=_deepseekKey?'sk-...'+_deepseekKey.slice(-6)+' (محفوظ)':'أدخل مفتاح DeepSeek';
+  const dm=document.getElementById('deepseekModelSel');
+  if(dm)dm.value=S.deepseekModel||'deepseek-chat';
+  _syncAiEngineBtn();
+}
 
 /* ── مفتاح Serper.dev (Google Search مجاني) ── */
 const GGL_KEY_K = 'KAI_v24_SERPER';
@@ -6805,7 +6994,7 @@ function migrate(o){
   if(!o.meta)o.meta={version:'24.0',created:Date.now(),seedVersion:0};
   if(!o.meta.seedVersion)o.meta.seedVersion=0;
   if(o.knowledge){Object.keys(o.knowledge).forEach(k=>{if(typeof o.knowledge[k]==='string')o.knowledge[k]={display:k,answer:o.knowledge[k],confidence:.7,usageCount:0,history:[]};if(!o.knowledge[k].history)o.knowledge[k].history=[];});}
-  if(o.history&&o.history.length>5000)o.history=o.history.slice(-5000);
+  if(o.history&&o.history.length>2000)o.history=o.history.slice(-2000);
   if(o.learnLog&&o.learnLog.length>500)o.learnLog=o.learnLog.slice(-500);
   return o;
 }
@@ -6827,7 +7016,7 @@ async function _syncFromIDB(){
     } else if(!p.knowledge||Object.keys(p.knowledge).length===0){
       /* IDB فارغ من المعرفة — انقل إليه من الذاكرة المحلية */
       if(DB.knowledge&&Object.keys(DB.knowledge).length>0)
-        idbSet(SK,JSON.stringify(DB)).catch(()=>{});
+        setTimeout(()=>{try{const _s=JSON.stringify(DB);idbSet(SK,_s).catch(()=>{});}catch(e){}},0);
     }
   }catch(e){}
 }
@@ -6851,7 +7040,7 @@ function _doSave(){
   }
 
   /* ═══ IndexedDB: الحفظ الكامل — بلا حد عملي (مئات MB) ═══ */
-  idbSet(SK,JSON.stringify(DB)).catch(()=>{});
+  setTimeout(()=>{try{const _s=JSON.stringify(DB);idbSet(SK,_s).catch(()=>{});}catch(e){}},0);
 
   /* ═══ localStorage: نسخة خفيفة جداً — بدون knowledge/entities
      الهدف: fallback سريع عند أول تحميل قبل IDB فقط
@@ -7194,13 +7383,14 @@ const MathEngine = (function(){
       .replace(/،/g,',').replace(/÷/g,'/').replace(/×/g,'*')
       .replace(/−/g,'-').replace(/²/g,'^2').replace(/³/g,'^3')
       .replace(/π/g,'Math.PI').replace(/φ/g,'1.6180339887')
-      .replace(/∞/g,'Infinity').replace(/√/g,'sqrt');
+      .replace(/∞/g,'Infinity').replace(/√/g,'sqrt')
+      .replace(/→/g,'->');
   }
 
   function fmt(n, dp=10){
     if(n===null||n===undefined) return '—';
     if(typeof n==='string') return n;
-    if(!isFinite(n)) return n>0?'∞':'-∞';
+    if(!isFinite(n)) return n>0?'+∞':'-∞';
     if(Object.is(n,-0)) return '0';
     if(Number.isInteger(n)&&Math.abs(n)<1e15) return String(n);
     const abs=Math.abs(n);
@@ -7355,35 +7545,32 @@ const MathEngine = (function(){
 
   /* ════ فحص صياغة المعادلة قبل التقييم ════ */
   function checkSyntax(expr){
-    const e = arabicToLatin(String(expr)).trim();
+    /* طبّق إصلاح الأقواس أولاً — نفس ما يفعله evalSafe */
+    let e = arabicToLatin(String(expr)).trim();
+    const _op=(e.match(/\(/g)||[]).length, _cl=(e.match(/\)/g)||[]).length;
+    if(_op>_cl) e += ')'.repeat(_op-_cl);
+    e = e.replace(/[+\-*\/^]{1,}\s*$/, '').replace(/\.\s*$/, '');
     if(!e) return {ok:false, msg:'التعبير فارغ'};
 
-    /* فحص الأقواس */
-    let depth=0, lastOpen=-1;
+    /* فحص قوس إغلاق زائد (هذا خطأ حقيقي) */
+    let depth=0;
     for(let i=0;i<e.length;i++){
-      if(e[i]==='('){depth++;lastOpen=i;}
-      else if(e[i]===')'){
-        if(depth===0) return {ok:false, msg:`قوس إغلاق ')' إضافي عند الموضع ${i+1}`};
+      if(e[i]==="(") depth++;
+      else if(e[i]===")"){
+        if(depth===0) return {ok:false, msg:`قوس إغلاق ')' زائد عند الموضع ${i+1}`};
         depth--;
       }
     }
-    if(depth>0){
-      const pos=lastOpen+1;
-      return {ok:false, msg:`قوس فتح '(' عند الموضع ${pos} غير مغلق — أضف ')' في النهاية`};
-    }
 
-    /* فحص عمليات متتالية غير منطقية — مثل ** أو // */
-    const dblOp = e.match(/[*/^]{2,}|[+\-]{3,}|\*\/|\/\*/);
-    if(dblOp) return {ok:false, msg:`عملية غير صحيحة: "${dblOp[0]}" في التعبير`};
+    /* فحص عمليات متتالية غير منطقية */
+    const dblOp = e.match(/[*/]{2,}|[+\-]{3,}|\*\/|\/\*/);
+    if(dblOp) return {ok:false, msg:`عملية غير صحيحة: "${dblOp[0]}"`};
 
     /* فحص أقواس فارغة () */
     if(/\(\s*\)/.test(e)) return {ok:false, msg:'أقواس فارغة () بلا محتوى'};
 
-    /* فحص تعبير يبدأ بعملية (ليست + أو -) */
+    /* فحص بداية بعملية (ليست + أو -) */
     if(/^[*/^]/.test(e)) return {ok:false, msg:`التعبير لا يمكن أن يبدأ بـ "${e[0]}"`};
-
-    /* فحص نهاية بعملية */
-    if(/[+\-*/^]$/.test(e)) return {ok:false, msg:`التعبير لا يمكن أن ينتهي بـ "${e[e.length-1]}"`};
 
     return {ok:true};
   }
@@ -8036,10 +8223,25 @@ const MathEngine = (function(){
     }catch(e){return null;}
   }
 
-  function evalFn(expr,x){
+  function evalFn(expr,xVal){
     try{
-      const e=prepExpr(String(expr)).replace(/(?<![a-zA-Z])x(?![a-zA-Z])/g,'('+x+')');
-      return evalSafe(e);
+      const xStr = '(' + xVal + ')';
+      /* المحاولة 1: تحويل الرموز أولاً ثم استبدال x */
+      let s1 = arabicToLatin(String(expr))
+        .replace(/×/g,'*').replace(/÷/g,'/')
+        .replace(/√\(/g,'Math.sqrt(').replace(/√([^(])/g,'Math.sqrt($1)')
+        .replace(/²/g,'^2').replace(/³/g,'^3')
+        .replace(/π/g,'Math.PI').replace(/∞/g,'Infinity');
+      const withX1 = s1.replace(/(?<![a-zA-Z_])x(?![a-zA-Z_0-9])/g, xStr);
+      const r1 = evalSafe(withX1);
+      if(r1 !== null) return r1;
+      /* المحاولة 2: prepExpr الكاملة ثم استبدال x */
+      const e2 = prepExpr(String(expr)).replace(/(?<![a-zA-Z])x(?![a-zA-Z])/g, xStr);
+      const r2 = evalSafe(e2);
+      if(r2 !== null) return r2;
+      /* المحاولة 3: استبدال x أولاً ثم prepExpr */
+      const withX3 = String(expr).replace(/(?<![a-zA-Z_])x(?![a-zA-Z_0-9])/g, xStr);
+      return evalSafe(prepExpr(withX3));
     }catch(e){return null;}
   }
 
@@ -8095,20 +8297,50 @@ const MathEngine = (function(){
   }
 
   function evalLimit(exprStr,to){
-    /* محاولة مباشرة ثم L'Hopital عددياً */
-    const eps=[1e-5,1e-6,1e-7,1e-8,1e-9,1e-10];
-    const rightVals=eps.map(e=>evalFn(exprStr,to+e)).filter(v=>v!==null&&isFinite(v));
-    const leftVals= eps.map(e=>evalFn(exprStr,to-e)).filter(v=>v!==null&&isFinite(v));
-    if(!rightVals.length&&!leftVals.length) return null;
-    const allVals=[...rightVals,...leftVals];
-    const avg=allVals.reduce((a,b)=>a+b,0)/allVals.length;
-    const spread=Math.max(...allVals)-Math.min(...allVals);
-    if(spread<Math.abs(avg)*0.001+1e-7) return avg;
+    /* تقريب عددي متعدد المستويات من الجانبين */
+    const eps=[1e-3,1e-4,1e-5,1e-6,1e-7,1e-8,1e-9,1e-10];
+    const rv=eps.map(e=>evalFn(exprStr,to+e)).filter(v=>v!==null);
+    const lv=eps.map(e=>evalFn(exprStr,to-e)).filter(v=>v!==null);
+
+    /* كشف التباعد في اتجاه واحد */
+    function _divSign(arr){
+      const infArr=arr.filter(v=>!isFinite(v));
+      if(infArr.length>=1) return infArr[0]>0?1:-1;
+      const fin=arr.filter(v=>isFinite(v));
+      if(fin.length<2) return null;
+      const last=fin[fin.length-1], prev=fin[fin.length-2];
+      if(Math.abs(last)>1e10 && Math.abs(last)>Math.abs(prev)*5) return last>0?1:-1;
+      return null;
+    }
+    const rSign=_divSign(rv), lSign=_divSign(lv);
+    /* كلاهما يتباعدان — نفس الإشارة */
+    if(rSign!==null && lSign!==null){
+      if(rSign===lSign) return rSign>0?Infinity:-Infinity;
+      return null; /* اتجاهان معاكسان → لا نهاية */
+    }
+
+    /* قيم محدودة من الجانبين */
+    const finR=rv.filter(v=>isFinite(v)), finL=lv.filter(v=>isFinite(v));
+    if(!finR.length && !finL.length) return null;
+
+    const allFin=[...finR,...finL];
+    const avg=allFin.reduce((a,b)=>a+b,0)/allFin.length;
+    const spread=Math.max(...allFin)-Math.min(...allFin);
+
+    /* تقارب ممتاز */
+    if(spread < Math.abs(avg)*0.002+1e-7) return avg;
+
+    /* كشف تذبذب: نطاق واسع ولا تتقارب */
+    if(allFin.length>=4){
+      const rng=Math.max(...allFin)-Math.min(...allFin);
+      if(rng>0.5 && rng>Math.abs(avg)*0.1+0.1) return null;
+    }
+
     /* نهاية أحادية الجانب */
-    if(rightVals.length&&leftVals.length){
-      const rAvg=rightVals.reduce((a,b)=>a+b,0)/rightVals.length;
-      const lAvg=leftVals.reduce((a,b)=>a+b,0)/leftVals.length;
-      if(Math.abs(rAvg-lAvg)<1e-5) return (rAvg+lAvg)/2;
+    if(finR.length>=2 && finL.length>=2){
+      const rA=finR[finR.length-1], lA=finL[finL.length-1];
+      if(Math.abs(rA-lA)<1e-4) return (rA+lA)/2;
+      return null; /* النهايتان الجانبيتان مختلفتان */
     }
     return null;
   }
@@ -8561,33 +8793,212 @@ const MathEngine = (function(){
       return R;
     }
 
-    /* ─ حد النهاية: "حد x^2-1/x-1 عند x→1" ─ */
-    const limM=input.match(/(?:حد|lim)\s+(.+?)\s+(?:عند|as|when)?\s*x\s*[→\->]+\s*([\d.\-]+|∞|infinity)/i);
-    if(limM){
-      const exprL=limM[1].trim(), toStr=limM[2];
-      const to=toStr.match(/∞|inf/i)?Infinity:+toStr;
-      let lval=null;
-      if(isFinite(to)){
-        /* جرب التعويض المباشر */
-        const direct=evalFn(exprL,to);
-        if(direct!==null&&isFinite(direct)) lval=direct;
-        else lval=evalLimit(exprL,to);
+    /* ─ حد النهاية v4 — نظام مُعاد بناؤه بالكامل ─ */
+
+    /* ── استخلاص أجزاء lim(f,x,a) بدعم الأقواس المتداخلة ── */
+    function _limExtract(s){
+      s = s.trim();
+      if(!/^lim\s*\(/i.test(s)) return null;
+      const start = s.indexOf('(');
+      let d = 0, commas = [];
+      for(let j = start+1; j < s.length; j++){
+        if(s[j] === '(') d++;
+        else if(s[j] === ')'){
+          if(d === 0){ break; }
+          d--;
+        } else if(s[j] === ',' && d === 0) commas.push(j);
+      }
+      if(commas.length < 2) return null;
+      const xC = commas[commas.length-2], aC = commas[commas.length-1];
+      if(s.slice(xC+1, aC).trim().toLowerCase() !== 'x') return null;
+      const close = s.lastIndexOf(')');
+      return { fn: s.slice(start+1, xC).trim(), a: s.slice(aC+1, close).trim() };
+    }
+
+    /* ── نرمّل المدخل ── */
+    let _limRaw = input;
+    const _limP = _limExtract(_limRaw);
+    if(_limP){
+      if(!_limP.fn || _limP.fn === '__')
+        return {answer:null, steps:['أدخل الدالة أولاً'], type:'calculus', subtitle:'النهاية'};
+      _limRaw = 'lim ' + _limP.fn + ' عند x\u2192' + _limP.a;
+    }
+    /* تخطَّ الـ placeholder */
+    if(/^حد\s+__\s+عند\s+x\u2192/.test(_limRaw) || /^lim\s*\(\s*__/.test(_limRaw))
+      return {answer:null, steps:['أدخل الدالة أولاً'], type:'calculus', subtitle:'النهاية'};
+
+    /* ── أنماط التعرف على النهاية ── */
+    const _LP1 = /(?:حد|lim(?:it)?)\s+(.+?)\s+(?:عند\s+)?x\s*[\u2192\-][>]?\s*([+\-]?(?:\u221e|-\u221e|inf(?:inity)?|\d+(?:\.\d+)?))/i;
+    const _LP2 = /(?:حد|lim(?:it)?)\s+(.+?)\s+x\s*[=\-\u2192>]+\s*([+\-]?(?:\u221e|-\u221e|inf(?:inity)?|\d+(?:\.\d+)?))/i;
+    const _lM  = _limRaw.match(_LP1) || _limRaw.match(_LP2);
+
+    if(_lM){
+      /* ── الدالة ونقطة الاتجاه ── */
+      let exprL = _lM[1].trim().replace(/^(?:lim|حد)\s*/i,'').trim();
+      /* إزالة الضرب الضمني: x√(x) → x*√(x) */
+      exprL = exprL
+        .replace(/([0-9x)])\s*([a-zA-Z\u221a\(])/g,'$1*$2')
+        .replace(/\u221a\s*\(/g,'sqrt(')
+        .replace(/\u221a([^(])/g,'sqrt($1)')
+        .replace(/\xd7/g,'*').replace(/\xf7/g,'/')
+        .replace(/\u00b2/g,'^2').replace(/\u00b3/g,'^3');
+
+      const toRaw = _lM[2].trim();
+      const to =
+        toRaw.match(/^[+]?(?:\u221e|inf)/i)  ? Infinity  :
+        toRaw.match(/^[-](?:\u221e|inf)/i)   ? -Infinity :
+        +toRaw;
+      const toStr = to===Infinity?'\u221e': to===-Infinity?'-\u221e': String(to);
+
+      R.type = 'calculus';
+      R.subtitle = 'النهاية';
+      const steps = [
+        '\u{1F4D0} حد النهاية: lim\u2009f(x) \u2003 x \u2192 ' + toStr,
+        '\u{1F9EE} f(x) = ' + exprL
+      ];
+
+      let lval = null;
+      let method = '';
+
+      /* ════════════════════════════════════════════════════
+         CASE 1 — x → ±∞  (خوارزمية محسّنة v2)
+      ════════════════════════════════════════════════════ */
+      if(!isFinite(to)){
+        const sgn = to > 0 ? 1 : -1;
+        /* نستخدم قيماً ضخمة جداً (حتى 1e300) لكشف التباعد حتى للدوال البطيئة */
+        const _probes = [1e3,1e6,1e9,1e12,1e15,1e20,1e50,1e100,1e200,1e300];
+        const _pv = _probes.map(v => evalFn(exprL, v*sgn));
+        const finV = _pv.filter(v => v !== null &&  isFinite(v));
+        const infV = _pv.filter(v => v !== null && !isFinite(v));
+
+        if(infV.length >= 1){
+          /* تباعد صريح: بعض القيم أعطت ±Infinity مباشرة */
+          const posC = infV.filter(v=>v>0).length;
+          lval = posC >= infV.length/2 ? Infinity : -Infinity;
+          method = 'تباعد';
+          steps.push('\u{1F4C8} الدالة تتباعد \u2192 ' + (lval>0?'+\u221e':'-\u221e'));
+
+        } else if(finV.length >= 3){
+          /* حساب الرتابة: هل الدالة متزايدة أم متناقصة؟ */
+          let incC=0, decC=0;
+          for(let i=1;i<finV.length;i++){
+            if(finV[i]>finV[i-1]) incC++;
+            else if(finV[i]<finV[i-1]) decC++;
+          }
+          const isMonotone = (incC===0 || decC===0);
+          const _max=Math.max(...finV), _min=Math.min(...finV);
+          const _range=_max-_min, _absMax=Math.max(...finV.map(v=>Math.abs(v)));
+          const last=finV[finV.length-1], first=finV[0];
+          const diffs=[];
+          for(let i=1;i<finV.length;i++) diffs.push(Math.abs(finV[i]-finV[i-1]));
+          const lastDiff=diffs[diffs.length-1], maxDiff=Math.max(...diffs);
+
+          if(!isMonotone && _range>0.5 && _range>_absMax*0.05){
+            /* تذبذب: اتجاهات متعاكسة مع نطاق واسع → لا نهاية */
+            lval=null; method='تذبذب';
+            steps.push('\u{1F4A1} الدالة تتذبذب — لا توجد نهاية عند '+toStr);
+          } else if(lastDiff < 1e-5 && Math.abs(last) < 1e10){
+            /* الفروق تقاربت للصفر → نهاية منتهية */
+            lval=last; method='تقارب';
+            steps.push('\u2714 الدالة تتقارب نحو '+fmt(last));
+          } else if(lastDiff > maxDiff*0.05){
+            /* الفروق لا تتقلص → الدالة تتباعد */
+            lval=last>0?Infinity:-Infinity; method='تباعد';
+            steps.push('\u{1F4C8} الدالة تتباعد \u2192 '+(lval>0?'+\u221e':'-\u221e'));
+          } else if(Math.abs(last) > 1e12){
+            /* قيمة ضخمة جداً حتى مع تقلص الفروق → تباعد بطيء */
+            lval=last>0?Infinity:-Infinity; method='تباعد بطيء';
+            steps.push('\u{1F4C8} قيمة تتباعد \u2192 '+(lval>0?'+\u221e':'-\u221e'));
+          } else {
+            /* تقدير عددي: أفضل تقريب متاح */
+            lval=last; method='تقدير';
+            steps.push('\u{1F4CA} تقدير عددي: '+fmt(last));
+          }
+        } else if(finV.length >= 1){
+          const last=finV[finV.length-1];
+          if(Math.abs(last)>1e8){ lval=last>0?Infinity:-Infinity; steps.push('\u{1F4C8} قيمة كبيرة \u2192 تباعد'); }
+          else { lval=last; steps.push('\u{1F4CA} تقدير عددي: '+fmt(last)); }
+        }
+
+      /* ════════════════════════════════════════════════════
+         CASE 2 — x → a (قيمة محدودة)
+      ════════════════════════════════════════════════════ */
       } else {
-        /* x→∞: جرب قيماً كبيرة */
-        const big=[1e6,1e7,1e8,1e9];
-        const bv=big.map(x=>evalFn(exprL,x)).filter(v=>v!==null&&isFinite(v));
-        if(bv.length>1){
-          const last=bv[bv.length-1],prev=bv[bv.length-2];
-          if(Math.abs(last-prev)<Math.abs(last)*0.001+1e-10) lval=last;
+        /* أولاً: تعويض مباشر */
+        const direct = evalFn(exprL, to);
+        if(direct !== null && isFinite(direct)){
+          lval = direct;
+          method = 'تعويض مباشر';
+          steps.push('\u2714 بالتعويض المباشر: f(' + toStr + ') = ' + fmt(direct));
+
+        } else {
+          /* ثانياً: تقريب من الجانبين */
+          const eps = [1e-3,1e-4,1e-5,1e-6,1e-7,1e-8];
+          const Rv = eps.map(e => evalFn(exprL, to+e)).filter(v => v!==null);
+          const Lv = eps.map(e => evalFn(exprL, to-e)).filter(v => v!==null);
+
+          const Rfin = Rv.filter(v => isFinite(v));
+          const Lfin = Lv.filter(v => isFinite(v));
+
+          if(Rfin.length >= 2 && Lfin.length >= 2){
+            const rL = Rfin[Rfin.length-1], lL = Lfin[Lfin.length-1];
+
+            if(Math.abs(rL - lL) < 1e-3){
+              /* نهاية موجودة من الجانبين */
+              lval = (rL + lL) / 2;
+              method = "L'Hôpital عددي";
+              steps.push("\u2714 L'Hôpital / تقريب من الجانبين: " + fmt(lval));
+
+            } else {
+              /* تحقق من التباعد */
+              const rInf = Rv.some(v => !isFinite(v));
+              const lInf = Lv.some(v => !isFinite(v));
+              if(rInf || lInf){
+                const rSign = rInf ? (Rv.find(v=>!isFinite(v))>0?1:-1) : Math.sign(rL);
+                const lSign = lInf ? (Lv.find(v=>!isFinite(v))>0?1:-1) : Math.sign(lL);
+                if(rSign === lSign){
+                  lval = rSign > 0 ? Infinity : -Infinity;
+                  steps.push('\u{1F4C8} كلا الجانبين يتباعدان \u2192 ' + (lval>0?'+\u221e':'-\u221e'));
+                } else {
+                  lval = null;
+                  steps.push('\u26A0 الجانب الأيمن \u2260 الأيسر (اتجاهان معاكسان) — لا توجد نهاية');
+                }
+              } else {
+                /* نهايتان أحاديتا الجانب مختلفتان */
+                lval = null;
+                steps.push('\u26A0 النهاية اليمنى (' + fmt(rL) + ') \u2260 اليسرى (' + fmt(lL) + ') — لا توجد نهاية');
+              }
+            }
+          } else if(Rfin.length >= 2){
+            lval = Rfin[Rfin.length-1];
+            method = 'تقريب أيمن';
+            steps.push('\u{1F4CA} تقريب من اليمين: ' + fmt(lval));
+          } else if(Lfin.length >= 2){
+            lval = Lfin[Lfin.length-1];
+            method = 'تقريب أيسر';
+            steps.push('\u{1F4CA} تقريب من اليسار: ' + fmt(lval));
+          } else {
+            /* آخر محاولة: evalLimit */
+            const ev = evalLimit(exprL, to);
+            if(ev !== null){
+              lval = ev;
+              method = 'تقريب عددي متعدد';
+              steps.push('\u{1F4CA} تقريب عددي: ' + fmt(ev));
+            }
+          }
         }
       }
-      R.type='calculus';R.subtitle='النهاية';
-      if(lval!==null){
-        R.steps=[`lim (${exprL})  x → ${toStr}`,`= ${fmt(lval)}`];
-        R.answer=`lim = ${fmt(lval)}`;
+
+      /* ── النتيجة النهائية ── */
+      if(lval !== null){
+        const dispVal = !isFinite(lval) ? (lval>0?'+\u221e':'-\u221e') : fmt(lval);
+        steps.push('\u{1F3AF} \u0627\u0644\u0646\u062a\u064a\u062c\u0629: lim = ' + dispVal);
+        R.steps = steps;
+        R.answer = 'lim = ' + dispVal;
       } else {
-        R.steps=[`lim (${exprL})  x → ${toStr}`,'النهاية غير موجودة أو تتطلب L\'Hôpital'];
-        R.answer='غير محدد';
+        steps.push('\u{1F6AB} النهاية غير موجودة أو الدالة تتذبذب عند هذه النقطة');
+        R.steps = steps;
+        R.answer = 'لا توجد نهاية محددة';
       }
       return R;
     }
@@ -8732,7 +9143,9 @@ function autoCorrect(text){
 /* ═══ AUTO MERGE ═══ */
 let _merging=false;
 function autoMerge(){
-  if(!S.mergeSimilar||_merging)return;_merging=true;
+  if(!S.mergeSimilar||_merging)return;
+  if(Object.keys(DB.knowledge).length>8000){_merging=false;return;}
+  _merging=true;
   const thresh=(S.mergeThresh||92)/100;
   const keys=Object.keys(DB.knowledge).slice();let i=0;
   function batch(){
@@ -9724,8 +10137,8 @@ async function respondClaudeDirect(orig){
     if(!aiResult.text){sysMsg('<i class="fas fa-exclamation-triangle"></i> تعذّر الحصول على رد — تحقق من المفتاح والاتصال');return;}
     const bot=document.createElement('div');bot.className='message bot';
     const badge=document.createElement('div');
-    badge.className='ans-badge '+(aiResult.engine==='gemini'?'gemini':aiResult.engine==='claude'?'claude':'fact');
-    badge.innerHTML=(aiResult.engine==='gemini'?'✦ Gemini AI':'<i class="fas fa-robot"></i> Claude AI')+' — مباشر';
+    badge.className='ans-badge '+(aiResult.engine==='gemini'?'gemini':aiResult.engine==='deepseek'?'deepseek':aiResult.engine==='claude'?'claude':'fact');
+    badge.innerHTML=(aiResult.engine==='gemini'?'✦ Gemini AI':aiResult.engine==='deepseek'?'🐋 DeepSeek AI':'<i class="fas fa-robot"></i> Claude AI')+' — مباشر';
     bot.appendChild(badge);
     const ab=document.createElement('div');ab.className='ans-block';ab.innerHTML=renderMd(aiResult.text);bot.appendChild(ab);
     const foot=document.createElement('div');foot.className='msg-footer';
@@ -9823,9 +10236,12 @@ function send(){
         const res=respond(txt);
         if(done){clearTimeout(guard);return;}
 
-        const hasKey=!!(getApiKey()||getGeminiKey());
+        const hasKey=!!(getApiKey()||getGeminiKey()||getDeepSeekKey());
         const isOnlineNow=_isOnline()&&!_offlineMode;
-        const isUtilResponse=res&&(res._util||res.ansType==='تعلم'||res.ansType==='تصحيح'||res.ansType==='حساب'||res.ansType==='تذكير'||res.ansType==='إحصاء');
+        /* isUtilResponse: ردود محلية بحتة (لا تحتاج AI) — لكن إذا وجد مفتاح وإنترنت نرسل للـ API */
+        const isUtilResponse=res&&(res._util||res.ansType==='تعلم'||res.ansType==='تصحيح'||res.ansType==='تذكير'||res.ansType==='إحصاء');
+        /* حسابات الآلة تُعرض محلياً دائماً (نتائج MathEngine الدقيقة) */
+        const isCalcResult=res&&(res.ansType==='حساب'||res.type==='calculus'||res.type==='calc');
 
         /* ─── دالة مشتركة: عرض الجواب المحلي مع شارة "بدون إنترنت" ─── */
         const _showLocalOffline=(r)=>{
@@ -9844,7 +10260,25 @@ function send(){
           if(S.autoSpeak&&(r.mainAns||r.text))speak(r.mainAns||r.text);
         };
 
-        if(isUtilResponse){
+        /* ═══════════════════════════════════════════════════════
+           ترتيب الأولويات:
+           1. متصل + مفتاح → API دائماً (Claude/Gemini/DeepSeek)
+           2. ردود الأداة المحلية (util/تعلم/...) → محلي
+           3. غير متصل + مفتاح → API مباشر
+           4. غير متصل + لا مفتاح → ذاكرة محلية
+           5. متصل + لا مفتاح + notFound → بحث ويب
+           6. متصل + لا مفتاح → محلي
+        ═══════════════════════════════════════════════════════ */
+        if(hasKey && isOnlineNow){
+          /* ─── متصل + مفتاح: اذهب للـ API دائماً ─── */
+          done=true; clearTimeout(guard);
+          setAvatar('idle');
+          if(_claudeDirectMode || !S.webSearchEnabled){
+            respondClaudeDirect(txt).finally(()=>{setAvatar('idle');const _i=document.getElementById('userInput');if(_i)_i.disabled=false;if(S.autoFocus)_i?.focus();});
+          } else {
+            respondWithSearch(txt).finally(()=>{setAvatar('idle');const _i=document.getElementById('userInput');if(_i)_i.disabled=false;if(S.autoFocus)_i?.focus();});
+          }
+        } else if(isUtilResponse){
           done=true;clearTimeout(guard);
           const bot=buildBotMessage(res,txt);
           cc.appendChild(bot);cc.scrollTop=cc.scrollHeight;
@@ -11052,7 +11486,7 @@ function updateStats(){
   if(llv){const logs=DB.learnLog.filter(l=>l&&l.reason!=='unanswered').slice(-25).reverse();llv.innerHTML=logs.length?logs.map(l=>'<div>'+new Date(l.t).toLocaleTimeString('ar-SA')+' — <strong>'+esc((l.display||l.key||'').substring(0,30))+'</strong> ['+l.reason+']</div>').join(''):'<div>لا يوجد بعد</div>';}
   const si=document.getElementById('sysInfo');
   if(si){
-    const sz=Math.round(JSON.stringify(DB).length/1024);
+    const sz=Math.round((JSON.stringify(DB.knowledge||{}).length+JSON.stringify(DB.history||[]).length)/1024);
     si.innerHTML=
       '<i class="fas fa-database"></i> الحجم: <strong>'+sz+' KB</strong><br>'+
       'معرفة: <strong>'+kLen+'</strong> — كيانات: <strong>'+eLen+'</strong><br>'+
@@ -11060,7 +11494,7 @@ function updateStats(){
       'المطوّر: <strong style="color:var(--gold)">Murhaf Hassan</strong><br>'+
       'الإصدار: <strong>'+DB.meta.version+'</strong><br>'+
       'IndexedDB: <strong>'+(_idb?'<span style="color:var(--green)">متصل</span>':'<span style="color:var(--text3)">غير متاح</span>')+'</strong><br>'+
-      'Claude AI: '+(getApiKey()?'<span style="color:var(--green)">نشط ✓</span>':'<span style="color:var(--text3)">بدون مفتاح</span>')+'<br>'+'Gemini AI: '+(getGeminiKey()?'<span style="color:#34a853">نشط ✓</span>':'<span style="color:var(--text3)">بدون مفتاح</span>')+'<br>'+
+      'Claude AI: '+(getApiKey()?'<span style="color:var(--green)">نشط ✓</span>':'<span style="color:var(--text3)">بدون مفتاح</span>')+'<br>'+'DeepSeek AI: '+(getDeepSeekKey()?'<span style="color:#4db8ff">نشط ✓</span>':'<span style="color:var(--text3)">بدون مفتاح</span>')+'<br>'+'Gemini AI: '+(getGeminiKey()?'<span style="color:#34a853">نشط ✓</span>':'<span style="color:var(--text3)">بدون مفتاح</span>')+'<br>'+
       'Google Search: '+(getGoogleKey()?'<span style="color:#4285f4">نشط ✓ (Serper)</span>':'<span style="color:var(--text3)">DuckDuckGo (افتراضي)</span>')+'<br>'+
       'بحث الإنترنت: '+(S.webSearchEnabled&&_isOnline()?'<span style="color:var(--green)">مفعّل</span>':(!_isOnline()?'<span style="color:var(--text3)">📴 غير متصل</span>':'<span style="color:var(--text3)">معطّل</span>'));
   }
@@ -11427,18 +11861,31 @@ function initEvents(){
       _updateGoogleStatus();toast('<i class="fas fa-trash-alt"></i> تم مسح مفتاح Google');
     }
   });
+  /* DeepSeek key handlers */
+  document.getElementById('saveDeepSeekKeyBtn')?.addEventListener('click',()=>{
+    const k=document.getElementById('deepseekKeyInput')?.value.trim();
+    if(!k){toast('<i class="fas fa-exclamation-circle"></i> أدخل مفتاح DeepSeek أولاً');return;}
+    saveDeepSeekKey(k);_updateDeepSeekStatus();toast('<i class="fas fa-water"></i> تم حفظ مفتاح DeepSeek بنجاح');});
+  document.getElementById('showDeepSeekKeyBtn')?.addEventListener('click',()=>{
+    const inp=document.getElementById('deepseekKeyInput');const btn=document.getElementById('showDeepSeekKeyBtn');if(!inp)return;
+    if(inp.type==='password'){inp.type='text';if(!inp.value&&_deepseekKey)inp.value=_deepseekKey;btn.innerHTML='<i class="fas fa-eye-slash"></i> إخفاء';}
+    else{inp.type='password';btn.innerHTML='<i class="fas fa-eye"></i> إظهار';}});
+  document.getElementById('clearDeepSeekKeyBtn')?.addEventListener('click',()=>{
+    if(confirm('مسح مفتاح DeepSeek؟')){saveDeepSeekKey('');const inp=document.getElementById('deepseekKeyInput');if(inp)inp.value='';_updateDeepSeekStatus();toast('<i class="fas fa-trash-alt"></i> تم مسح مفتاح DeepSeek');}});
+  document.getElementById('deepseekModelSel')?.addEventListener('change',e=>{S.deepseekModel=e.target.value;saveSettings();toast('🐋 DeepSeek: '+e.target.value);});
+
   document.querySelectorAll('.ai-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
       S.aiEngine=btn.dataset.ai;saveSettings();_syncAiEngineBtn();
-      const labels={auto:'⚡ تلقائي',claude:'🤖 Claude',gemini:'✦ Gemini'};
+      const labels={auto:'⚡ تلقائي',claude:'🤖 Claude',gemini:'✦ Gemini',deepseek:'🐋 DeepSeek',local:'🧠 محلي'};
       toast(labels[S.aiEngine]||'');
     });
   });
   document.getElementById('aiEngineBtn')?.addEventListener('click',()=>{
-    const order=['auto','claude','gemini'];
-    S.aiEngine=order[(order.indexOf(S.aiEngine||'auto')+1)%3];
+    const order=['auto','claude','deepseek','gemini','local'];
+    S.aiEngine=order[(order.indexOf(S.aiEngine||'auto')+1)%5];
     saveSettings();_syncAiEngineBtn();
-    const labels={auto:'⚡ تلقائي',claude:'🤖 Claude فقط',gemini:'✦ Gemini فقط'};
+    const labels={auto:'⚡ تلقائي',claude:'🤖 Claude فقط',deepseek:'🐋 DeepSeek فقط',gemini:'✦ Gemini فقط',local:'🧠 محلي — بدون مفتاح'};
     toast(labels[S.aiEngine]);
   });
   document.getElementById('claudeDirectBtn')?.addEventListener('click',()=>{
@@ -11645,6 +12092,43 @@ function initEvents(){
     if(symCk) symCk.checked = on;
   }
 
+  /* ══════════════ renderLimDisplay v4 — عرض النهايات كالكتاب ══════════════ */
+  function renderLimDisplay(expr){
+    if(!expr) return null;
+    const s = String(expr).trim();
+    /* صيغة 1: lim(f,x,a) */
+    const pat1 = /^lim\s*\(\s*(.*?)\s*,\s*x\s*,\s*([+\-]?(?:∞|-∞|\d+(?:\.\d+)?|inf(?:inity)?|π))\s*\)/i;
+    /* صيغة 2: lim/حد f عند x→a أو x→a */
+    const pat2 = /^(?:حد|lim(?:it)?)\s+(.*?)\s+(?:عند\s+)?x\s*[→\->]\s*([+\-]?(?:∞|-∞|inf(?:inity)?|π|\d+(?:\.\d+)?))/i;
+    /* صيغة 3: بدون "عند" */
+    const pat3 = /^(?:حد|lim(?:it)?)\s+(.*?)\s+x\s*[=\->→]+\s*([+\-]?(?:∞|-∞|inf(?:inity)?|π|\d+(?:\.\d+)?))/i;
+    let fn='', point='';
+    const m1=s.match(pat1), m2=s.match(pat2), m3=s.match(pat3);
+    if(m1){ fn=m1[1].trim(); point=m1[2].trim(); }
+    else if(m2){ fn=m2[1].trim().replace(/^(?:lim|حد)\s*/i,''); point=m2[2].trim(); }
+    else if(m3){ fn=m3[1].trim().replace(/^(?:lim|حد)\s*/i,''); point=m3[2].trim(); }
+    else return null;
+    if(!fn || fn==='__') fn = '<span style="border-right:2px solid var(--gold,#c9952a);padding-right:3px;opacity:.7;font-style:italic">f(x)</span>';
+    /* تحسين مظهر الدالة */
+    fn = fn
+      .replace(/\*\*/g,'^').replace(/\*/g,'×')
+      .replace(/Math\.sqrt\(/g,'√(').replace(/sqrt\(/g,'√(')
+      .replace(/\^2(?![0-9])/g,'²').replace(/\^3(?![0-9])/g,'³')
+      .replace(/Math\.PI/g,'π').replace(/Math\.E(?![a-zA-Z])/g,'e');
+    /* تحسين مظهر النقطة */
+    const ptDisp = point
+      .replace(/^\+?(?:∞|inf(?:inity)?)/i,'∞')
+      .replace(/^-(?:∞|inf(?:inity)?)/i,'-∞')
+      .replace(/Math\.PI/gi,'π');
+    return '<span class="mk-lim-wrap">'
+      +'<span class="mk-lim-sym">'
+      +'<span class="mk-lim-sym-lim">lim</span>'
+      +'<span class="mk-lim-sym-sub">x → '+ptDisp+'</span>'
+      +'</span>'
+      +'<span class="mk-lim-fn">'+fn+'</span>'
+      +'</span>';
+  }
+
   /* ══════════════ renderDisplay — عرض الكسور ══════════════ */
   function renderDisplay(text){
     if(!text || text === '0') return null;
@@ -11696,11 +12180,12 @@ function initEvents(){
 
     if(mkBuffer){
       const pretty = prettyDisplay(mkBuffer);
-      const fh = renderDisplay(pretty);
-      if(fh){ exprEl.innerHTML = fh; exprEl.className = ''; }
+      const limH = renderLimDisplay(mkBuffer);
+      const fh = limH || renderDisplay(pretty);
+      if(fh){ exprEl.innerHTML = fh; exprEl.className = limH ? 'mk-lim-expr' : ''; }
       else { exprEl.textContent = pretty; exprEl.className = ''; }
       const len = pretty.replace(/<[^>]+>/g,'').length;
-      exprEl.style.fontSize = len>26?'.9rem':len>20?'1.2rem':len>14?'1.6rem':'2.2rem';
+      exprEl.style.fontSize = limH ? '2rem' : (len>26?'.9rem':len>20?'1.2rem':len>14?'1.6rem':'2.2rem');
     } else if(lastResult !== null){
       const fh2 = renderDisplay(String(lastResult));
       if(fh2){ exprEl.innerHTML = fh2; }
@@ -11736,9 +12221,12 @@ function initEvents(){
   });
   document.getElementById('mathPanelClose')?.addEventListener('click', closeMathPanel);
   document.addEventListener('click', e=>{
-    if(panel.classList.contains('on') && !panel.contains(e.target) && !e.target.closest('#mathKbBtn'))
+    /* أغلق البانل فقط إذا ضُغط خارجه تماماً وليس على زر الفتح */
+    if(panel.classList.contains('on') && !panel.contains(e.target) && !e.target.closest('#mathKbBtn') && !e.target.closest('#limPickerOverlay'))
       closeMathPanel();
   });
+  /* امنع إغلاق البانل عند الضغط داخله */
+  panel.addEventListener('click', e=>{ e.stopPropagation(); });
 
   /* سحب للأسفل من الـ handle لإغلاق */
   let _tsY=0, _touchTarget=null;
@@ -11822,6 +12310,19 @@ function initEvents(){
     if(!btn||btn.id) return;
     if(btn.hasAttribute('data-mk-clear')){ mkBuffer=''; lastResult=null; ansValue=null; updatePreview(); return; }
     if(btn.hasAttribute('data-ins-bracket')){
+      /* داخل lim: عدّ الأقواس داخل الدالة فقط */
+      const _limB1 = mkBuffer.match(/^(lim\()([^,]*)(,x,[^)]+\))$/i);
+      const _limB2 = mkBuffer.match(/^(حد\s+)(.+?)(\s+عند\s+x→.+)$/i);
+      if(_limB1){
+        const fn = _limB1[2] === '__' ? '' : _limB1[2];
+        const o=(fn.match(/\(/g)||[]).length, c=(fn.match(/\)/g)||[]).length;
+        const newFn = fn + (o>c?')':'(');
+        mkBuffer = _limB1[1]+newFn+_limB1[3]; updatePreview(); return;
+      } else if(_limB2){
+        const fn = _limB2[2].trim() === '__' ? '' : _limB2[2].trim();
+        const o=(fn.match(/\(/g)||[]).length, c=(fn.match(/\)/g)||[]).length;
+        mkBuffer = _limB2[1]+(fn+(o>c?')':'('))+_limB2[3]; updatePreview(); return;
+      }
       const o=(mkBuffer.match(/\(/g)||[]).length, c=(mkBuffer.match(/\)/g)||[]).length;
       mkBuffer += o>c ? ')' : '('; updatePreview(); return;
     }
@@ -11829,9 +12330,44 @@ function initEvents(){
       const cv=btn.dataset.insConv, n=mkBuffer.trim();
       mkBuffer = (n&&/^[\d.]+$/.test(n)) ? n+' '+cv : mkBuffer+' '+cv; updatePreview(); return;
     }
-    if(btn.dataset.ins==='⌫'){ mkBuffer=mkBuffer.slice(0,-1); updatePreview(); return; }
+    if(btn.dataset.ins==='⌫'){
+      /* backspace داخل lim: احذف آخر حرف من الدالة الداخلية */
+      const _bsLim1 = mkBuffer.match(/^(lim\()(.+)(,x,[^)]+\))$/i);
+      const _bsLim2 = mkBuffer.match(/^(حد\s+)(.+)(\s+عند\s+x→.+)$/i);
+      if(_bsLim1 && _bsLim1[2].length > 0){
+        const inner = _bsLim1[2].slice(0,-1);
+        mkBuffer = inner ? _bsLim1[1]+inner+_bsLim1[3] : _bsLim1[1]+'__'+_bsLim1[3];
+      } else if(_bsLim2 && _bsLim2[2].trim().length > 0){
+        const inner = _bsLim2[2].trim().slice(0,-1);
+        mkBuffer = _bsLim2[1]+(inner||'__')+_bsLim2[3];
+      } else {
+        mkBuffer = mkBuffer.slice(0,-1);
+      }
+      updatePreview(); return;
+    }
     const ins=btn.dataset.ins; if(!ins) return;
-    mkBuffer+=ins; updatePreview();
+    /* ── lim mode: كل إدخال يدخل داخل الدالة قبل ,x, ── */
+    const _limInner1 = mkBuffer.match(/^(lim\()([^,]*)(,x,[^)]+\))$/i);
+    const _limInner2 = mkBuffer.match(/^(حد\s+)(.+?)(\s+عند\s+x→.+)$/i);
+    if(_limInner1){
+      let fn = _limInner1[2] === '__' ? '' : _limInner1[2];
+      const _mul = fn && /[\d)πφ]$/.test(fn) && /^[a-zA-Z√∛]/.test(ins);
+      fn += (_mul?'*':'') + ins;
+      mkBuffer = _limInner1[1] + fn + _limInner1[3];
+      updatePreview(); return;
+    }
+    if(_limInner2){
+      let fn = _limInner2[2].trim() === '__' ? '' : _limInner2[2].trim();
+      const _mul = fn && /[\d)πφ]$/.test(fn) && /^[a-zA-Z√∛]/.test(ins);
+      fn += (_mul?'*':'') + ins;
+      mkBuffer = _limInner2[1] + fn + _limInner2[3];
+      updatePreview(); return;
+    }
+    /* ضرب ضمني: إذا انتهى البافر برقم/قوس وبدأ الإدراج بدالة → أضف * تلقائياً */
+    const _needsMul = mkBuffer && /[\d)πφ]$/.test(mkBuffer) &&
+      /^[a-zA-Z√∛]/.test(ins) && !/^[\+\-\*\/\^]/.test(ins);
+    mkBuffer += (_needsMul ? '*' : '') + ins;
+    updatePreview();
   });
 
   /* ══════════════ أزرار خاصة ══════════════ */
@@ -11844,14 +12380,25 @@ function initEvents(){
     const val=lastResult!==null?String(lastResult):mkBuffer;
     if(val) navigator.clipboard?.writeText(val).then(()=>toast('📋 تم النسخ',1500)).catch(()=>{});
   });
-  document.getElementById('mkSmartBracket')?.addEventListener('click',()=>{
-    const o=(mkBuffer.match(/\(/g)||[]).length, c=(mkBuffer.match(/\)/g)||[]).length;
-    mkBuffer += o>c ? ')' : '('; updatePreview();
-  });
-  document.getElementById('mkSmartBracket2')?.addEventListener('click',()=>{
-    const o=(mkBuffer.match(/\(/g)||[]).length, c=(mkBuffer.match(/\)/g)||[]).length;
-    mkBuffer += o>c ? ')' : '('; updatePreview();
-  });
+  function _smartBracket(){
+    const _limB1 = mkBuffer.match(/^(lim\()([^,]*)(,x,[^)]+\))$/i);
+    const _limB2 = mkBuffer.match(/^(حد\s+)(.+?)(\s+عند\s+x→.+)$/i);
+    if(_limB1){
+      const fn = _limB1[2]==='__'?'':_limB1[2];
+      const o=(fn.match(/\(/g)||[]).length, c=(fn.match(/\)/g)||[]).length;
+      mkBuffer = _limB1[1]+(fn+(o>c?')':'('))+_limB1[3];
+    } else if(_limB2){
+      const fn = _limB2[2].trim()==='__'?'':_limB2[2].trim();
+      const o=(fn.match(/\(/g)||[]).length, c=(fn.match(/\)/g)||[]).length;
+      mkBuffer = _limB2[1]+(fn+(o>c?')':'('))+_limB2[3];
+    } else {
+      const o=(mkBuffer.match(/\(/g)||[]).length, c=(mkBuffer.match(/\)/g)||[]).length;
+      mkBuffer += o>c ? ')' : '(';
+    }
+    updatePreview();
+  }
+  document.getElementById('mkSmartBracket')?.addEventListener('click', _smartBracket);
+  document.getElementById('mkSmartBracket2')?.addEventListener('click', _smartBracket);
   document.getElementById('mkFracBtn')?.addEventListener('click',()=>{
     mkBuffer += (mkBuffer&&/[\d)]$/.test(mkBuffer)) ? '/' : (mkBuffer?'/':'1/');
     updatePreview();
@@ -11862,19 +12409,37 @@ function initEvents(){
 
   /* ══════════════ حساب فوري ══════════════ */
   function doSolve(){
-    const expr=(mkBuffer||inp.value).trim();
+    let expr=(mkBuffer||inp.value).trim();
     if(!expr){ _showCalcError('أدخل تعبيراً أولاً'); return; }
+
+    /* ── إصلاح تلقائي قبل الفحص ── */
+    /* 1. أغلق الأقواس المفتوحة */
+    const _op=(expr.match(/\(/g)||[]).length, _cl=(expr.match(/\)/g)||[]).length;
+    if(_op>_cl) expr += ')'.repeat(_op-_cl);
+    /* 2. احذف المعاملات الزائدة في النهاية */
+    expr = expr.replace(/[+\-*\/×÷\^]\s*$/, '');
+    /* 3. احذف نقطة عشرية في نهاية العدد */
+    expr = expr.replace(/\.\s*$/, '');
+    /* مزامنة البافر بعد الإصلاح */
+    mkBuffer = expr;
 
     /* تبديل وضع الزوايا في المحرك */
     const origAngle = MathEngine && MathEngine._angleMode;
     if(MathEngine) MathEngine._angleMode = mkSettings.angleMode;
 
-    const syntaxCheck = MathEngine.checkSyntax(expr);
-    if(!syntaxCheck.ok){ _showCalcError('خطأ: ' + syntaxCheck.msg); if(MathEngine) MathEngine._angleMode=origAngle; return; }
+    /* تخطَّ checkSyntax للنهايات — لها معالج خاص في MathEngine.solve */
+    const _isLimExpr = /^(?:حد|lim)/i.test(expr);
+    if(!_isLimExpr){
+      const syntaxCheck = MathEngine.checkSyntax(expr);
+      if(!syntaxCheck.ok){ _showCalcError('خطأ: ' + syntaxCheck.msg); if(MathEngine) MathEngine._angleMode=origAngle; return; }
+    }
 
     let res;
     try { res = MathEngine.solve(expr); } catch(e){ res={answer:null,steps:[],type:'calc'}; }
     if(MathEngine) MathEngine._angleMode = origAngle;
+
+    /* هل هذا تعبير نهاية؟ */
+    const _isLimResult = res && res.type === 'calculus' && res.subtitle === 'النهاية';
 
     if(res && res.answer !== null){
       /* تطبيق وضع الكسر */
@@ -11896,29 +12461,51 @@ function initEvents(){
       /* عرض على الشاشة */
       if(exprSub) exprSub.textContent = expr + ' =';
       if(exprEl){
-        const fh = renderDisplay(String(displayAns));
-        if(fh){ exprEl.innerHTML = fh; } else { exprEl.textContent = displayAns; }
-        exprEl.className = 'mk-result';
-        const l = String(displayAns).length;
-        exprEl.style.fontSize = l>18?'1.1rem':l>12?'1.6rem':'2.2rem';
+        const limH = renderLimDisplay(expr);
+        if(_isLimResult && limH){
+          /* نهاية: رمز lim + السهم + النتيجة في صف واحد */
+          const rawAns = String(displayAns).replace(/^lim\s*=\s*/i,'');
+          exprEl.innerHTML =
+            '<div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">'
+            + limH
+            + '<span style="font-size:1.8rem;color:var(--gold,#c9952a);font-weight:900"> = </span>'
+            + '<span style="font-size:1.8rem;color:var(--gold2,#e8b84b);font-weight:900">' + rawAns + '</span>'
+            + '</div>';
+          exprEl.className = 'mk-lim-expr';
+          exprEl.style.fontSize = '1.6rem';
+        } else if(_isLimResult){
+          /* نهاية بدون تصيير lim: نعرض النص مباشرة */
+          exprEl.textContent = displayAns;
+          exprEl.className = 'mk-result';
+          exprEl.style.fontSize = '1.8rem';
+        } else {
+          const fh = limH || renderDisplay(String(displayAns));
+          if(limH){ exprEl.innerHTML = fh; exprEl.className='mk-lim-expr'; exprEl.style.fontSize='2rem'; }
+          else if(fh){ exprEl.innerHTML = fh; exprEl.className=''; }
+          else { exprEl.textContent = displayAns; exprEl.className='mk-result'; }
+          if(!limH){
+            exprEl.className = 'mk-result';
+            const l = String(displayAns).length;
+            exprEl.style.fontSize = l>18?'1.1rem':l>12?'1.6rem':'2.2rem';
+          }
+        }
         exprEl.style.transition='color .25s'; exprEl.style.color='var(--gold2)';
         setTimeout(()=>{ exprEl.style.color=''; },700);
       }
 
-      /* بطاقة في المحادثة */
-      const cc=document.getElementById('chatContainer');
-      if(cc){
-        const wrap=document.createElement('div'); wrap.className='message bot';
-        wrap.innerHTML=MathEngine.renderCard(res);
-        /* تحسين عرض الكسر في البطاقة */
-        const ab=wrap.querySelector('.mrc-ans');
-        if(ab){ const fh2=renderDisplay(ab.textContent||''); if(fh2) ab.innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;justify-content:center">'+fh2+'</span>'; }
-        cc.appendChild(wrap); cc.scrollTop=cc.scrollHeight;
+      if(typeof mkHistoryAdd==='function'){
+        /* للنهايات: احفظ الخطوات أيضاً */
+        if(res.type==='calculus' && res.steps && res.steps.length){
+          const steps = res.steps;
+          mkHistoryAdd(expr, displayAns, res.type);
+          /* نخزّن الخطوات على آخر عنصر في السجل */
+          if(window._mkLastSteps === undefined) window._mkLastSteps = {};
+          window._mkLastSteps[expr] = steps;
+        } else {
+          mkHistoryAdd(expr, displayAns, res.type);
+        }
       }
 
-      if(typeof mkHistoryAdd==='function') mkHistoryAdd(expr, displayAns, res.type);
-
-      /* ANS: احتفظ للعمليات التالية */
       if(mkSettings.keepAns !== false){
         mkBuffer = String(displayAns);
         inp.value = mkBuffer;
@@ -11926,8 +12513,32 @@ function initEvents(){
         mkBuffer=''; inp.value='';
       }
       toast('✅ = ' + displayAns, 2000);
+
+    } else if(_isLimResult) {
+      /* ── النهاية لا توجد أو تتذبذب — عرض النتيجة بشكل جميل ولا نُرسل لـ math.js ── */
+      const noLimMsg = (res.steps && res.steps.length > 0)
+        ? res.steps[res.steps.length-1]
+        : 'لا توجد نهاية محددة';
+      if(exprSub) exprSub.textContent = expr + ' =';
+      if(exprEl){
+        const limH = renderLimDisplay(expr);
+        exprEl.innerHTML = (limH || '') +
+          '<div style="font-size:.95rem;color:#f87171;margin-top:6px;text-align:center;font-weight:700">'
+          + '⚠ ' + noLimMsg + '</div>';
+        exprEl.className = 'mk-lim-expr';
+        exprEl.style.fontSize = '1.8rem';
+        exprEl.style.transition='color .25s'; exprEl.style.color='#f87171';
+        setTimeout(()=>{ exprEl.style.color=''; },800);
+      }
+      if(typeof mkHistoryAdd==='function'){
+        mkHistoryAdd(expr, noLimMsg, 'calculus');
+        if(window._mkLastSteps === undefined) window._mkLastSteps = {};
+        window._mkLastSteps[expr] = res.steps || [noLimMsg];
+      }
+      toast('⚠ ' + noLimMsg, 2500);
+
     } else {
-      /* لم يجد حلاً — جرب math.js */
+      /* لم يجد حلاً — جرب math.js (للتعبيرات غير النهايات فقط) */
       solveWithMathJS(expr);
     }
   }
@@ -12076,39 +12687,124 @@ function initEvents(){
   /* حل بديل باستخدام math.js مباشرة */
   function solveWithMathJS(expr) {
     try {
-      const result = math.evaluate(expr.replace(/×/g,'*').replace(/÷/g,'/'));
+      /* تطبيق نفس تحويلات prepExpr قبل إرسالها لـ math.js */
+      let e = expr
+        .replace(/×/g,'*').replace(/÷/g,'/')
+        .replace(/−/g,'-').replace(/²/g,'^2').replace(/³/g,'^3')
+        .replace(/π/g,'pi').replace(/√/g,'sqrt').replace(/∛/g,'cbrt')
+        .replace(/°/g,'deg');
+      /* أغلق الأقواس المفتوحة */
+      const _o=(e.match(/\(/g)||[]).length, _c=(e.match(/\)/g)||[]).length;
+      if(_o>_c) e += ')'.repeat(_o-_c);
+      /* ضرب ضمني: 5sqrt → 5*sqrt */
+      e = e.replace(/(\d)\s*(sqrt|cbrt|sin|cos|tan|log|ln|exp|abs)/g,'$1*$2');
+      e = e.replace(/(\d)\s*\(/g,'$1*(');
+      const result = math.evaluate(e);
       if (result !== undefined && result !== null) {
+        const displayVal = (typeof result === 'number') ? MathEngine.fmt(result) : String(result);
         if(exprSub) exprSub.textContent = expr + ' =';
-        if(exprEl) { exprEl.textContent = result; exprEl.className = 'mk-result'; }
-        lastResult = result;
-        if(typeof mkHistoryAdd === 'function') mkHistoryAdd(expr, result, 'calc');
+        if(exprEl) {
+          exprEl.textContent = displayVal;
+          exprEl.className = 'mk-result';
+          exprEl.style.fontSize = displayVal.length>18?'1.1rem':displayVal.length>12?'1.6rem':'2.2rem';
+          exprEl.style.transition='color .25s'; exprEl.style.color='var(--gold2)';
+          setTimeout(()=>{ exprEl.style.color=''; },700);
+        }
+        lastResult = displayVal;
+        ansValue = displayVal;
+        if(mkSettings.keepAns !== false){ mkBuffer=String(displayVal); inp.value=mkBuffer; }
+        else { mkBuffer=''; inp.value=''; }
+        if(typeof mkHistoryAdd === 'function') mkHistoryAdd(expr, displayVal, 'calc');
+        toast('✅ = ' + displayVal, 2000);
       } else {
         _showCalcError('لم أستطع حساب هذه المعادلة');
       }
     } catch(e) {
-      _showCalcError('خطأ في الحساب: ' + e.message);
+      /* ترجمة رسائل math.js إلى عربي مفهوم */
+      let errMsg = e.message || '';
+      if(/unexpected.*\)|parenthes/i.test(errMsg))      errMsg = 'قوس إغلاق ) زائد أو في مكان خاطئ';
+      else if(/undefined.*symbol|not defined/i.test(errMsg)) errMsg = 'رمز غير معروف — تحقق من أسماء الدوال';
+      else if(/unexpected end/i.test(errMsg))            errMsg = 'التعبير غير مكتمل — أكمل الصيغة';
+      else if(/cannot.*convert|type error/i.test(errMsg)) errMsg = 'خطأ في نوع البيانات — تحقق من القيم';
+      else if(/syntax/i.test(errMsg))                    errMsg = 'خطأ في الصياغة — راجع التعبير';
+      else errMsg = errMsg.replace(/[\u0000-\u001F]/g,' ').slice(0,60);
+      _showCalcError(errMsg);
     }
   }
 
   /* خطأ على الشاشة */
+  /* ── جدول تفسير الأخطاء ── */
+  const _errHints = [
+    { test: /قوس.*زائد|unexpected.*\)/i,     fix: 'احذف القوس الزائد )', example: 'مثال: sin(x) وليس sin(x))' },
+    { test: /أقواس فارغة|empty/i,             fix: 'أضف محتوى بين الأقواس', example: 'مثال: sin(30) وليس sin()' },
+    { test: /يبدأ.*بـ|cannot start/i,         fix: 'ابدأ التعبير برقم أو دالة', example: 'مثال: 5*3 وليس *3' },
+    { test: /عملية غير صحيحة/i,              fix: 'عمليات متكررة — احذف الزائد', example: 'مثال: 5*3 وليس 5**3' },
+    { test: /أدخل الدالة|أدخل تعبير/i,        fix: 'اكتب الدالة قبل الحساب', example: 'مثال: sin(x) أو x^2' },
+    { test: /لا توجد نهاية/i,                fix: 'الدالة لا تتقارب عند هذه النقطة', example: 'جرب نقطة أخرى أو تحقق من الدالة' },
+    { test: /div.*zero|قسم.*صفر|division/i,  fix: 'لا يمكن القسمة على صفر', example: 'تحقق من المقام في الدالة' },
+    { test: /syntax|صياغة|part/i,             fix: 'خطأ في الكتابة — راجع التعبير', example: 'تأكد من الأقواس والعمليات' },
+  ];
+  function _getHint(msg){
+    for(const h of _errHints) if(h.test.test(msg)) return h;
+    return { fix: 'راجع التعبير المدخل', example: 'تأكد من صحة الصيغة الرياضية' };
+  }
+
   function _showCalcError(msg){
+    const hint = _getHint(msg);
+    /* عرض في الشاشة */
     if(exprEl){
-      const prev=exprEl.textContent, pClass=exprEl.className;
-      exprEl.textContent='⚠ '+msg; exprEl.className=''; exprEl.style.color='#f87171';
-      exprEl.style.fontSize=msg.length>30?'.75rem':'.85rem';
+      const prev=exprEl.textContent, pClass=exprEl.className, prevFS=exprEl.style.fontSize;
+      exprEl.innerHTML = '<span style="font-size:.7rem;line-height:1.4;display:flex;flex-direction:column;align-items:flex-end;gap:2px">'
+        + '<span style="color:#f87171;font-weight:900">⚠ '+msg+'</span>'
+        + '<span style="color:rgba(251,146,60,.8);font-size:.62rem">↳ '+hint.fix+'</span>'
+        + '</span>';
+      exprEl.className=''; exprEl.style.fontSize='1rem';
       exprEl.style.transform='translateX(-4px)';
       setTimeout(()=>{exprEl.style.transform='translateX(4px)';},80);
       setTimeout(()=>{exprEl.style.transform='';},160);
-      setTimeout(()=>{exprEl.textContent=prev; exprEl.className=pClass; exprEl.style.color=''; exprEl.style.fontSize=''; updatePreview();},4000);
+      setTimeout(()=>{exprEl.innerHTML=''; exprEl.textContent=prev; exprEl.className=pClass; exprEl.style.color=''; exprEl.style.fontSize=prevFS; updatePreview();},5000);
     }
-    toast('⚠️ '+msg,3000);
+    /* toast مع مثال */
+    const toastEl = document.createElement('div');
+    toastEl.style.cssText = 'position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#1a0f0f;border:1px solid rgba(248,113,113,.4);border-radius:14px;padding:10px 16px;max-width:90vw;z-index:99998;font-family:inherit;text-align:right;box-shadow:0 4px 24px rgba(0,0,0,.5)';
+    toastEl.innerHTML = '<div style="color:#f87171;font-size:.78rem;font-weight:900;margin-bottom:4px">⚠️ '+msg+'</div>'
+      + '<div style="color:rgba(251,146,60,.9);font-size:.7rem;margin-bottom:3px">🔧 '+hint.fix+'</div>'
+      + '<div style="color:rgba(255,255,255,.35);font-size:.62rem;direction:ltr;text-align:left">'+hint.example+'</div>';
+    document.body.appendChild(toastEl);
+    setTimeout(()=>{ toastEl.style.opacity='0'; toastEl.style.transition='opacity .4s'; setTimeout(()=>toastEl.remove(),400); }, 5000);
   }
 
   /* إرسال للـ math.js */
   function doSendToAI(customText){
-    const text=customText||(mkBuffer||inp.value);
+    const text = customText || (mkBuffer || inp.value);
     if(!text.trim()){ _showCalcError('أدخل تعبيراً أولاً'); return; }
-    solveWithMathJS(text.replace(/^احسب.*?:/i,'').trim());
+    const expr = text.replace(/^احسب.*?:/i,'').trim();
+
+    /* للنهايات: احسب أولاً ثم أرسل النتيجة + الخطوات للـ AI */
+    if(/^(?:حد|lim)/i.test(expr)){
+      let res;
+      try { res = MathEngine.solve(expr); } catch(e){ res = null; }
+      if(res && res.type === 'calculus'){
+        /* ابنِ رسالة شاملة للـ AI */
+        const ans = res.answer || 'لا توجد نهاية محددة';
+        const stepsText = (res.steps||[]).join('\n• ');
+        const aiMsg = 'احسب النهاية التالية واشرح خطوات الحل بالتفصيل:\n'
+          + expr + '\n\n'
+          + (res.steps&&res.steps.length
+              ? 'الحل العددي:\n• ' + stepsText + '\n\nالنتيجة: ' + ans
+              : 'النتيجة: ' + ans);
+        /* أغلق الحاسبة وأرسل للـ AI */
+        const panel = document.getElementById('mkPanel');
+        if(panel) panel.classList.remove('on');
+        const inp2 = document.getElementById('userInput');
+        if(inp2){ inp2.value = aiMsg; }
+        const sendBtn = document.getElementById('sendBtn');
+        if(sendBtn) sendBtn.click();
+        return;
+      }
+    }
+    /* غير النهايات: الطريقة القديمة */
+    solveWithMathJS(expr);
   }
 
   /* ══════════════ أزرار الحساب ══════════════ */
@@ -12171,12 +12867,75 @@ function initEvents(){
     const kw = mkSettings.symMode ? '∫('+a+','+b2+',': 'تكامل محدود من '+a+' إلى '+b2+': ';
     mkBuffer = kw + (mkBuffer.trim()||''); updatePreview();
   });
-  document.getElementById('mkLimBtn')?.addEventListener('click',()=>{
-    const at=prompt('عند x يساوي:','0')||'0';
-    const kw = mkSettings.symMode ? 'lim(' : 'حد ';
-    mkBuffer = mkBuffer.trim() ? kw+mkBuffer+(mkSettings.symMode?',x,'+at+')':' عند x='+at) : kw;
-    updatePreview();
-  });
+  /* ── Lim Picker (بدون prompt) ── */
+  (function(){
+    const overlay = document.getElementById('limPickerOverlay');
+    if(!overlay) return;
+    let _resolve = null;
+    function openLimPicker(){
+      return new Promise(res => {
+        _resolve = res;
+        const inp = document.getElementById('limPickerInput');
+        if(inp) inp.value = '';
+        overlay.style.display = 'flex';
+        if(inp) setTimeout(()=>inp.focus(), 80);
+      });
+    }
+    function closeLimPicker(val){
+      overlay.style.display = 'none';
+      /* reset inputs */
+      const fnEl=document.getElementById('limPickerFn');
+      const inpEl=document.getElementById('limPickerInput');
+      if(fnEl) fnEl.value='';
+      if(inpEl){ inpEl.value=''; inpEl.style.borderColor=''; }
+      if(_resolve){ _resolve(val); _resolve = null; }
+    }
+    overlay.addEventListener('click', e => { if(e.target === overlay) closeLimPicker(null); });
+    document.getElementById('limPickerCancel')?.addEventListener('click', () => closeLimPicker(null));
+    document.getElementById('limPickerOk')?.addEventListener('click', () => {
+      let a = (document.getElementById('limPickerInput')?.value || '').trim() || '∞';
+      /* إصلاح: تحويل π إلى القيمة العددية في السياق النصي */
+      if(a==='π') a='π';
+      const fn = (document.getElementById('limPickerFn')?.value || '').trim();
+      closeLimPicker({a, fn});
+    });
+    document.getElementById('limPickerInput')?.addEventListener('keypress', e => {
+      if(e.key === 'Enter') document.getElementById('limPickerOk')?.click();
+    });
+    document.getElementById('limPickerFn')?.addEventListener('keypress', e => {
+      if(e.key === 'Enter') document.getElementById('limPickerInput')?.focus();
+    });
+    document.querySelectorAll('.lim-pick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const inp = document.getElementById('limPickerInput');
+        if(inp){ inp.value = btn.dataset.val; inp.style.borderColor = 'rgba(201,149,42,.5)'; }
+      });
+    });
+    document.getElementById('mkLimBtn')?.addEventListener('click', async ()=>{
+      /* احضر الـ fn الحالي من البافر */
+      let curFn = '';
+      const _bWrap1 = mkBuffer.trim().match(/^lim\s*\((.*)\s*,\s*x\s*,\s*[^,)]+\)/i);
+      const _bWrap2 = mkBuffer.trim().match(/^(?:حد|lim)\s+(.+?)\s+(?:عند\s+)?x\s*→/i);
+      if(_bWrap1) curFn = _bWrap1[1].trim() === '__' ? '' : _bWrap1[1].trim();
+      else if(_bWrap2) curFn = _bWrap2[1].trim();
+      /* افتح الـ picker مع prefill */
+      const fnEl = document.getElementById('limPickerFn');
+      if(fnEl) fnEl.value = curFn;
+      const result = await openLimPicker();
+      if(!result) return;
+      const {a: at, fn: pickedFn} = (typeof result === 'object') ? result : {a: result, fn: ''};
+      /* استخدم fn من الـ picker أو من البافر */
+      const finalFn = pickedFn || curFn || mkBuffer.trim() || '__';
+      if(finalFn && finalFn !== '__'){
+        mkBuffer = mkSettings.symMode
+          ? 'lim(' + finalFn + ',x,' + at + ')'
+          : 'حد ' + finalFn + ' عند x→' + at;
+      } else {
+        mkBuffer = mkSettings.symMode ? 'lim(__,x,' + at + ')' : 'حد __ عند x→' + at;
+      }
+      updatePreview();
+    });
+  })();
 
   /* ══════════════ الزوايا الشهيرة ══════════════ */
   const TRIG_TABLE = { '30':{sin:'1/2',cos:'√3/2',tan:'1/√3',cot:'√3'}, '45':{sin:'√2/2',cos:'√2/2',tan:'1',cot:'1'}, '60':{sin:'√3/2',cos:'1/2',tan:'√3',cot:'1/√3'}, '90':{sin:'1',cos:'0',tan:'∞',cot:'0'} };
@@ -13424,7 +14183,7 @@ function initEvents(){
     a.download='king-learn-log.txt';a.click();
   });
   document.getElementById('maxMsgsInp')?.addEventListener('change',function(){
-    S.maxMsgs=Math.max(50,Math.min(1000,+this.value||200));saveSettings();toast('✅',1000);
+    S.maxMsgs=Math.max(50,Math.min(2000,+this.value||500));saveSettings();toast('✅',1000);
   });
   bChk('chkDeepMode',function(){return S.deepMode||false;},function(v){S.deepMode=v;saveSettings();});
   bChk('chkAutoLearn2',function(){return DB.flags.autoLearn!==false;},function(v){DB.flags.autoLearn=v;saveDB();});
@@ -13544,7 +14303,7 @@ if(cc){
 }
 
 showScreen('chat');
-loadApiKey();loadGeminiKey();loadGoogleKey();_updateApiStatus();_updateGeminiStatus();_updateGoogleStatus();_syncAiEngineBtn();_updateNetBadge();_syncWebBtn();
+loadApiKey();loadGeminiKey();loadDeepSeekKey();loadGoogleKey();_updateApiStatus();_updateGeminiStatus();_updateGoogleStatus();_syncAiEngineBtn();_updateNetBadge();_syncWebBtn();
 updateStats();renderReminders();refreshCtxBar();applySettings();scheduleBackup();
 setTimeout(()=>{_viLoadSaved();_viUpdateNavBadge();if(_viSavedList.length)_viSyncAllToMemory();},300);
 setTimeout(refreshSugBar,500);
@@ -15152,7 +15911,7 @@ async function _callClaude(system, userMsg) {
         system: system,
         messages: [{ role: 'user', content: userMsg }]
       }),
-      signal: _makeSignal(20000)
+      signal: _makeSignal(45000)
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
@@ -15187,7 +15946,7 @@ async function _callGemini(prompt) {
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { maxOutputTokens: 1024, temperature: 0.65 }
         }),
-        signal: _makeSignal(20000)
+        signal: _makeSignal(45000)
       }
     );
     const data = await resp.json().catch(() => ({}));
@@ -15203,6 +15962,46 @@ async function _callGemini(prompt) {
   } catch (e) {
     if (e.name === 'TimeoutError' || e.name === 'AbortError')
       return { ok: false, err: 'انتهت مهلة الاتصال بـ Gemini (20 ثانية) — حاول مرة أخرى' };
+    return { ok: false, err: 'خطأ في الشبكة: ' + e.message };
+  }
+}
+
+/* DeepSeek API (OpenAI-compatible) */
+async function _callDeepSeek(system, userMsg) {
+  const key = getDeepSeekKey();
+  if (!key) return { ok: false, err: 'لم يتم إدخال مفتاح DeepSeek API — أضفه من الإعدادات' };
+  try {
+    const model = S.deepseekModel || 'deepseek-chat';
+    const resp = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 1024,
+        temperature: 0.65,
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: userMsg }
+        ]
+      }),
+      signal: _makeSignal(45000)
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      const m = data?.error?.message || ('خطأ ' + resp.status);
+      if (resp.status === 401) return { ok: false, err: 'مفتاح DeepSeek غير صحيح — تحقق منه في الإعدادات' };
+      if (resp.status === 429) return { ok: false, err: 'تجاوزت حد طلبات DeepSeek — انتظر قليلاً' };
+      return { ok: false, err: m.replace(/sk-[^\s"']*/g, '[KEY]') };
+    }
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (!text || text.length < 3) return { ok: false, err: 'DeepSeek لم يُرجع رداً — حاول مرة أخرى' };
+    return { ok: true, text: text, engine: 'deepseek' };
+  } catch (e) {
+    if (e.name === 'TimeoutError' || e.name === 'AbortError')
+      return { ok: false, err: 'انتهت مهلة الاتصال بـ DeepSeek (25 ثانية) — حاول مرة أخرى' };
     return { ok: false, err: 'خطأ في الشبكة: ' + e.message };
   }
 }
@@ -15308,7 +16107,7 @@ const LocalAI = (function () {
     });
     if (window.DB && DB.knowledge) {
       Object.entries(DB.knowledge).forEach(([k, v]) => {
-        var ans = v && (v.ans || (typeof v === 'string' ? v : null));
+        var ans = v && (v.answer || v.ans || (typeof v === 'string' ? v : null));
         if (ans && ans.length > 2) {
           var tokens = _tokenize(k + ' ' + ans);
           _allDocs.push({ tokens, answer: ans, key: k });
@@ -15369,8 +16168,11 @@ const LocalAI = (function () {
     _markov = {};
     var corpus = KB_BUILT.map(e => e[1]).join(' ');
     if (window.DB && DB.knowledge) {
-      Object.values(DB.knowledge).forEach(v => {
-        var a = v && (v.ans || (typeof v === 'string' ? v : ''));
+      var kbEntries = Object.values(DB.knowledge);
+      // تجنب بناء Markov ضخم عند قاعدة بيانات كبيرة — يأخذ ذاكرة ووقت كبير
+      var sample = kbEntries.length > 5000 ? kbEntries.slice(-3000) : kbEntries;
+      sample.forEach(v => {
+        var a = v && (v.answer || v.ans || (typeof v === 'string' ? v : ''));
         if (a) corpus += ' ' + a;
       });
     }
@@ -15469,14 +16271,25 @@ const LocalAI = (function () {
   /* ─── التعلم من المحادثة ─── */
   function _learn(q, a) {
     if (!q || !a || a.length < 4) return;
-    // أعد بناء الفهرس عند الإضافة التالية
-    _idfCache = null;
-    _allDocs  = null;
-    _markov   = null;
-    // احفظ في ذاكرة المستخدم
     var k = q.toLowerCase().trim().substring(0, 80);
     if (window.DB && DB.knowledge && !DB.knowledge[k]) {
       try { setKB(k, a.substring(0, 300), 0.82, 'local-ai-v3'); } catch(e) {}
+      // تحديث تدريجي للفهرس بدل إعادة البناء الكامل
+      if (_idfCache && _allDocs) {
+        var tokens = _tokenize(k + ' ' + a.substring(0, 300));
+        _allDocs.push({ tokens: tokens, answer: a.substring(0, 300), key: k });
+        var N = _allDocs.length;
+        var seen = new Set(tokens);
+        seen.forEach(function(t) {
+          var df = 0;
+          for (var i = 0; i < _allDocs.length; i++) {
+            if (_allDocs[i].tokens.indexOf(t) >= 0) df++;
+          }
+          _idfCache[t] = Math.log((N + 1) / (df + 1)) + 1;
+        });
+      } else {
+        _idfCache = null; _allDocs = null; _markov = null;
+      }
     }
   }
 
@@ -15724,19 +16537,56 @@ async function _aiProcess(question, rawData) {
     : 'السؤال: ' + question;
   const flatPrompt = sys + '\n\n' + userMsg;
 
+  /* ── وضع الذكاء المحلي: يعمل بدون أي مفتاح ── */
+  if (engine === 'local') {
+    /* جرب LocalAI أولاً */
+    try {
+      const la = LocalAI.answer(question);
+      if (la && la.answer && la.answer.trim().length > 2) {
+        return { ok: true, text: la.answer, engine: 'local', source: la.source || 'ذاكرة محلية', confidence: la.confidence };
+      }
+    } catch(e) {}
+    /* Gemini Nano إن وُجد */
+    if (typeof _nano !== 'undefined' && _nano.isEnabled && _nano.isEnabled()) {
+      try {
+        const nAns = await _nano.ask(question);
+        if (nAns && nAns.trim().length > 3) return { ok: true, text: nAns, engine: 'nano' };
+      } catch(e) {}
+    }
+    /* لا يوجد جواب — أظهر بطاقة "علّمني" */
+    return { text: null, engine: 'local', err: null, _askUser: true };
+  }
+
+  /* ── كل وضع يشتغل لحاله فقط ── */
   if (engine === 'claude') {
+    if (!getApiKey()) return { text: null, engine: 'claude', err: 'مفتاح Claude غير موجود — أضفه من الإعدادات ← API' };
     const r = await _callClaude(sys, userMsg);
     return r.ok ? r : { text: null, engine: 'claude', err: r.err };
   }
   if (engine === 'gemini') {
+    if (!getGeminiKey()) return { text: null, engine: 'gemini', err: 'مفتاح Gemini غير موجود — أضفه من الإعدادات ← API' };
     const r = await _callGemini(flatPrompt);
     return r.ok ? r : { text: null, engine: 'gemini', err: r.err };
   }
+  if (engine === 'deepseek') {
+    if (!getDeepSeekKey()) return { text: null, engine: 'deepseek', err: 'مفتاح DeepSeek غير موجود — أضفه من الإعدادات ← API' };
+    const r = await _callDeepSeek(sys, userMsg);
+    return r.ok ? r : { text: null, engine: 'deepseek', err: r.err };
+  }
+
+  /* ── الوضع التلقائي: جرب المتاح بالترتيب ── */
   if (getApiKey()) {
     const r = await _callClaude(sys, userMsg);
     if (r.ok) return r;
     if (r.err && (r.err.includes('غير صحيح') || r.err.includes('مفتاح'))) {
       return { text: null, engine: 'claude', err: r.err };
+    }
+  }
+  if (getDeepSeekKey()) {
+    const r = await _callDeepSeek(sys, userMsg);
+    if (r.ok) return r;
+    if (r.err && (r.err.includes('غير صحيح') || r.err.includes('مفتاح'))) {
+      return { text: null, engine: 'deepseek', err: r.err };
     }
   }
   if (getGeminiKey()) {
@@ -15773,7 +16623,9 @@ async function webSearch(q) {
   _forceWebSearch = false;
 
   let wikiData = null;
-  const needsSearch = S.webSearchEnabled && _isOnline() && q.length > 4;
+  /* ويكيبيديا والبحث الخارجي فقط في وضع Auto — باقي الأوضاع تعتمد على API مباشرة */
+  const isAutoMode = !S.aiEngine || S.aiEngine === 'auto';
+  const needsSearch = isAutoMode && S.webSearchEnabled && _isOnline() && q.length > 4;
 
   if (needsSearch) {
     wikiData = await Promise.race([
@@ -15912,7 +16764,7 @@ async function respondWithSearch(orig) {
 
   const loadEl = document.createElement('div');
   loadEl.className = 'message sys';
-  const _aiName = getApiKey() ? 'Claude' : getGeminiKey() ? 'Gemini' : 'AI';
+  const _aiName = getApiKey() ? 'Claude' : getDeepSeekKey() ? 'DeepSeek' : getGeminiKey() ? 'Gemini' : 'AI';
   loadEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> ' + _aiName +
     (S.webSearchEnabled ? ' + بحث ذكي...' : ' يفكر...');
   cc.appendChild(loadEl); cc.scrollTop = cc.scrollHeight;
@@ -15922,8 +16774,32 @@ async function respondWithSearch(orig) {
     try { loadEl.remove(); } catch (e) {}
 
     if (!result || result._failed) {
-      const errMsg = (result && result._err) || 'تعذّر الحصول على إجابة';
-      _showErr(errMsg, cc);
+      const errMsg = (result && result._err) || '';
+      /* في وضع محلي — أظهر بطاقة "علّمني" بدل رسالة الخطأ */
+      if ((S.aiEngine === 'local') || (!errMsg && !result)) {
+        const bot0 = document.createElement('div'); bot0.className = 'message bot';
+        const uc = document.createElement('div'); uc.className = 'unknown-card';
+        uc.innerHTML = '<i class="fas fa-brain"></i> لم أجد جواباً في ذاكرتي. <strong>علّمني الجواب:</strong>';
+        const qw = document.createElement('div'); qw.style.cssText = 'display:flex;gap:6px;margin-top:8px';
+        const qi = document.createElement('input'); qi.className = 'form-input';
+        qi.style.cssText = 'flex:1;margin:0'; qi.placeholder = 'اكتب الجواب الصحيح...';
+        const qb = document.createElement('button'); qb.className = 'send-btn';
+        qb.style.cssText = 'width:34px;height:34px;flex-shrink:0';
+        qb.innerHTML = '<i class="fas fa-check"></i>';
+        qb.addEventListener('click', () => {
+          const a = qi.value.trim(); if (!a) return;
+          setKB(orig, a, .98, 'user-teach'); updateCtx(orig, a, a);
+          try { LocalAI.learn(orig, a); } catch(e) {}
+          qw.innerHTML = '<div class="learn-badge"><i class="fas fa-check-circle"></i> تعلمت: ' + esc(a) + '</div>';
+          saveDB(); updateStats(); _lastUnanswered = null;
+        });
+        qi.addEventListener('keypress', e => { if (e.key === 'Enter') qb.click(); });
+        qw.append(qi, qb); bot0.append(uc, qw);
+        cc.appendChild(bot0); cc.scrollTop = cc.scrollHeight;
+        setAvatar('idle'); if(inp){inp.disabled=false; if(S.autoFocus)inp.focus();}
+        return;
+      }
+      if (errMsg) _showErr(errMsg, cc);
       const localRes = respond(orig);
       if (localRes && !localRes._notFound) {
         const localBot = buildBotMessage(localRes, orig);
@@ -17259,6 +18135,12 @@ window._vidAiOpen = _vidAiOpen;
     el.innerHTML = [..._hist].reverse().map((h,i)=>{
       const ico = icons[h.type]||'🔢';
       const d = new Date(h.t); const ts = d.getHours()+':'+(d.getMinutes()+'').padStart(2,'0');
+      const _steps = (window._mkLastSteps && window._mkLastSteps[h.expr]) || [];
+      const _stepsHtml = _steps.length && h.type==='calculus'
+        ? `<div style="font-size:10px;color:var(--text3);margin-top:4px;border-top:1px solid var(--border);padding-top:4px;line-height:1.7;white-space:normal;direction:rtl">` 
+          + _steps.slice(0,-1).map(s=>'<div>'+s+'</div>').join('') 
+          + '</div>'
+        : '';
       return `<div onclick="mkHistUse(${_hist.length-1-i})" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;cursor:pointer;transition:var(--trans)" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <span style="font-size:10px;color:var(--text3)">${ico} ${ts}</span>
@@ -17266,6 +18148,7 @@ window._vidAiOpen = _vidAiOpen;
         </div>
         <div style="font-size:11px;color:var(--text2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">${h.expr}</div>
         <div style="font-size:13px;font-weight:700;color:var(--gold);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" dir="ltr">= ${h.ans}</div>
+        ${_stepsHtml}
       </div>`;
     }).join('');
   }
@@ -22384,6 +23267,37 @@ document.addEventListener('DOMContentLoaded',()=>{
     </div><!-- /kt-body -->
   </div><!-- /kt-sheet -->
 </div><!-- /kingTranslateModal -->
+
+<!-- ══ Lim Picker Dialog ══ -->
+<div id="limPickerOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;align-items:center;justify-content:center;">
+  <div style="background:#13111e;border:1px solid rgba(201,149,42,.5);border-radius:20px;padding:20px 18px 16px;width:min(320px,92vw);box-shadow:0 12px 48px rgba(0,0,0,.8),0 0 0 1px rgba(201,149,42,.1);font-family:inherit;">
+    <div style="font-size:.78rem;color:rgba(201,149,42,.7);font-weight:900;margin-bottom:14px;text-align:center;letter-spacing:.08em;text-transform:uppercase;">⧸ حد النهاية</div>
+    <!-- F(x) input -->
+    <div style="margin-bottom:11px;">
+      <div style="font-size:.65rem;color:rgba(255,255,255,.35);margin-bottom:5px;letter-spacing:.05em;">F(x) = الدالة</div>
+      <input id="limPickerFn" type="text" inputmode="text" placeholder="مثال: sin(x)/x  أو  x^2-1" value=""
+        style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(201,149,42,.25);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;font-family:'Courier New',monospace;outline:none;text-align:left;direction:ltr;" />
+    </div>
+    <!-- a= input -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:.65rem;color:rgba(255,255,255,.35);margin-bottom:5px;letter-spacing:.05em;">x → النهاية عند</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;">
+        <button class="lim-pick-btn" data-val="∞"  style="flex:1;min-width:44px;padding:9px 4px;border-radius:10px;border:1px solid rgba(201,149,42,.25);background:rgba(201,149,42,.08);color:#f0c84e;font-size:1.1rem;font-weight:800;cursor:pointer;transition:.12s;">∞</button>
+        <button class="lim-pick-btn" data-val="-∞" style="flex:1;min-width:44px;padding:9px 4px;border-radius:10px;border:1px solid rgba(96,217,250,.2);background:rgba(96,217,250,.06);color:#60d9fa;font-size:1.1rem;font-weight:800;cursor:pointer;transition:.12s;">-∞</button>
+        <button class="lim-pick-btn" data-val="0"  style="flex:1;min-width:44px;padding:9px 4px;border-radius:10px;border:1px solid rgba(52,211,153,.2);background:rgba(52,211,153,.06);color:#34d399;font-size:1.1rem;font-weight:800;cursor:pointer;transition:.12s;">0</button>
+        <button class="lim-pick-btn" data-val="1"  style="flex:1;min-width:44px;padding:9px 4px;border-radius:10px;border:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.06);color:#a78bfa;font-size:1.1rem;font-weight:800;cursor:pointer;transition:.12s;">1</button>
+        <button class="lim-pick-btn" data-val="-1" style="flex:1;min-width:44px;padding:9px 4px;border-radius:10px;border:1px solid rgba(248,113,113,.2);background:rgba(248,113,113,.06);color:#f87171;font-size:1rem;font-weight:800;cursor:pointer;transition:.12s;">-1</button>
+        <button class="lim-pick-btn" data-val="π"  style="flex:1;min-width:44px;padding:9px 4px;border-radius:10px;border:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.06);color:#c4b5fd;font-size:1rem;font-weight:800;cursor:pointer;transition:.12s;">π</button>
+      </div>
+      <input id="limPickerInput" type="text" inputmode="numeric" placeholder="أو أدخل رقماً..." value=""
+        style="width:100%;box-sizing:border-box;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;font-family:inherit;outline:none;text-align:center;" />
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button id="limPickerCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:transparent;color:rgba(255,255,255,.4);font-size:.8rem;cursor:pointer;font-family:inherit;">إلغاء</button>
+      <button id="limPickerOk" style="flex:2;padding:10px;border-radius:12px;border:none;background:linear-gradient(135deg,#c9952a,#e8b84b);color:#000;font-size:.85rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 2px 12px rgba(201,149,42,.3);">حساب النهاية ←</button>
+    </div>
+  </div>
+</div>
 </body>
 <script>
 /* ══════════════════════════════════════════════════════════════════
