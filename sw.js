@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   👑 The King AI — Service Worker v25.0
+   👑 The King AI — Service Worker v26.0
    Developed by: Murhaf Hassan
    © 2025 All Rights Reserved
    ✅ يعمل بدون إنترنت بعد أول تحميل
@@ -8,7 +8,7 @@
    ✅ مزامنة في الخلفية (Background Sync)
 ═══════════════════════════════════════════════════════════════ */
 
-const VER    = 'king-ai-v25.0';
+const VER    = 'king-ai-v26.0';
 const SCOPE  = self.registration.scope;
 
 /* ════════════════════════════════════════════
@@ -28,6 +28,8 @@ const CDN_CACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.woff2',
   'https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.min.js',
+  'https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
 ];
 
 /* ════════════════════════════════════════════
@@ -506,4 +508,4 @@ self.addEventListener('periodicsync', e => {
 /* ─── ابدأ الفحص فور تحميل السيرفس ووركر ─── */
 _startBgAlarmChecker();
 
-console.info('[SW] 👑 King AI Service Worker v25.0 — Ready');
+console.info('[SW] 👑 King AI Service Worker v26.0 — Ready');
