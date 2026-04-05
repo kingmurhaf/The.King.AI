@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   👑 The King AI — Service Worker v26.0
+   👑 The King AI — Service Worker v27.0
    Developed by: Murhaf Hassan
    © 2025 All Rights Reserved
    ✅ يعمل بدون إنترنت بعد أول تحميل
@@ -8,7 +8,7 @@
    ✅ مزامنة في الخلفية (Background Sync)
 ═══════════════════════════════════════════════════════════════ */
 
-const VER    = 'king-ai-v26.0';
+const VER    = 'king-ai-v27.0';
 const SCOPE  = self.registration.scope;
 
 /* ════════════════════════════════════════════
@@ -24,6 +24,9 @@ const PRECACHE_URLS = [
   './apple-touch-icon.png',
 ];
 
+/* CDN_CACHE — مكتبات خارجية تُخزَّن عند أول اتصال بالإنترنت
+   ملاحظة: إذا فشل التحميل عند التثبيت (لا إنترنت)، يُعاد
+   المحاولة تلقائياً عند أول طلب ناجح عبر الـ fetch handler */
 const CDN_CACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.woff2',
@@ -31,6 +34,9 @@ const CDN_CACHE = [
   'https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.js',
   'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
 ];
+
+/* قائمة CDN لإعادة المحاولة عند fetch (تُملأ عند فشل التثبيت) */
+const _pendingCdn = new Set();
 
 /* ════════════════════════════════════════════
    ⏰ إدارة المنبهات في الخلفية
@@ -193,8 +199,14 @@ self.addEventListener('install', e => {
       for (const url of CDN_CACHE) {
         try {
           const resp = await fetch(url, { mode: 'cors' });
-          if (resp.ok) await cache.put(url, resp);
+          if (resp.ok) {
+            await cache.put(url, resp);
+          } else {
+            _pendingCdn.add(url);
+            console.warn('[SW] precache miss (cdn):', url);
+          }
         } catch(err) {
+          _pendingCdn.add(url); // إعادة المحاولة لاحقاً عند fetch
           console.warn('[SW] precache miss (cdn):', url);
         }
       }
@@ -306,11 +318,33 @@ self.addEventListener('fetch', e => {
     e.respondWith(
       caches.open(VER).then(cache =>
         cache.match(e.request).then(cached => {
-          if (cached) return cached;
+          if (cached) {
+            /* إذا نجح التحميل من cache، حاول تحديثه في الخلفية */
+            fetch(e.request).then(resp => {
+              if (resp && resp.status === 200) cache.put(e.request, resp.clone());
+              /* بعد كل طلب ناجح، خزّن أي CDN فشل سابقاً */
+              if (_pendingCdn.size > 0) {
+                _pendingCdn.forEach(cdnUrl => {
+                  fetch(cdnUrl, { mode: 'cors' }).then(r => {
+                    if (r && r.ok) { cache.put(cdnUrl, r); _pendingCdn.delete(cdnUrl); }
+                  }).catch(() => {});
+                });
+              }
+            }).catch(() => {});
+            return cached;
+          }
           return fetch(e.request)
             .then(resp => {
               if (resp && resp.status === 200) {
                 cache.put(e.request, resp.clone());
+                /* محاولة تخزين CDN المعلّق بعد أي طلب ناجح */
+                if (_pendingCdn.size > 0) {
+                  _pendingCdn.forEach(cdnUrl => {
+                    fetch(cdnUrl, { mode: 'cors' }).then(r => {
+                      if (r && r.ok) { cache.put(cdnUrl, r); _pendingCdn.delete(cdnUrl); }
+                    }).catch(() => {});
+                  });
+                }
               }
               return resp;
             })
@@ -508,4 +542,4 @@ self.addEventListener('periodicsync', e => {
 /* ─── ابدأ الفحص فور تحميل السيرفس ووركر ─── */
 _startBgAlarmChecker();
 
-console.info('[SW] 👑 King AI Service Worker v26.0 — Ready');
+console.info('[SW] 👑 King AI Service Worker v27.0 — Ready');

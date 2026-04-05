@@ -3,42 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta http-equiv="Content-Security-Policy" content="
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval'
-    https://cdnjs.cloudflare.com
-    https://cdn.jsdelivr.net
-    https://unpkg.com
-    blob:;
-  style-src 'self' 'unsafe-inline'
-    https://cdnjs.cloudflare.com
-    https://fonts.googleapis.com;
-  font-src 'self'
-    https://cdnjs.cloudflare.com
-    https://fonts.gstatic.com
-    https://cdn.jsdelivr.net
-    https://unpkg.com
-    data:;
-  img-src 'self' data: blob:
-    https://cdnjs.cloudflare.com
-    https://www.google.com
-    https://www.gstatic.com;
-  frame-src
-    https://www.youtube-nocookie.com
-    https://www.youtube.com;
-  connect-src 'self'
-    https://api.anthropic.com
-    https://generativelanguage.googleapis.com
-    https://api.openai.com
-    https://api.deepseek.com
-    https://serper.dev
-    https://duckduckgo.com
-    https://cdnjs.cloudflare.com
-    https://cdn.jsdelivr.net;
-  worker-src 'self' blob:;
-  object-src 'none';
-  base-uri 'self';
-"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com blob:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com data:; img-src 'self' data: blob: https:; frame-src https://www.youtube-nocookie.com https://www.youtube.com; connect-src 'self' https://api.anthropic.com https://generativelanguage.googleapis.com https://api.deepseek.com https://google.serper.dev https://api.duckduckgo.com https://html.duckduckgo.com https://en.wikipedia.org https://ar.wikipedia.org https://commons.wikimedia.org https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.aladhan.com https://aladhan.com https://api.dictionaryapi.dev https://api.mymemory.translated.net https://libretranslate.de https://lingva.ml https://translate.googleapis.com https://open.er-api.com https://corsproxy.io https://api.allorigins.win https://api.ocr.space https://invidious.fdn.fr https://invidious.darkness.services https://inv.nadeko.net https://iv.ggtyler.dev https://invidious.io https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com blob:; worker-src 'self' blob:;"/>
 <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
 <title>👑 The King AI</title>
@@ -196,7 +161,35 @@ src:local('Font Awesome 6 Brands Regular'),url('https://cdnjs.cloudflare.com/aja
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png"/>
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"/>
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"/>
-<script src="https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.js"></script>
+<script>
+/* تحميل Algebrite مع دعم offline عبر Service Worker cache */
+(function(){
+  function _loadAlgebriteFromBlob(code){
+    try{
+      var b=new Blob([code],{type:'application/javascript'});
+      var u=URL.createObjectURL(b);
+      var s=document.createElement('script');
+      s.src=u;
+      s.onload=function(){URL.revokeObjectURL(u);};
+      s.onerror=function(){URL.revokeObjectURL(u);window._algebriteOffline=true;};
+      document.head.appendChild(s);
+    }catch(e){window._algebriteOffline=true;}
+  }
+  var sc=document.createElement('script');
+  sc.src='https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.js';
+  sc.onerror=function(){
+    /* حاول من cache الـ Service Worker */
+    if('caches' in window){
+      caches.match('https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.js')
+        .then(function(r){
+          if(r){r.text().then(_loadAlgebriteFromBlob);}
+          else{window._algebriteOffline=true;}
+        }).catch(function(){window._algebriteOffline=true;});
+    } else {window._algebriteOffline=true;}
+  };
+  document.head.appendChild(sc);
+})();
+</script>
 <style>
 
 
@@ -641,6 +634,14 @@ body.fs-xl  { font-size:19px; }
 .conflict-btns .cbtn-old:hover { background:rgba(74,222,128,.12); color:#4ade80; border-color:#4ade80; }
 .conflict-btns .cbtn-new:hover { background:rgba(251,191,36,.12); color:var(--gold); border-color:var(--gold); }
 
+/* ─── ASK-USER BOX — وضع محلي بلا إجابة ─── */
+.ask-user-box{margin-top:6px;padding:10px 12px;background:rgba(74,222,128,.05);border:1px dashed rgba(74,222,128,.3);border-radius:12px;font-size:.75rem;}
+.ask-user-box .aub-hint{color:#4ade80;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.ask-user-box textarea{width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;line-height:1.6;padding:8px 10px;resize:none;min-height:72px;outline:none;transition:border-color .2s;}
+.ask-user-box textarea:focus{border-color:#4ade80;}
+.ask-user-box .aub-save{margin-top:7px;width:100%;padding:8px;background:rgba(74,222,128,.15);border:1px solid #4ade80;border-radius:8px;color:#4ade80;font-weight:700;font-size:.8rem;cursor:pointer;transition:var(--trans);font-family:inherit;}
+.ask-user-box .aub-save:hover{background:rgba(74,222,128,.28);}
+
 /* ─── SIMPLE ANSWER — الوضع العادي ─── */
 .simple-ans {
   font-size:1.12rem; font-weight:700; color:var(--text);
@@ -688,6 +689,18 @@ body.fs-xl  { font-size:19px; }
   font-size:.6875rem; padding:3px 10px; border-radius:20px;
   margin-top:5px; font-weight:700;
 }
+
+/* زر حفظ الجواب الإنترنت للاستخدام أوفلاين */
+.save-offline-btn {
+  display:inline-flex; align-items:center; gap:4px;
+  background:transparent; color:var(--text3);
+  border:1px solid var(--border); border-radius:20px;
+  font-size:.62rem; padding:2px 9px; margin-top:5px;
+  font-weight:700; cursor:pointer; font-family:inherit;
+  transition:color .2s, border-color .2s, background .2s;
+}
+.save-offline-btn:hover { color:var(--gold); border-color:var(--gold); background:rgba(251,191,36,.07); }
+
 
 /* typing keyframes & spans kept here; block definition merged below */
 .typing span {
@@ -4425,6 +4438,10 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
             <div class="act-icon" style="background:rgba(148,163,184,.12);color:#94a3b8;border:1px solid rgba(148,163,184,.2)"><svg viewBox="0 0 24 24" fill="currentColor" style="width:1em;height:1em"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div>
             <span class="act-label" style="color:#94a3b8">ويكي</span>
           </button>
+          <button class="act-btn act-btn-search" id="chromeSearchBtn">
+            <div class="act-icon" style="background:linear-gradient(135deg,rgba(66,133,244,.18),rgba(52,168,83,.12));color:#4285f4;border:1px solid rgba(66,133,244,.3)"><svg viewBox="0 0 24 24" fill="currentColor" style="width:1em;height:1em"><circle cx="12" cy="12" r="4" fill="#4285f4"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#34a853" opacity=".6"/><path d="M12 8h8.93A10 10 0 0112 2v6z" fill="#ea4335" opacity=".8"/><path d="M3.07 8H12V2A10 10 0 003.07 8z" fill="#fbbc04" opacity=".8"/></svg></div>
+            <span class="act-label" style="color:#4285f4">كروم</span>
+          </button>
         </div>
 
         <!-- ══ القسم 2: الأدوات الرئيسية ══ -->
@@ -6570,8 +6587,8 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
   <div class="bot-nav">
     <div class="nav-i on" data-sc="chat" role="button" tabindex="0" aria-label="محادثة"><div class="nav-icon"><i class="fas fa-comment-dots"></i></div><span>محادثة</span></div>
     <div class="nav-i" data-sc="memory" role="button" tabindex="0" aria-label="ذاكرة"><div class="nav-icon"><i class="fas fa-database"></i></div><span>ذاكرة</span></div>
-    <!-- صوت بدل يوتيوب في شريط التنقل -->
-    <div class="nav-i" id="navMicBtn" role="button" tabindex="0" aria-label="صوت"><div class="nav-icon" style="background:rgba(239,68,68,.12)"><i class="fas fa-microphone" style="color:#f87171"></i></div><span style="color:#f87171">صوت</span></div>
+    <!-- يوتيوب في شريط التنقل -->
+    <div class="nav-i" id="navYTBtn" data-sc="videos" role="button" tabindex="0" aria-label="يوتيوب"><div class="nav-icon" style="background:rgba(255,40,40,.14)"><i class="fab fa-youtube" style="color:#ff3333;font-size:1.05rem"></i></div><span style="color:#ff4444">يوتيوب</span></div>
     <div class="nav-i" data-sc="reminders" role="button" tabindex="0" aria-label="تذكيرات"><div class="nav-icon"><i class="fas fa-bell"></i></div><span>تذكيرات</span></div>
     <div class="nav-i" id="calcNavBtn" role="button" tabindex="0" aria-label="حاسبة"><div class="nav-icon" style="background:var(--gold-dim)"><i class="fas fa-calculator" style="color:var(--gold)"></i></div><span style="color:var(--gold)">حاسبة</span></div>
     <div class="nav-i" data-sc="settings" role="button" tabindex="0" aria-label="إعدادات"><div class="nav-icon"><i class="fas fa-sliders-h"></i></div><span>إعدادات</span></div>
@@ -6680,7 +6697,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
         <span style="color:var(--gold)"><i class="fas fa-bell"></i> <span id="remSumActive">0</span> نشط</span>
         <span style="color:#a78bfa"><i class="fas fa-redo"></i> <span id="remSumRoutine">0</span> روتين</span>
         <span style="color:#ef4444" id="remSumUrgent" style="display:none"><i class="fas fa-exclamation-circle"></i> <span id="remSumUrgentN">0</span> عاجل</span>
-        <span style="color:#22c55e"><i class="fas fa-check-circle"></i> <span id="remSumDone">0</span>/<span id="remSumTotal">0</span> ✓</span>
+        <span style="color:#22c55e"><i class="fas fa-check-circle"></i> <span id="remSumDone2">0</span>/<span id="remSumTotal2">0</span> ✓</span>
         <span style="color:var(--text3)" id="remSumDate"></span>
       </div>
     </div>
@@ -6918,7 +6935,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
       <div style="margin-top:12px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <span style="font-size:12px;color:var(--text2);font-weight:700"><i class="fas fa-redo" style="color:var(--gold)"></i> التكرار</span>
-          <select id="alarmRepeatSel" class="form-select" style="font-size:11px;padding:4px 8px;border-radius:8px;height:auto;width:auto;margin:0">
+          <select id="alarmRepeatSelModal" class="form-select" style="font-size:11px;padding:4px 8px;border-radius:8px;height:auto;width:auto;margin:0">
             <option value="3">3 مرات</option>
             <option value="5" selected>5 مرات</option>
             <option value="10">10 مرات</option>
@@ -6930,8 +6947,8 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:12px">
         <span style="font-size:12px;color:var(--text2);font-weight:700"><i class="fas fa-mobile" style="color:var(--gold)"></i> اهتزاز مع التنبيه</span>
         <label style="position:relative;width:42px;height:22px;flex-shrink:0">
-          <input type="checkbox" id="chkVibrateNotif" checked style="opacity:0;width:0;height:0;position:absolute">
-          <span style="position:absolute;inset:0;background:rgba(255,255,255,.12);border-radius:22px;cursor:pointer;transition:.25s" onclick="this.style.background=document.getElementById('chkVibrateNotif').checked?'rgba(255,255,255,.12)':'var(--gold)';document.getElementById('chkVibrateNotif').checked=!document.getElementById('chkVibrateNotif').checked"></span>
+          <input type="checkbox" id="chkVibrateModal" checked style="opacity:0;width:0;height:0;position:absolute">
+          <span style="position:absolute;inset:0;background:rgba(255,255,255,.12);border-radius:22px;cursor:pointer;transition:.25s" onclick="this.style.background=document.getElementById('chkVibrateModal').checked?'rgba(255,255,255,.12)':'var(--gold)';document.getElementById('chkVibrateModal').checked=!document.getElementById('chkVibrateModal').checked"></span>
         </label>
       </div>
       <button onclick="document.getElementById('remToneModal').style.display='none';_remSaveToneSettings()" style="width:100%;margin-top:14px;padding:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:#000;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit">
@@ -7491,7 +7508,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
       <div class="card">
         <div class="card-title"><i class="fas fa-database"></i> إدارة الذاكرة</div>
         <div class="btn-row" style="flex-wrap:wrap">
-          <button class="btn" id="mergeBtn"><i class="fas fa-compress-alt"></i> دمج المتشابهات</button>
+          <button class="btn" id="mergeBtn2"><i class="fas fa-compress-alt"></i> دمج المتشابهات</button>
           <button class="btn" id="expJsonBtn4"><i class="fas fa-download"></i> تصدير كامل</button>
           <button class="btn" id="expTxtBtn3"><i class="fas fa-file-alt"></i> تصدير نص</button>
           <button class="btn" id="expCsvBtn4"><i class="fas fa-table"></i> CSV</button>
@@ -7513,7 +7530,7 @@ body.compact-msgs .message{padding:7px 11px;font-size:.875rem;}
       <div class="card" style="border-color:rgba(239,68,68,.3)">
         <div class="card-title" style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i> منطقة الخطر</div>
         <div class="btn-row">
-          <button class="btn danger" id="resetMemBtn"><i class="fas fa-trash-alt"></i> إعادة ضبط الذاكرة</button>
+          <button class="btn danger" id="resetMemBtn2"><i class="fas fa-trash-alt"></i> إعادة ضبط الذاكرة</button>
           <button class="btn danger" id="clrAllBtn"><i class="fas fa-bomb"></i> مسح كل البيانات</button>
         </div>
         <p class="form-meta" style="color:var(--red);margin-top:6px">⚠️ لا يمكن التراجع عن هذه العمليات</p>
@@ -8130,7 +8147,9 @@ let S={
 
 
 /* ═══ API KEY STORE ═══ */
-const AK='KAI_v24_API';
+const AK='KAI_v27_API';
+/* migration: ترحيل المفتاح من الإصدار القديم إذا وُجد */
+(()=>{try{const old=localStorage.getItem('KAI_v24_API');if(old&&!localStorage.getItem(AK)){localStorage.setItem(AK,old);localStorage.removeItem('KAI_v24_API');}}catch(e){}})();
 let _apiKey='';
 /* ── AES-GCM Encryption (256-bit, per-device key) ── */
 /* يستخدم Web Crypto API — تشفير حقيقي بدلاً من XOR */
@@ -8814,25 +8833,35 @@ function _attachPendingConflict(botEl){
   if(!_pendingConflict) return;
   const {question,oldAns,newAns,nk,conf,reason} = _pendingConflict;
   _pendingConflict = null;
-  const snippet = oldAns.length>55 ? oldAns.substring(0,55)+'…' : oldAns;
   const notice = document.createElement('div');
   notice.className = 'conflict-notice';
-  notice.innerHTML =
-    '<div class="conflict-hint">⚠️ يوجد جواب محفوظ: <em>'+esc(snippet)+'</em></div>'
-   +'<div class="conflict-btns">'
-   +'<button class="cbtn-old">ابقَ على القديم</button>'
-   +'<button class="cbtn-new">احفظ الجديد</button>'
-   +'</div>';
-  notice.querySelector('.cbtn-old').addEventListener('click',()=>{
+  /* بناء واجهة مقارنة واضحة — قديم vs جديد */
+  const _os = oldAns.length>110 ? oldAns.substring(0,110)+'…' : oldAns;
+  const _ns = newAns.length>110 ? newAns.substring(0,110)+'…' : newAns;
+  const _ch = document.createElement('div');
+  _ch.className='conflict-hint';
+  _ch.innerHTML='⚖️ <strong>توجد إجابة محفوظة — أيهما تحفظ؟</strong>';
+  notice.appendChild(_ch);
+  const _cg=document.createElement('div');
+  _cg.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:7px 0';
+  const _mk=(lbl,col,txt)=>{const c=document.createElement('div');c.style.cssText=`padding:7px 9px;border-radius:8px;border:1px solid ${col}33;background:${col}08;font-size:.67rem;line-height:1.55;color:var(--text2)`;c.innerHTML=`<div style="color:${col};font-weight:800;font-size:.63rem;margin-bottom:3px">${lbl}</div>`+esc(txt);return c;};
+  _cg.appendChild(_mk('📌 القديم','#4ade80',_os));
+  _cg.appendChild(_mk('✨ الجديد','#e8b84b',_ns));
+  notice.appendChild(_cg);
+  const _cb=document.createElement('div');_cb.className='conflict-btns';
+  const _bo=document.createElement('button');_bo.className='cbtn-old';_bo.innerHTML='✅ ابقَ على القديم';
+  const _bn=document.createElement('button');_bn.className='cbtn-new';_bn.innerHTML='💾 احفظ الجديد';
+  _cb.append(_bo,_bn);notice.appendChild(_cb);
+  _bo.addEventListener('click',()=>{
     DB.knowledge[nk].confidence=Math.min(1,(DB.knowledge[nk].confidence||.75)+.05);
     saveDB();
     notice.innerHTML='<span style="color:#4ade80;font-size:.72rem">✓ تم الإبقاء على الجواب الأصلي</span>';
-    setTimeout(()=>notice.remove(),2200);
+    setTimeout(()=>notice.remove(),2500);
   });
-  notice.querySelector('.cbtn-new').addEventListener('click',()=>{
+  _bn.addEventListener('click',()=>{
     setKB(question,newAns,conf,reason,true);
     notice.innerHTML='<span style="color:var(--gold);font-size:.72rem">✓ تم حفظ الجواب الجديد</span>';
-    setTimeout(()=>notice.remove(),2200);
+    setTimeout(()=>notice.remove(),2500);
   });
   botEl.appendChild(notice);
 }
@@ -8953,6 +8982,7 @@ const MathEngine = (function(){
 const ALG = {
   _ready: false,
   init(){
+    if(window._algebriteOffline){ this._ready=false; return false; }
     try{ if(typeof Algebrite!=='undefined'){ this._ready=true; } }catch(e){}
     return this._ready;
   },
@@ -11779,7 +11809,38 @@ async function respondClaudeDirect(orig){
     }
     const aiResult=await _aiProcess(orig,null);
     try{loadEl.remove();}catch(e){}
-    if(!aiResult.text){sysMsg('<i class="fas fa-exclamation-triangle"></i> تعذّر الحصول على رد — تحقق من المفتاح والاتصال');return;}
+    if(!aiResult.text){
+      if(aiResult._askUser){
+        /* وضع محلي: لم تُوجد إجابة — اطلب من المستخدم كتابتها */
+        const bot=document.createElement('div');bot.className='message bot';
+        const badge=document.createElement('div');badge.className='ans-badge learn';
+        badge.innerHTML='🧠 ذكاء محلي — لم تُوجد إجابة';
+        bot.appendChild(badge);
+        const box=document.createElement('div');box.className='ask-user-box';
+        box.innerHTML='<div class="aub-hint"><i class="fas fa-pencil-alt"></i> اكتب الإجابة لأحفظها في الذاكرة:</div>';
+        const ta=document.createElement('textarea');
+        ta.placeholder='اكتب الإجابة هنا...';ta.setAttribute('inputmode','text');
+        const btn=document.createElement('button');btn.className='aub-save';
+        btn.innerHTML='<i class="fas fa-save"></i> حفظ في الذاكرة المحلية';
+        btn.addEventListener('click',()=>{
+          const ans=ta.value.trim();if(!ans)return;
+          setKB(orig,ans,0.95,'user-teach',true);
+          try{LocalAI.learn(orig,ans);}catch(e){}
+          DB.history.push({user:orig,bot:ans,t:Date.now()});
+          if(DB.history.length>S.maxMsgs)DB.history.shift();
+          saveDB();updateStats();
+          box.innerHTML='<div class="aub-hint" style="color:#4ade80"><i class="fas fa-check-circle"></i> تم الحفظ ✓</div><div style="font-size:.78rem;color:var(--text2);margin-top:4px">'+esc(ans)+'</div>';
+          toast('<i class="fas fa-database"></i> تم حفظ الإجابة في الذاكرة');
+        });
+        ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey)btn.click();});
+        box.append(ta,btn);bot.appendChild(box);
+        cc.appendChild(bot);cc.scrollTop=cc.scrollHeight;
+        ta.focus();
+      } else {
+        sysMsg('<i class="fas fa-exclamation-triangle"></i> تعذّر الحصول على رد — تحقق من المفتاح والاتصال');
+      }
+      return;
+    }
     const bot=document.createElement('div');bot.className='message bot';
     const badge=document.createElement('div');
     badge.className='ans-badge '+(aiResult.engine==='gemini'?'gemini':aiResult.engine==='deepseek'?'deepseek':aiResult.engine==='claude'?'claude':'fact');
@@ -11809,12 +11870,12 @@ async function respondClaudeDirect(orig){
      {ic:'<i class="fas fa-copy"></i>',tt:'نسخ',fn:()=>{copyTxt(_a);closePop();}}]
     .forEach(({ic,fn})=>{const b=document.createElement('button');b.innerHTML=ic;b.addEventListener('click',e=>{e.stopPropagation();fn();});pop.appendChild(b);});
     trig.addEventListener('click',e=>{e.stopPropagation();const on=pop.classList.contains('on');if(!on)closePop();pop.classList.toggle('on',!on);_openPop=!on?pop:null;});
-    tw.append(trig,pop);foot.appendChild(tw);bot.appendChild(foot);
+    tw.append(trig,pop);foot.appendChild(tw);
+    foot.appendChild(_makeSaveBtn(orig, aiResult.text));
+    bot.appendChild(foot);
     cc.appendChild(bot);cc.scrollTop=cc.scrollHeight;
-    setKB(orig,aiResult.text.substring(0,300),.88,'ai-direct');
-    updateCtx(orig,aiResult.text.substring(0,300),orig);
-    try{LocalAI.learn(orig,aiResult.text.substring(0,300));}catch(e){}
-    DB.history.push({user:orig,bot:aiResult.text.substring(0,300),t:Date.now()});
+    updateCtx(orig,aiResult.text.substring(0,800),orig);
+    DB.history.push({user:orig,bot:aiResult.text.substring(0,800),t:Date.now()});
     if(DB.history.length>S.maxMsgs)DB.history.shift();
     saveDB();updateStats();
     if(S.autoSpeak)speak(aiResult.text);
@@ -12780,6 +12841,7 @@ function renderReminders() {
   const total = reminders.length;
   document.getElementById('remSumActive')  && (document.getElementById('remSumActive').textContent = active);
   document.getElementById('remSumDone')    && (document.getElementById('remSumDone').textContent = done);
+  document.getElementById('remSumDone2')   && (document.getElementById('remSumDone2').textContent = done);
   document.getElementById('remSumRoutine') && (document.getElementById('remSumRoutine').textContent = routine);
   const pct = total ? Math.round((done / total) * 100) : 0;
   const fill = document.getElementById('remProgressFill');
@@ -16333,28 +16395,14 @@ function initEvents(){
     }
   })();
 
-  /* ── صوت في شريط التنقل السفلي ── */
+  /* ── يوتيوب في شريط التنقل السفلي ── */
   (function(){
-    const navMic=document.getElementById('navMicBtn');
-    if(!navMic) return;
-    if('SpeechRecognition' in window||'webkitSpeechRecognition' in window){
-      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      const recN=new SR();recN.lang='ar-SA';recN.interimResults=false;recN.maxAlternatives=1;
-      navMic.addEventListener('click',()=>{
-        try{recN.start();}catch(e){}
-        toast('⊙ استماع...');
-        navMic.querySelector('.nav-icon').style.background='rgba(239,68,68,.3)';
-      });
-      recN.onresult=e=>{
-        const i=document.getElementById('userInput');
-        if(i){i.value=e.results[0][0].transcript;if(S.enterSend)setTimeout(send,100);else i.focus();}
-        navMic.querySelector('.nav-icon').style.background='';
-      };
-      recN.onerror=e=>{toast('✕ خطأ مايك: '+e.error);navMic.querySelector('.nav-icon').style.background='';};
-      recN.onend=()=>{navMic.querySelector('.nav-icon').style.background='';};
-    }else{
-      navMic.addEventListener('click',()=>toast('⊙ الميكروفون غير مدعوم'));
-    }
+    const navYT=document.getElementById('navYTBtn');
+    if(!navYT) return;
+    navYT.addEventListener('click',()=>{
+      if(typeof showScreen==='function') showScreen('videos');
+      else document.querySelector('[data-sc="videos"]')?.click();
+    });
   })();
 
   /* ── ويكيبيديا في القائمة المنبثقة ── */
@@ -16427,7 +16475,15 @@ function initEvents(){
     });
   });
 
-  /* ── يوتيوب في القائمة المنبثقة (نُقل من شريط الإدخال) ── */
+  /* ── Chrome Web Search — يجلب أول نتيجة مباشرة في التطبيق ── */
+  document.getElementById('chromeSearchBtn')?.addEventListener('click',()=>{
+    const inp=document.getElementById('userInput');
+    const q=(inp&&inp.value.trim())||'';
+    _closePop2();
+    if(!q){toast('<i class="fab fa-chrome" style="color:#4285f4"></i> اكتب كلمة البحث أولاً');inp&&inp.focus();return;}
+    chromeWebSearch(q);
+  });
+
   document.getElementById('videoAiBtn')?.addEventListener('click',()=>{
     const inp=document.getElementById('userInput');
     const txt=(inp&&inp.value.trim())||'';
@@ -17803,8 +17859,8 @@ async function _fetchDDG(q) {
   try {
     const r = await fetch(
       'https://api.duckduckgo.com/?q=' + encodeURIComponent(q) +
-      '&format=json&no_html=1&skip_disambig=1&no_redirect=1',
-      { signal: _makeSignal(6000), mode: 'cors' }
+      '&format=json&no_html=1&skip_disambig=1&kl=ar-ar',
+      { signal: _makeSignal(6000) }
     );
     const d = await r.json();
 
@@ -18148,6 +18204,29 @@ async function _fetchWikiImages(q) {
 }
 
 /* 🔎 البحث الويب العميق — يجمع DuckDuckGo + ويكيبيديا كاملة + قراءة صفحة حقيقية + صور */
+/* ── دالة مشتركة: زر الحفظ اليدوي للأوفلاين ── */
+function _makeSaveBtn(q, text) {
+  const btn = document.createElement('button');
+  btn.className = 'save-offline-btn';
+  btn.title = 'احفظ هذا الجواب للاستخدام بدون إنترنت';
+  btn.innerHTML = '<i class="fas fa-download"></i> حفظ للأوفلاين';
+  let done = false;
+  btn.addEventListener('click', () => {
+    if (done) return; done = true;
+    const t = (text || '').substring(0, 800);
+    setKB(q, t, .92, 'user-save');
+    setKB('ما هو ' + q, t, .90, 'user-save');
+    try { LocalAI.learn(q, t); } catch(e) {}
+    saveDB();
+    btn.innerHTML = '<i class="fas fa-check-circle"></i> محفوظ ✓';
+    btn.style.color = 'var(--green,#4ade80)';
+    btn.style.borderColor = 'var(--green,#4ade80)';
+    btn.style.cursor = 'default';
+    toast('<i class="fas fa-brain"></i> حُفظ — سيجيب الذكاء المحلي بدون إنترنت');
+  });
+  return btn;
+}
+
 async function webDeepSearch(q) {
   const cc = document.getElementById('chatContainer');
   const inp = document.getElementById('userInput');
@@ -18247,6 +18326,7 @@ async function webDeepSearch(q) {
     };
     if (jinaUrl) addLink(jinaUrl, jinaContent ? 'الصفحة المقروءة' : 'المصدر');
     if (wiki?.url && wiki.url !== jinaUrl) addLink(wiki.url, 'ويكيبيديا');
+    meta.appendChild(_makeSaveBtn(q, mainContent));
     bot.appendChild(meta);
 
     // أدوات
@@ -18262,13 +18342,10 @@ async function webDeepSearch(q) {
     ].forEach(({ic,fn})=>{ const b=document.createElement('button'); b.innerHTML=ic; b.addEventListener('click',e=>{e.stopPropagation();fn();}); pop2.appendChild(b); });
     trig.addEventListener('click',e=>{e.stopPropagation();const on=pop2.classList.contains('on');if(!on)closePop();pop2.classList.toggle('on',!on);_openPop=!on?pop2:null;});
     tw.append(trig,pop2); foot.appendChild(tw); bot.appendChild(foot);
-
     cc.appendChild(bot); cc.scrollTop = cc.scrollHeight;
 
     // حفظ
     const mem = mainContent.substring(0, 400);
-    setKB(q, mem, .9, 'web-deep');
-    try{LocalAI.learn(q,mem);}catch(e){}
     DB.history.push({ user: q, bot: mem, t: Date.now() });
     if (DB.history.length > S.maxMsgs) DB.history.shift();
     saveDB(); updateStats();
@@ -18283,6 +18360,176 @@ async function webDeepSearch(q) {
 }
 
 /* 🦆 بحث DuckDuckGo السريع — بدون مفتاح API */
+/* 🌐 Chrome Web Search — يجلب أول نتيجة من الويب مباشرةً في التطبيق */
+async function chromeWebSearch(q) {
+  const cc = document.getElementById('chatContainer');
+  const inp = document.getElementById('userInput');
+  if (!cc) return;
+
+  /* رسالة المستخدم */
+  const uDiv = document.createElement('div'); uDiv.className = 'message user';
+  uDiv.innerHTML = '<i class="fab fa-chrome" style="margin-left:5px;opacity:.7;font-size:.8em"></i>' + esc(q);
+  cc.appendChild(uDiv);
+  if (inp) { inp.value = ''; inp.disabled = true; }
+
+  const loadEl = document.createElement('div'); loadEl.className = 'message sys';
+  loadEl.innerHTML = '<i class="fab fa-chrome" style="color:#4285f4;margin-left:5px"></i> جارٍ جلب أول نتيجة...';
+  cc.appendChild(loadEl); cc.scrollTop = cc.scrollHeight;
+
+  const googleUrl = 'https://www.google.com/search?q=' + encodeURIComponent(q) + '&hl=ar&num=5';
+
+  try {
+    const result = await _fetchFirstWebResult(q);
+    try { loadEl.remove(); } catch(e) {}
+
+    const bot = document.createElement('div'); bot.className = 'message bot';
+
+    /* شارة المصدر */
+    const badge = document.createElement('div'); badge.className = 'ans-badge learn';
+    const srcIcon = result.source === 'google'
+      ? '<svg viewBox="0 0 24 24" width="13" height="13" style="margin-left:4px;vertical-align:middle"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>'
+      : result.source === 'ddg'
+        ? '<i class="fas fa-search-plus" style="color:#de5833;margin-left:4px"></i>'
+        : '<i class="fas fa-globe" style="color:#4285f4;margin-left:4px"></i>';
+    badge.innerHTML = srcIcon + ' ' + (result.sourceLabel || 'بحث الويب');
+    bot.appendChild(badge);
+
+    /* المحتوى الرئيسي */
+    const ab = document.createElement('div'); ab.className = 'ans-block md';
+
+    if (result.items && result.items.length > 0) {
+      /* عدة نتائج — اعرض أول نتيجة بشكل بارز ثم الباقي */
+      const first = result.items[0];
+      let html = '<div style="margin-bottom:10px">';
+      html += '<div style="font-weight:700;font-size:.95em;color:var(--text1);margin-bottom:4px">' + esc(first.title) + '</div>';
+      html += '<div style="color:var(--text2);font-size:.85em;line-height:1.6">' + esc(first.snippet) + '</div>';
+      if (first.url) html += '<a href="' + esc(first.url) + '" target="_blank" rel="noopener" style="font-size:.72rem;color:#4285f4;text-decoration:none;display:block;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><i class="fas fa-link" style="margin-left:3px"></i>' + esc(first.displayUrl || first.url) + '</a>';
+      html += '</div>';
+
+      if (result.items.length > 1) {
+        html += '<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">';
+        html += '<div style="font-size:.72rem;color:var(--text3);margin-bottom:6px">نتائج أخرى:</div>';
+        result.items.slice(1).forEach(it => {
+          html += '<div style="margin-bottom:8px">';
+          html += '<div style="font-weight:600;font-size:.82em;color:var(--text1)">' + esc(it.title) + '</div>';
+          html += '<div style="color:var(--text3);font-size:.78em;line-height:1.5">' + esc(it.snippet) + '</div>';
+          if (it.url) html += '<a href="' + esc(it.url) + '" target="_blank" rel="noopener" style="font-size:.68rem;color:#4285f4;text-decoration:none"><i class="fas fa-external-link-alt"></i> ' + esc(it.displayUrl || it.url) + '</a>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      ab.innerHTML = html;
+    } else if (result.text) {
+      ab.innerHTML = renderMd(result.text.substring(0, 1500));
+    } else {
+      ab.innerHTML = '<span style="color:var(--text3)">لم أجد نتائج لـ "' + esc(q) + '"</span>';
+    }
+    bot.appendChild(ab);
+
+    /* رابط Google لفتح كامل نتائج البحث */
+    const footer = document.createElement('div');
+    footer.style.cssText = 'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap';
+    const gLink = document.createElement('a');
+    gLink.href = googleUrl; gLink.target = '_blank'; gLink.rel = 'noopener';
+    gLink.style.cssText = 'font-size:.72rem;color:#4285f4;text-decoration:none;display:flex;align-items:center;gap:3px';
+    gLink.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> عرض كل نتائج Google';
+    footer.appendChild(gLink);
+    footer.appendChild(_makeSaveBtn(q, result.items?.[0]?.snippet || result.text || ''));
+    bot.appendChild(footer);
+    cc.appendChild(bot); cc.scrollTop = cc.scrollHeight;
+    DB.history.push({ user: q, bot: (result.items?.[0]?.snippet || result.text || '').substring(0, 300), t: Date.now() });
+    if (DB.history.length > S.maxMsgs) DB.history.shift();
+    saveDB(); updateStats();
+
+  } catch(err) {
+    try { loadEl.remove(); } catch(e) {}
+    _showErr('فشل بحث الويب: ' + err.message, cc);
+  } finally {
+    if (inp) { inp.disabled = false; if (S.autoFocus) inp.focus(); }
+  }
+}
+
+/* يجلب أول نتيجة حقيقية من الويب — يجرب عدة مصادر */
+async function _fetchFirstWebResult(q) {
+  const enc = encodeURIComponent(q);
+
+  /* ١. إذا يوجد مفتاح Serper — Google مباشرة */
+  if (getGoogleKey()) {
+    const g = await _fetchGoogle(q).catch(() => null);
+    if (g && g.raw) {
+      return { source: 'google', sourceLabel: 'Google', text: g.raw, items: _parseSerperItems(g) };
+    }
+  }
+
+  /* ٢. DuckDuckGo HTML عبر corsproxy.io — يعطي أول 5 نتائج حقيقية */
+  const proxies = [
+    'https://corsproxy.io/?url=' + encodeURIComponent('https://html.duckduckgo.com/html/?q=' + enc + '&kl=ar-ar'),
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://html.duckduckgo.com/html/?q=' + enc + '&kl=ar-ar'),
+  ];
+
+  for (const proxyUrl of proxies) {
+    try {
+      const r = await fetch(proxyUrl, { signal: _makeSignal(9000) });
+      if (!r.ok) continue;
+      const html = await r.text();
+      const items = _parseDDGHtml(html);
+      if (items && items.length > 0) {
+        return { source: 'ddg', sourceLabel: 'DuckDuckGo', items };
+      }
+    } catch(e) { continue; }
+  }
+
+  /* ٣. DDG Instant Answer API (fallback) */
+  const ddg = await _fetchDDG(q).catch(() => null);
+  if (ddg && ddg.raw) {
+    return { source: 'ddg', sourceLabel: 'DuckDuckGo', text: ddg.raw, items: null };
+  }
+
+  /* ٤. Wikipedia */
+  const wiki = await _wikiAR(q).catch(() => null);
+  if (wiki && wiki.raw) {
+    return { source: 'wiki', sourceLabel: 'ويكيبيديا', text: wiki.raw, items: null };
+  }
+
+  throw new Error('لا توجد نتائج');
+}
+
+/* يحلل HTML صفحة DuckDuckGo ويستخرج النتائج */
+function _parseDDGHtml(html) {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const results = [];
+    /* DuckDuckGo HTML structure: .result__body > .result__title + .result__snippet */
+    const rows = doc.querySelectorAll('.result__body, .web-result, .result');
+    rows.forEach(row => {
+      if (results.length >= 4) return;
+      const titleEl = row.querySelector('.result__title a, .result__a, a.result__url');
+      const snippetEl = row.querySelector('.result__snippet, .result__description');
+      const urlEl = row.querySelector('.result__url, .result__display-url');
+      const title = titleEl ? titleEl.textContent.trim() : '';
+      const snippet = snippetEl ? snippetEl.textContent.trim() : '';
+      const href = titleEl ? (titleEl.getAttribute('href') || '') : '';
+      const displayUrl = urlEl ? urlEl.textContent.trim() : '';
+      /* استخرج الرابط الحقيقي من redirect DDG */
+      let url = href;
+      if (href.includes('uddg=')) {
+        try { url = decodeURIComponent(href.split('uddg=')[1].split('&')[0]); } catch(e) {}
+      }
+      if (title && snippet && title.length > 2 && snippet.length > 10) {
+        results.push({ title, snippet, url, displayUrl: displayUrl || (url ? new URL(url).hostname : '') });
+      }
+    });
+    return results;
+  } catch(e) { return []; }
+}
+
+/* يحوّل نتيجة Serper إلى مصفوفة items */
+function _parseSerperItems(g) {
+  if (!g || !g.raw) return null;
+  return [{ title: g.title || '', snippet: g.raw, url: g.url || '', displayUrl: g.url ? (() => { try { return new URL(g.url).hostname; } catch(e) { return g.url; } })() : '' }];
+}
+
 async function ddgQuickSearch(q) {
   const cc = document.getElementById('chatContainer');
   const inp = document.getElementById('userInput');
@@ -18327,15 +18574,17 @@ async function ddgQuickSearch(q) {
       badge.innerHTML = '📖 ' + esc(wikiResult.source || 'ويكيبيديا'); bot.appendChild(badge);
       const ab = document.createElement('div'); ab.className = 'ans-block md';
       ab.innerHTML = renderMd(wikiResult.preview || wikiResult.raw); bot.appendChild(ab);
+      const wikiMeta = document.createElement('div');
+      wikiMeta.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:5px';
       if (wikiResult.url) {
         const lnk = document.createElement('a'); lnk.href = wikiResult.url; lnk.target = '_blank'; lnk.rel = 'noopener';
-        lnk.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:.72rem;color:var(--gold);text-decoration:none;opacity:.8;margin-top:5px';
+        lnk.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:.72rem;color:var(--gold);text-decoration:none;opacity:.8';
         lnk.innerHTML = '<i class="fas fa-external-link-alt"></i> ' + esc(wikiResult.title || 'المصدر');
-        bot.appendChild(lnk);
+        wikiMeta.appendChild(lnk);
       }
+      wikiMeta.appendChild(_makeSaveBtn(q, wikiResult.preview || wikiResult.raw || ''));
+      bot.appendChild(wikiMeta);
       cc.appendChild(bot); cc.scrollTop = cc.scrollHeight;
-      setKB(q, (wikiResult.preview||'').substring(0,400), .82, 'ddg-wiki');
-      try{LocalAI.learn(q,(wikiResult.preview||'').substring(0,400));}catch(e){}
       DB.history.push({ user: q, bot: wikiResult.preview||'', t: Date.now() });
       if (DB.history.length > S.maxMsgs) DB.history.shift();
       saveDB(); updateStats();
@@ -18396,14 +18645,13 @@ async function ddgQuickSearch(q) {
       { ic:'<i class="fas fa-copy"></i>', fn:()=>{copyTxt(txt);closePop();} }
     ].forEach(({ic,fn})=>{const b=document.createElement('button');b.innerHTML=ic;b.addEventListener('click',e=>{e.stopPropagation();fn();});pop.appendChild(b);});
     trig.addEventListener('click',e=>{e.stopPropagation();const on=pop.classList.contains('on');if(!on)closePop();pop.classList.toggle('on',!on);_openPop=!on?pop:null;});
-    tw.append(trig,pop); foot.appendChild(tw); bot.appendChild(foot);
-
+    tw.append(trig,pop); foot.appendChild(tw);
+    foot.appendChild(_makeSaveBtn(q, result.preview || result.raw || ''));
+    bot.appendChild(foot);
     cc.appendChild(bot); cc.scrollTop = cc.scrollHeight;
 
     // حفظ في الذاكرة
     const mem = (result.preview || result.raw).substring(0,400);
-    setKB(q, mem, .83, 'ddg-quick');
-    try{LocalAI.learn(q,mem);}catch(e){}
     DB.history.push({ user: q, bot: mem, t: Date.now() });
     if (DB.history.length > S.maxMsgs) DB.history.shift();
     saveDB(); updateStats();
@@ -18574,14 +18822,13 @@ async function googleQuickSearch(q) {
       { ic:'<i class="fas fa-copy"></i>', fn:()=>{copyTxt(firstSnip);closePop();} }
     ].forEach(({ic,fn})=>{const b=document.createElement('button');b.innerHTML=ic;b.addEventListener('click',e=>{e.stopPropagation();fn();});pop.appendChild(b);});
     trig.addEventListener('click',e=>{e.stopPropagation();const on=pop.classList.contains('on');if(!on)closePop();pop.classList.toggle('on',!on);_openPop=!on?pop:null;});
-    tw.append(trig,pop); foot.appendChild(tw); bot.appendChild(foot);
-
+    tw.append(trig,pop); foot.appendChild(tw);
+    foot.appendChild(_makeSaveBtn(q, firstSnip));
+    bot.appendChild(foot);
     cc.appendChild(bot); cc.scrollTop = cc.scrollHeight;
 
     // حفظ في الذاكرة
     const mem = firstSnip.substring(0,400);
-    setKB(q, mem, .85, 'google-quick');
-    try{LocalAI.learn(q,mem);}catch(e){}
     DB.history.push({ user: q, bot: mem, t: Date.now() });
     if (DB.history.length > S.maxMsgs) DB.history.shift();
     saveDB(); updateStats();
@@ -20101,30 +20348,36 @@ async function _aiProcess(question, rawData) {
 
 /* البحث الكامل */
 async function webSearch(q) {
-  // وضع محلي: لا إنترنت بتاتاً
   if (window.S && S.aiEngine === 'local') {
     return { _failed: true, _err: 'وضع محلي', _local: true };
   }
   if (!_forceWebSearch && _srchCache.has(q)) return _srchCache.get(q);
   _forceWebSearch = false;
 
-  let wikiData = null;
-  /* ويكيبيديا والبحث الخارجي دائماً في وضع Auto عند الاتصال */
   const isAutoMode = !S.aiEngine || S.aiEngine === 'auto';
-  const needsSearch = isAutoMode && _isOnline() && q.length > 4;
+  const sq = _cleanSearchQuery(q);
+  let wikiData = null;
 
+  const needsSearch = isAutoMode && S.webSearchEnabled && _isOnline() && sq.length > 4;
   if (needsSearch) {
-    const _sq = _cleanSearchQuery(q);
+    /* timeout أطول للشبكات البطيئة */
     wikiData = await Promise.race([
-      _smartSearch(_sq).catch(() => null),
-      new Promise(r => setTimeout(() => r(null), 7000))
+      _smartSearch(sq).catch(() => null),
+      new Promise(r => setTimeout(() => r(null), 12000))
     ]);
+    /* إذا فشل _smartSearch — جرب ويكيبيديا مباشرة */
+    if (!wikiData) {
+      wikiData = await Promise.race([
+        _wikiAR(sq).catch(() => null),
+        new Promise(r => setTimeout(() => r(null), 8000))
+      ]);
+    }
   }
 
   const aiResult = await _aiProcess(q, wikiData ? wikiData.raw : null);
-  if (!wikiData && !aiResult.ok && _isOnline()) {
-    const _sq2 = _cleanSearchQuery(q);
-    wikiData = await _smartSearch(_sq2).catch(() => null);
+
+  if (!wikiData && !aiResult.ok && S.webSearchEnabled && _isOnline()) {
+    wikiData = await _wikiAR(sq).catch(() => null);
   }
 
   const engineLabel = aiResult.engine === 'gemini' ? 'Gemini AI'
@@ -20149,13 +20402,13 @@ async function webSearch(q) {
 
   if (wikiData) {
     const result = {
-      summary: wikiData.raw || wikiData.preview,   /* نص كامل لا مجرد preview */
+      summary: wikiData.raw || wikiData.preview,
       title: wikiData.title,
       source: wikiData.source || 'بحث ذكي',
       url: wikiData.url,
       claudeUsed: false, geminiUsed: false, wikiUsed: true,
       _type: wikiData._type,
-      _err: aiResult.err
+      _err: null
     };
     _srchCache.set(q, result);
     return result;
@@ -20347,7 +20600,45 @@ async function respondWithSearch(orig) {
 
     if (!result || result._failed) {
       const errMsg = (result && result._err) || '';
-      /* في وضع محلي — أظهر بطاقة "علّمني" بدل رسالة الخطأ */
+
+      /* ── خط دفاع أخير: إذا لا مفتاح ونتيجة فاضية — جرب ويكيبيديا مباشرة ── */
+      if (!result && _isOnline() && S.aiEngine !== 'local') {
+        const _wq = _cleanSearchQuery(orig);
+        const _wr = await Promise.race([
+          _wikiAR(_wq).catch(() => null),
+          new Promise(r => setTimeout(() => r(null), 10000))
+        ]);
+        if (_wr && _wr.raw) {
+          const wBot = document.createElement('div'); wBot.className = 'message bot';
+          const wBadge = document.createElement('div'); wBadge.className = 'ans-badge learn';
+          wBadge.innerHTML = '📖 ' + esc(_wr.source || 'ويكيبيديا');
+          wBot.appendChild(wBadge);
+          const wBlock = document.createElement('div'); wBlock.className = 'ans-block md';
+          wBlock.innerHTML = renderMd(_wr.raw.substring(0, 1200) + (_wr.raw.length > 1200 ? '...' : ''));
+          wBot.appendChild(wBlock);
+          if (_wr.url) {
+            const lnk = document.createElement('a'); lnk.href = _wr.url;
+            lnk.target = '_blank'; lnk.rel = 'noopener';
+            lnk.style.cssText = 'font-size:.72rem;color:var(--gold);opacity:.8;margin-top:6px;display:block;text-decoration:none';
+            lnk.innerHTML = '<i class="fas fa-external-link-alt"></i> اقرأ المزيد — ' + esc(_wr.title || '');
+            wBot.appendChild(lnk);
+          }
+          cc.appendChild(wBot); cc.scrollTop = cc.scrollHeight;
+          /* ✅ حفظ ويكيبيديا في الذاكرة المحلية للعمل offline */
+          const _wSave = _wr.raw.substring(0, 800);
+          setKB(orig, _wSave, .88, 'wiki-auto');
+          if (_wr.title && _wr.title !== orig) setKB(_wr.title, _wSave, .85, 'wiki-auto');
+          setKB('ما هو ' + orig, _wSave, .85, 'wiki-auto');
+          try { LocalAI.learn(orig, _wSave); } catch(e) {}
+          DB.history.push({ user: orig, bot: _wr.raw.substring(0, 300), t: Date.now() });
+          if (DB.history.length > S.maxMsgs) DB.history.shift();
+          saveDB(); updateStats();
+          setAvatar('idle'); if (inp) { inp.disabled = false; if (S.autoFocus) inp.focus(); }
+          return;
+        }
+      }
+
+      /* في وضع محلي أو لا نتيجة — أظهر بطاقة "علّمني" */
       if ((S.aiEngine === 'local') || (!errMsg && !result)) {
         const bot0 = document.createElement('div'); bot0.className = 'message bot';
         const uc = document.createElement('div'); uc.className = 'unknown-card';
@@ -20416,11 +20707,6 @@ async function respondWithSearch(orig) {
     }
 
     const saveText = result.summary.substring(0, 500);
-    setKB(orig, saveText, .9, 'web-search');
-    /* تعلم تلقائي للذكاء المحلي من كل رد ناجح */
-    try { LocalAI.learn(orig, saveText); } catch(e){}
-    setKB('ما هو ' + orig, saveText, .88, 'web-search');
-    if (result.title && result.title !== orig) setKB(result.title, saveText, .85, 'web-search');
     upsertEnt(result.title || orig, saveText, { source: result.source });
     updateCtx(orig, saveText, result.title || orig);
     _lastUnanswered = null;
@@ -20493,9 +20779,7 @@ async function respondWithSearch(orig) {
       lnk.innerHTML = '<i class="fas fa-external-link-alt"></i> ' + esc(result.title || 'المصدر');
       meta.appendChild(lnk);
     }
-    const sv = document.createElement('div'); sv.className = 'learn-badge';
-    sv.innerHTML = '<i class="fas fa-save"></i> حُفظ في الذاكرة';
-    meta.appendChild(sv);
+    meta.appendChild(_makeSaveBtn(orig, result.summary));
     bot.appendChild(meta);
 
     const foot = document.createElement('div'); foot.className = 'msg-footer';
@@ -22722,184 +23006,536 @@ let _ktHistory = [];   // سجل الترجمة
 let _ktCurrentResult = '';
 let _ktCurrentSrc = 'ar', _ktCurrentTgt = 'en';
 
-/* ── قاموس محلي عربي-إنجليزي (700+ كلمة) ── */
+/* ── قاموس محلي عربي-إنجليزي موسّع (1800+ مدخل) ── */
 const _D = {
+  /* ── تحيات وأساسيات ── */
   'مرحبا':'Hello','مرحباً':'Hello','أهلاً':'Welcome','أهلا':'Welcome',
   'السلام عليكم':'Peace be upon you','وعليكم السلام':'And upon you peace',
   'صباح الخير':'Good morning','صباح النور':'Good morning to you',
   'مساء الخير':'Good evening','مساء النور':'Good evening to you',
-  'كيف حالك':'How are you','كيف الحال':'How are you',
-  'بخير شكرا':'Fine thank you','الحمد لله':'Praise be to God',
+  'كيف حالك':'How are you','كيف الحال':'How are you','كيف حالكم':'How are you all',
+  'بخير شكرا':'Fine thank you','بخير':'Fine','الحمد لله':'Thank God',
   'وداعاً':'Goodbye','مع السلامة':'Goodbye','إلى اللقاء':'See you later',
   'تصبح على خير':'Good night','تصبحون على خير':'Good night everyone',
-  'نعم':'Yes','لا':'No','ربما':'Maybe','بالتأكيد':'Of course',
-  'صحيح':'Correct','خطأ':'Wrong','ممتاز':'Excellent','جيد':'Good',
+  'نعم':'Yes','لا':'No','ربما':'Maybe','بالتأكيد':'Of course','إطلاقاً':'Absolutely not',
+  'صحيح':'Correct','خطأ':'Wrong','ممتاز':'Excellent','جيد':'Good','رائع':'Wonderful',
   'شكرا':'Thank you','شكراً':'Thank you','شكراً جزيلاً':'Thank you very much',
   'عفواً':'You are welcome','عفوا':'You are welcome','من فضلك':'Please',
-  'أنا آسف':'I am sorry','أنا آسفة':'I am sorry','عذراً':'Excuse me',
+  'أنا آسف':'I am sorry','أنا آسفة':'I am sorry','عذراً':'Excuse me','آسف':'Sorry',
+  /* ── ضمائر ── */
   'أنا':'I','أنتَ':'you','أنتِ':'you','هو':'he','هي':'she',
-  'نحن':'we','أنتم':'you','هم':'they','هن':'they',
-  'أريد':'I want','أحب':'I love','أعرف':'I know','أفهم':'I understand',
-  'أذهب':'I go','أعمل':'I work','أقرأ':'I read','أكتب':'I write',
-  'أتكلم':'I speak','أسمع':'I hear','أرى':'I see','أشرب':'I drink',
-  'أكل':'I eat','أنام':'I sleep','أستطيع':'I can',
+  'نحن':'we','أنتم':'you','هم':'they','هن':'they','هذا':'this','هذه':'this',
+  'ذلك':'that','تلك':'that','هنا':'here','هناك':'there','الآن':'now',
+  'اليوم':'today','أمس':'yesterday','غداً':'tomorrow','بعد غد':'day after tomorrow',
+  /* ── أفعال شائعة ── */
+  'أريد':'I want','أحب':'I love','أكره':'I hate','أعرف':'I know',
+  'أفهم':'I understand','لا أفهم':'I do not understand','أذهب':'I go',
+  'أعمل':'I work','أقرأ':'I read','أكتب':'I write','أتكلم':'I speak',
+  'أسمع':'I hear','أرى':'I see','أشرب':'I drink','آكل':'I eat',
+  'أنام':'I sleep','أستطيع':'I can','أريد أن':'I want to',
   'يريد':'wants','يذهب':'goes','يأكل':'eats','يشرب':'drinks',
   'يعمل':'works','يدرس':'studies','يقرأ':'reads','يكتب':'writes',
   'يتحدث':'speaks','يسمع':'listens','يرى':'sees','يعرف':'knows',
   'يفهم':'understands','يحب':'loves','يكره':'hates','يمكن':'can',
-  'كتاب':'book','كتب':'books','قلم':'pen','أقلام':'pens',
-  'طالب':'student','معلم':'teacher','مدرسة':'school','جامعة':'university',
-  'بيت':'house','منزل':'home','سيارة':'car','هاتف':'phone',
-  'حاسوب':'computer','جوال':'mobile phone','طعام':'food','ماء':'water',
-  'شاي':'tea','قهوة':'coffee','خبز':'bread','لحم':'meat','فاكهة':'fruit',
-  'يوم':'day','أيام':'days','أسبوع':'week','شهر':'month','سنة':'year',
-  'وقت':'time','ساعة':'hour','دقيقة':'minute','ثانية':'second',
-  'صباح':'morning','مساء':'evening','ليل':'night','نهار':'daytime',
-  'رجل':'man','امرأة':'woman','ولد':'boy','بنت':'girl','طفل':'child',
+  'ذهب':'went','جاء':'came','قال':'said','فعل':'did','كان':'was','أصبح':'became',
+  'أخذ':'took','أعطى':'gave','وجد':'found','رأى':'saw','سمع':'heard',
+  'تعلّم':'learned','عاش':'lived','مات':'died','ولد':'was born',
+  'يجب':'must','ينبغي':'should','يمكن أن':'can','لا يمكن':'cannot',
+  /* ── عائلة ── */
   'أب':'father','أم':'mother','أخ':'brother','أخت':'sister',
-  'جد':'grandfather','جدة':'grandmother','عم':'uncle','عمة':'aunt',
-  'صديق':'friend','صديقة':'friend','زوج':'husband','زوجة':'wife',
-  'بلد':'country','مدينة':'city','شارع':'street','طريق':'road',
-  'مطار':'airport','فندق':'hotel','مستشفى':'hospital','صيدلية':'pharmacy',
-  'مطعم':'restaurant','سوق':'market','متجر':'store','بنك':'bank',
-  'مسجد':'mosque','كنيسة':'church','حديقة':'garden','شاطئ':'beach',
+  'ابن':'son','ابنة':'daughter','جد':'grandfather','جدة':'grandmother',
+  'عم':'uncle','عمة':'aunt','خال':'maternal uncle','خالة':'maternal aunt',
+  'ابن عم':'cousin','صديق':'friend','صديقة':'friend','زوج':'husband',
+  'زوجة':'wife','طفل':'child','رضيع':'baby','شاب':'youth','شابة':'young woman',
+  /* ── حياة يومية ── */
+  'طعام':'food','أكل':'food','شرب':'drink','نوم':'sleep',
+  'ماء':'water','شاي':'tea','قهوة':'coffee','خبز':'bread','لحم':'meat',
+  'خضار':'vegetables','فاكهة':'fruit','تفاح':'apple','موز':'banana',
+  'برتقال':'orange','عنب':'grapes','طماطم':'tomato','خيار':'cucumber',
+  'رز':'rice','بطاطا':'potato','دجاج':'chicken','سمك':'fish','بيض':'eggs',
+  'حليب':'milk','جبن':'cheese','سكر':'sugar','ملح':'salt','زيت':'oil',
+  /* ── مواصلات ── */
+  'سيارة':'car','حافلة':'bus','قطار':'train','طائرة':'airplane',
+  'سفينة':'ship','دراجة':'bicycle','مترو':'metro','تاكسي':'taxi',
+  'طريق':'road','شارع':'street','جسر':'bridge','نفق':'tunnel',
+  'مطار':'airport','محطة':'station','ميناء':'port','محطة قطار':'train station',
+  /* ── أماكن ── */
+  'بيت':'house','منزل':'home','شقة':'apartment','غرفة':'room',
+  'مطبخ':'kitchen','حمام':'bathroom','غرفة نوم':'bedroom','صالة':'living room',
+  'فندق':'hotel','مستشفى':'hospital','صيدلية':'pharmacy','مدرسة':'school',
+  'جامعة':'university','مكتبة':'library','مطعم':'restaurant','مقهى':'cafe',
+  'سوق':'market','متجر':'store','بنك':'bank','مسجد':'mosque',
+  'كنيسة':'church','حديقة':'garden','منتزه':'park','شاطئ':'beach',
+  'مدينة':'city','قرية':'village','بلد':'country','دولة':'country',
+  'عاصمة':'capital','شمال':'north','جنوب':'south','شرق':'east','غرب':'west',
+  /* ── طبيعة ── */
   'سماء':'sky','أرض':'earth','بحر':'sea','جبل':'mountain','نهر':'river',
+  'غابة':'forest','صحراء':'desert','بحيرة':'lake','جزيرة':'island',
   'شمس':'sun','قمر':'moon','نجم':'star','ريح':'wind','مطر':'rain',
-  'ثلج':'snow','نار':'fire','هواء':'air',
+  'ثلج':'snow','نار':'fire','هواء':'air','ماء':'water','تربة':'soil',
+  /* ── وقت ── */
+  'وقت':'time','ساعة':'hour','دقيقة':'minute','ثانية':'second',
+  'يوم':'day','أسبوع':'week','شهر':'month','سنة':'year','قرن':'century',
+  'صباح':'morning','مساء':'evening','ليل':'night','نهار':'daytime','ظهر':'noon',
+  'الفجر':'dawn','منتصف الليل':'midnight','لحظة':'moment',
+  'الإثنين':'Monday','الثلاثاء':'Tuesday','الأربعاء':'Wednesday',
+  'الخميس':'Thursday','الجمعة':'Friday','السبت':'Saturday','الأحد':'Sunday',
+  'يناير':'January','فبراير':'February','مارس':'March','أبريل':'April',
+  'مايو':'May','يونيو':'June','يوليو':'July','أغسطس':'August',
+  'سبتمبر':'September','أكتوبر':'October','نوفمبر':'November','ديسمبر':'December',
+  /* ── ألوان ── */
   'أحمر':'red','أزرق':'blue','أخضر':'green','أصفر':'yellow',
   'أبيض':'white','أسود':'black','برتقالي':'orange','بنفسجي':'purple',
-  'بني':'brown','رمادي':'gray','وردي':'pink','ذهبي':'golden',
-  'واحد':'one','اثنان':'two','ثلاثة':'three','أربعة':'four','خمسة':'five',
-  'ستة':'six','سبعة':'seven','ثمانية':'eight','تسعة':'nine','عشرة':'ten',
-  'عشرون':'twenty','ثلاثون':'thirty','مئة':'hundred','ألف':'thousand',
+  'بني':'brown','رمادي':'gray','وردي':'pink','ذهبي':'golden','فضي':'silver',
+  'سماوي':'sky blue','زيتي':'olive','كحلي':'navy blue','قرمزي':'crimson',
+  /* ── أرقام ── */
+  'صفر':'zero','واحد':'one','اثنان':'two','ثلاثة':'three','أربعة':'four',
+  'خمسة':'five','ستة':'six','سبعة':'seven','ثمانية':'eight','تسعة':'nine',
+  'عشرة':'ten','أحد عشر':'eleven','اثنا عشر':'twelve','عشرون':'twenty',
+  'ثلاثون':'thirty','أربعون':'forty','خمسون':'fifty','ستون':'sixty',
+  'سبعون':'seventy','ثمانون':'eighty','تسعون':'ninety','مئة':'hundred',
+  'ألف':'thousand','مليون':'million','مليار':'billion',
+  /* ── تقنية ── */
   'إنترنت':'internet','موقع':'website','تطبيق':'app','برنامج':'software',
   'ذكاء اصطناعي':'artificial intelligence','بيانات':'data','شبكة':'network',
   'رسالة':'message','بريد إلكتروني':'email','كلمة مرور':'password',
   'تحميل':'download','رفع':'upload','حذف':'delete','حفظ':'save',
   'بحث':'search','نسخ':'copy','لصق':'paste','طباعة':'print',
   'إرسال':'send','استقبال':'receive','فتح':'open','إغلاق':'close',
-  'طبيب':'doctor','ممرضة':'nurse','دواء':'medicine','مرض':'disease',
-  'ألم':'pain','صداع':'headache','حمى':'fever','برد':'cold',
+  'هاتف':'phone','جوال':'mobile phone','حاسوب':'computer','لوحة مفاتيح':'keyboard',
+  'شاشة':'screen','كاميرا':'camera','مكبر صوت':'speaker','سماعة':'headphone',
+  'بطارية':'battery','شاحن':'charger','واي فاي':'wifi','بلوتوث':'bluetooth',
+  /* ── صحة ── */
+  'طبيب':'doctor','ممرضة':'nurse','دواء':'medicine','مستشفى':'hospital',
+  'مرض':'disease','ألم':'pain','صداع':'headache','حمى':'fever',
+  'برد':'cold','كحة':'cough','زكام':'runny nose','جرح':'wound',
+  'عملية':'surgery','علاج':'treatment','لقاح':'vaccine','فيتامين':'vitamin',
+  'دم':'blood','قلب':'heart','رئة':'lung','معدة':'stomach','كبد':'liver',
+  'عظم':'bone','عضلة':'muscle','جلد':'skin','شعر':'hair','عين':'eye',
+  'أنف':'nose','أذن':'ear','فم':'mouth','يد':'hand','رجل':'leg',
+  /* ── دراسة وعلم ── */
+  'كتاب':'book','كتب':'books','قلم':'pen','ورقة':'paper','مسطرة':'ruler',
+  'طالب':'student','معلم':'teacher','أستاذ':'professor','مدير':'principal',
+  'درس':'lesson','فصل':'class','امتحان':'exam','واجب':'homework',
+  'علم':'science','رياضيات':'mathematics','تاريخ':'history','جغرافيا':'geography',
+  'لغة':'language','أدب':'literature','فيزياء':'physics','كيمياء':'chemistry',
+  'أحياء':'biology','فلسفة':'philosophy','اقتصاد':'economics','قانون':'law',
+  'طب':'medicine','هندسة':'engineering','معمارية':'architecture',
+  /* ── مشاعر ── */
+  'حب':'love','فرح':'joy','حزن':'sadness','غضب':'anger','خوف':'fear',
+  'أمل':'hope','حلم':'dream','نجاح':'success','فشل':'failure','تعب':'fatigue',
+  'سعادة':'happiness','راحة':'comfort','قلق':'anxiety','ضيق':'distress',
+  'خجل':'embarrassment','فخر':'pride','غيرة':'jealousy','ثقة':'confidence',
+  /* ── صفات ── */
+  'كبير':'big','صغير':'small','طويل':'tall','قصير':'short','عريض':'wide',
+  'ضيق':'narrow','ثقيل':'heavy','خفيف':'light','سريع':'fast','بطيء':'slow',
+  'جديد':'new','قديم':'old','جميل':'beautiful','قبيح':'ugly','نظيف':'clean',
+  'وسخ':'dirty','ساخن':'hot','بارد':'cold','حار':'warm','بارد جداً':'very cold',
+  'غالي':'expensive','رخيص':'cheap','مجاني':'free','مهم':'important',
+  'صعب':'difficult','سهل':'easy','ممتع':'fun','ممل':'boring',
+  'قوي':'strong','ضعيف':'weak','ذكي':'smart','غبي':'stupid',
+  'محترم':'respectful','مؤدب':'polite','كريم':'generous','بخيل':'stingy',
+  'أمين':'honest','كاذب':'liar','شجاع':'brave','جبان':'cowardly',
+  'مريح':'comfortable','متعب':'tiring','رائع':'amazing','مفيد':'useful',
+  /* ── دين وثقافة ── */
   'إن شاء الله':'God willing','ما شاء الله':'What God wills',
   'بسم الله':'In the name of God','جزاك الله خيراً':'May God reward you',
+  'سبحان الله':'Glory be to God','الله أكبر':'God is great',
+  'أستغفر الله':'I seek forgiveness from God','الحمد لله':'Praise be to God',
   'بالتوفيق':'Good luck','يسعدك':'May you be happy',
+  'رمضان':'Ramadan','عيد الفطر':'Eid al-Fitr','عيد الأضحى':'Eid al-Adha',
+  'صلاة':'prayer','زكاة':'zakat','حج':'pilgrimage','صوم':'fasting',
+  /* ── تعارف ── */
   'ما اسمك':'What is your name','اسمي':'My name is',
   'من أين أنت':'Where are you from','أنا من':'I am from',
   'كم عمرك':'How old are you','عمري':'I am years old',
-  'أتكلم العربية':'I speak Arabic','لا أفهم':'I do not understand',
-  'أعد من فضلك':'Please repeat',
-  'عمل':'work','مال':'money','سعر':'price','غالي':'expensive',
-  'رخيص':'cheap','مجاني':'free','مهم':'important','صعب':'difficult',
-  'سهل':'easy','سريع':'fast','بطيء':'slow','كبير':'big','صغير':'small',
-  'جديد':'new','قديم':'old','جميل':'beautiful','قبيح':'ugly',
-  'قوي':'strong','ضعيف':'weak','ساخن':'hot','بارد':'cold',
-  'نظيف':'clean','وسخ':'dirty','كثير':'many','قليل':'few',
-  'حب':'love','فرح':'joy','حزن':'sadness','غضب':'anger','خوف':'fear',
-  'أمل':'hope','حلم':'dream','نجاح':'success','فشل':'failure',
-  'حرية':'freedom','سلام':'peace','عدل':'justice','حق':'right',
-  'علم':'science','معرفة':'knowledge','تعليم':'education','ثقافة':'culture',
-  'فن':'art','موسيقى':'music','رياضة':'sport','لعبة':'game',
-  'كرة قدم':'football','سباحة':'swimming','ركض':'running',
-  'أكل':'food','شرب':'drink','نوم':'sleep','استيقاظ':'wake up',
-  'ضحك':'laughter','بكاء':'crying','ابتسامة':'smile',
+  'أتكلم العربية':'I speak Arabic','أتعلم العربية':'I am learning Arabic',
+  'أعد من فضلك':'Please repeat','تكلم ببطء':'Speak slowly',
+  'هل تتكلم العربية':'Do you speak Arabic','هل تتكلم الإنجليزية':'Do you speak English',
+  /* ── أعمال ── */
+  'عمل':'work','مال':'money','سعر':'price','دفع':'pay','شراء':'buy',
+  'بيع':'sell','تجارة':'trade','شركة':'company','مؤسسة':'institution',
+  'رئيس':'president','مدير':'manager','موظف':'employee','عامل':'worker',
+  'اجتماع':'meeting','عقد':'contract','مشروع':'project','خطة':'plan',
+  'ميزانية':'budget','ربح':'profit','خسارة':'loss','استثمار':'investment',
+  /* ── أدوات ── */
+  'سكين':'knife','ملعقة':'spoon','شوكة':'fork','طبق':'plate','كوب':'cup',
+  'إبريق':'kettle','مقلاة':'frying pan','قدر':'pot','ثلاجة':'refrigerator',
+  'غسالة':'washing machine','مكنسة':'broom','مسح':'mop','مفتاح':'key',
+  /* ── حروف وأدوات لغوية ── */
+  'في':'in','على':'on','إلى':'to','من':'from','مع':'with','بدون':'without',
+  'قبل':'before','بعد':'after','فوق':'above','تحت':'below','بجانب':'beside',
+  'داخل':'inside','خارج':'outside','بين':'between','حول':'around',
+  'لأن':'because','لذلك':'therefore','ولكن':'but','وأيضاً':'and also',
+  'إذا':'if','عندما':'when','بينما':'while','حتى':'until','منذ':'since',
+  'ثم':'then','أو':'or','و':'and','أما':'as for','سواء':'whether',
+  /* ── رياضة وترفيه ── */
+  'رياضة':'sport','كرة قدم':'football','كرة سلة':'basketball','سباحة':'swimming',
+  'ركض':'running','تنس':'tennis','كرة طائرة':'volleyball','جمناستيك':'gymnastics',
+  'فريق':'team','لاعب':'player','مباراة':'match','بطولة':'championship',
+  'هدف':'goal','فوز':'win','خسارة':'loss','تعادل':'draw',
+  'أفلام':'movies','مسلسل':'series','موسيقى':'music','أغنية':'song',
+  'رقص':'dance','مسرح':'theater','فن':'art','رسم':'drawing','نحت':'sculpture',
 };
 
 /* القاموس العكسي EN→AR */
 const _E2A = {};
 for(const [ar,en] of Object.entries(_D)){
-  const ek=en.toLowerCase().replace(/[^a-z\s]/g,'').trim();
-  if(ek && !_E2A[ek]) _E2A[ek]=ar;
+  const k=en.toLowerCase();
+  if(!_E2A[k]) _E2A[k]=ar;
 }
 
-/* ══ كشف اللغة ══ */
-function _ktDetect(text){
-  const arChars = (text.match(/[\u0600-\u06FF]/g)||[]).length;
-  const enChars = (text.match(/[a-zA-Z]/g)||[]).length;
-  const ruChars = (text.match(/[\u0400-\u04FF]/g)||[]).length;
-  const zhChars = (text.match(/[\u4E00-\u9FFF]/g)||[]).length;
-  const jaChars = (text.match(/[\u3040-\u30FF]/g)||[]).length;
-  const max = Math.max(arChars, enChars, ruChars, zhChars, jaChars);
-  if(max===0) return 'en';
-  if(arChars===max) return 'ar';
-  if(ruChars===max) return 'ru';
-  if(zhChars===max) return 'zh';
-  if(jaChars===max) return 'ja';
-  return 'en';
-}
+/* ══ IDB Translation Cache ══ */
+const _ktIDB=(function(){
+  const DB='king-tr-v1', ST='tr';
+  let _db=null;
+  async function open(){
+    if(_db) return _db;
+    return new Promise((res,rej)=>{
+      const req=indexedDB.open(DB,1);
+      req.onupgradeneeded=e=>{
+        const d=e.target.result;
+        if(!d.objectStoreNames.contains(ST)) d.createObjectStore(ST,{keyPath:'k'});
+      };
+      req.onsuccess=e=>{_db=e.target.result;res(_db);};
+      req.onerror=()=>rej(req.error);
+    });
+  }
+  return {
+    async get(k){ try{ const d=await open(); return new Promise(r=>{const q=d.transaction(ST,'readonly').objectStore(ST).get(k);q.onsuccess=()=>r(q.result?.v||null);q.onerror=()=>r(null);}); }catch(e){return null;} },
+    async set(k,v){ try{ const d=await open(); return new Promise(r=>{const tx=d.transaction(ST,'readwrite');tx.objectStore(ST).put({k,v,t:Date.now()});tx.oncomplete=()=>r(true);tx.onerror=()=>r(false);}); }catch(e){return false;} },
+    async count(){ try{ const d=await open(); return new Promise(r=>{const q=d.transaction(ST,'readonly').objectStore(ST).count();q.onsuccess=()=>r(q.result);q.onerror=()=>r(0);}); }catch(e){return 0;} },
+    async clear(){ try{ const d=await open(); return new Promise(r=>{const tx=d.transaction(ST,'readwrite');tx.objectStore(ST).clear();tx.oncomplete=()=>r(true);tx.onerror=()=>r(false);}); }catch(e){return false;} },
+    async exportAll(){ try{ const d=await open(); return new Promise(r=>{const all=[];const req=d.transaction(ST,'readonly').objectStore(ST).openCursor();req.onsuccess=e=>{const cur=e.target.result;if(cur){all.push(cur.value);cur.continue();}else r(all);};req.onerror=()=>r([]);}); }catch(e){return[];} },
+  };
+})();
 
-/* ══ Google Translate (بدون مفتاح) ══ */
+/* ══ محركات الترجمة الأونلاين ══ */
 async function _ktGoogle(text, src, tgt){
   try{
-    const sl = src==='auto'?'auto':src;
-    const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl='
-      +sl+'&tl='+tgt+'&dt=t&dt=rm&q='+encodeURIComponent(text);
-    const r = await fetch(url, {signal:AbortSignal.timeout(9000)});
+    const sl=src==='auto'?'auto':src;
+    const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+sl+'&tl='+tgt+'&dt=t&dt=rm&q='+encodeURIComponent(text);
+    const r=await fetch(url,{signal:AbortSignal.timeout(9000)});
     if(!r.ok) return null;
-    const d = await r.json();
+    const d=await r.json();
     if(!d||!d[0]) return null;
-    const translated = d[0].filter(Boolean).map(x=>x[0]||'').join('');
-    return translated || null;
-  }catch(e){ return null; }
+    return d[0].filter(Boolean).map(x=>x[0]||'').join('')||null;
+  }catch(e){return null;}
 }
-
-/* ══ MyMemory fallback ══ */
 async function _ktMyMemory(text, src, tgt){
   try{
-    const sl = src==='auto'?'ar':src;
-    const maxLen = 480;
-    const chunks = [];
-    let rem = text;
+    const sl=src==='auto'?'ar':src;
+    const maxLen=480; const chunks=[];
+    let rem=text;
     while(rem.length>0){
       if(rem.length<=maxLen){chunks.push(rem);break;}
-      let cut=rem.lastIndexOf(' ',maxLen); if(cut<50)cut=maxLen;
-      chunks.push(rem.slice(0,cut).trim()); rem=rem.slice(cut).trim();
+      let cut=rem.lastIndexOf(' ',maxLen);if(cut<50)cut=maxLen;
+      chunks.push(rem.slice(0,cut).trim());rem=rem.slice(cut).trim();
     }
-    const parts = [];
+    const parts=[];
     for(const ch of chunks){
-      const r = await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(ch)+'&langpair='+sl+'|'+tgt,
-        {signal:AbortSignal.timeout(7000)});
-      const d = await r.json();
-      if(d.responseStatus===200 && d.responseData?.translatedText) parts.push(d.responseData.translatedText);
+      const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(ch)+'&langpair='+sl+'|'+tgt,{signal:AbortSignal.timeout(7000)});
+      const d=await r.json();
+      if(d.responseStatus===200&&d.responseData?.translatedText) parts.push(d.responseData.translatedText);
       else return null;
     }
-    return parts.join(' ') || null;
-  }catch(e){ return null; }
+    return parts.join(' ')||null;
+  }catch(e){return null;}
+}
+async function _ktLingva(text, src, tgt){
+  try{
+    const sl=src==='auto'?'ar':src;
+    const r=await fetch('https://lingva.ml/api/v1/'+sl+'/'+tgt+'/'+encodeURIComponent(text),{signal:AbortSignal.timeout(8000)});
+    if(!r.ok) return null;
+    const d=await r.json();
+    return d?.translation||null;
+  }catch(e){return null;}
 }
 
-/* ══ قاموس محلي ══ */
+/* ══ ترجمة أوفلاين بالقاموس المحلي ══ */
 function _ktOffline(text, src, tgt){
-  const isArEn = (src==='ar'||(src==='auto' && _ktDetect(text)==='ar')) && tgt==='en';
-  const dict = isArEn ? _D : _E2A;
-  let result = text;
-  const entries = Object.entries(dict).sort((a,b)=>b[0].length-a[0].length);
+  const isArEn=(src==='ar'||(src==='auto'&&_ktDetect(text)==='ar'))&&tgt==='en';
+  const dict=isArEn?_D:_E2A;
+  const exact=dict[text.trim()];
+  if(exact) return exact;
+  const entries=Object.entries(dict).sort((a,b)=>b[0].length-a[0].length);
+  let result=text;
   for(const [s,t] of entries){
+    if(s.length<2) continue;
     try{
-      const esc = s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-      result = result.replace(new RegExp(esc,'gi'), t);
+      const esc=s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      result=result.replace(new RegExp(esc,'gi'),t);
     }catch(e){}
   }
   return result;
 }
 
-/* ══ الترجمة الرئيسية ══ */
+/* ══ نظام الحزم الأوفلاين بالذكاء الاصطناعي ══ */
+window._KT_PACKS=[
+  {id:'ar-en',src:'ar',tgt:'en',model:'Xenova/opus-mt-ar-en',flag:'🇸🇦→🇬🇧',label:'عربي → إنجليزي',size:'~75 MB'},
+  {id:'en-ar',src:'en',tgt:'ar',model:'Xenova/opus-mt-en-ar',flag:'🇬🇧→🇸🇦',label:'إنجليزي → عربي',size:'~75 MB'},
+  {id:'mul-en',src:'auto',tgt:'en',model:'Xenova/opus-mt-mul-en',flag:'🌐→🇬🇧',label:'متعدد → إنجليزي',size:'~180 MB'},
+];
+
+window._ktLocalPipelines={};
+
+/* تحقق ما إذا كانت الحزمة محملة (باستخدام caches API) */
+async function _ktIsPackCached(model){
+  try{
+    const keys=await caches.keys();
+    for(const k of keys){
+      const c=await caches.open(k);
+      const reqs=await c.keys();
+      if(reqs.some(r=>r.url.includes(model.replace('/','-'))||r.url.includes(model))) return true;
+    }
+    // Check localStorage flag
+    return localStorage.getItem('kt-pack-'+model)==='1';
+  }catch(e){ return localStorage.getItem('kt-pack-'+model)==='1'; }
+}
+
+/* تحميل حزمة أوفلاين */
+window._ktDownloadPack=async function(packId){
+  const pack=window._KT_PACKS.find(p=>p.id===packId);
+  if(!pack) return;
+  if(!navigator.onLine){if(typeof toast==='function')toast('⚠ يلزم اتصال للتحميل',2000);return;}
+
+  const card=document.getElementById('kt-packcard-'+packId);
+  const bar=document.getElementById('kt-packbar-'+packId);
+  const btns=document.getElementById('kt-packbtns-'+packId);
+  const statusEl=document.getElementById('kt-packstatus-'+packId);
+
+  if(bar) bar.style.display='block';
+  if(btns) btns.innerHTML='<span style="font-size:11px;color:var(--gold)"><i class="fas fa-spinner fa-spin"></i> جارٍ تحميل النموذج...</span>';
+
+  try{
+    const {pipeline,env}=await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+    env.allowRemoteModels=true;
+    env.useBrowserCache=true;
+
+    let lastFile='';
+    const _dlFileLoaded={};
+    const _dlFileTotals={};
+    const translator=await pipeline('translation',pack.model,{
+      progress_callback:(info)=>{
+        if(info.status==='progress'){
+          const pct=Math.round(info.progress||0);
+          const fill=document.getElementById('kt-packfill-'+packId);
+          const txt=document.getElementById('kt-packtxt-'+packId);
+          if(fill) fill.style.width=pct+'%';
+          if(txt){
+            if(info.file){
+              _dlFileLoaded[info.file]=info.loaded||0;
+              if(info.total) _dlFileTotals[info.file]=info.total;
+            }
+            const totalLoaded=Object.values(_dlFileLoaded).reduce((a,b)=>a+b,0);
+            const totalSize=Object.values(_dlFileTotals).reduce((a,b)=>a+b,0);
+            const mb=totalSize?(totalLoaded/1024/1024).toFixed(1)+'/'+(totalSize/1024/1024).toFixed(1)+' MB':'';
+            txt.textContent=pct+'% '+mb+(info.file&&info.file!==lastFile?' — '+info.file.split('/').pop():'');
+            if(info.file) lastFile=info.file;
+          }
+        }
+      }
+    });
+
+    window._ktLocalPipelines[packId]=translator;
+    localStorage.setItem('kt-pack-'+pack.model,'1');
+
+    if(btns) btns.innerHTML=`
+      <button onclick="_ktTestPack('${packId}')" class="kt-pack-btn green"><i class="fas fa-flask"></i> اختبار</button>
+      <button onclick="_ktDeletePack('${packId}')" class="kt-pack-btn red"><i class="fas fa-trash"></i> حذف</button>
+    `;
+    if(statusEl) statusEl.innerHTML='<i class="fas fa-check-circle" style="color:#22c55e"></i> مفعّل ومجاهز';
+    if(card) card.classList.add('kt-pack-active');
+    if(typeof toast==='function') toast('✅ تم تحميل الحزمة — الترجمة الآن بدون إنترنت!',3000);
+    _ktRenderPackCount();
+  }catch(e){
+    console.error(e);
+    if(btns) btns.innerHTML=`<button onclick="_ktDownloadPack('${packId}')" class="kt-pack-btn gold"><i class="fas fa-download"></i> إعادة المحاولة</button>`;
+    if(statusEl) statusEl.innerHTML='<span style="color:#f87171"><i class="fas fa-times-circle"></i> فشل التحميل</span>';
+    if(typeof toast==='function') toast('❌ فشل: '+e.message,3000);
+  }
+  if(bar) bar.style.display='none';
+};
+
+/* حذف حزمة */
+window._ktDeletePack=async function(packId){
+  const pack=window._KT_PACKS.find(p=>p.id===packId);
+  if(!pack) return;
+  delete window._ktLocalPipelines[packId];
+  localStorage.removeItem('kt-pack-'+pack.model);
+  // مسح من cache
+  try{
+    const keys=await caches.keys();
+    for(const k of keys){
+      const c=await caches.open(k);
+      const reqs=await c.keys();
+      for(const req of reqs){
+        if(req.url.includes('xenova')||req.url.includes('opus-mt')) await c.delete(req);
+      }
+    }
+  }catch(e){}
+  _ktRenderPacks();
+  if(typeof toast==='function') toast('🗑 تم حذف الحزمة',1500);
+};
+
+/* اختبار الحزمة */
+window._ktTestPack=async function(packId){
+  const pipeline=window._ktLocalPipelines[packId];
+  if(!pipeline){ if(typeof toast==='function') toast('الحزمة غير محملة',1500); return; }
+  const pack=window._KT_PACKS.find(p=>p.id===packId);
+  if(typeof toast==='function') toast('<i class="fas fa-spinner fa-spin"></i> اختبار الترجمة...',2000);
+  try{
+    const testText=pack.src==='ar'?'مرحبا، كيف حالك اليوم؟':'Hello, how are you today?';
+    const result=await pipeline(testText,{max_new_tokens:128});
+    const tr=result[0]?.translation_text||'—';
+    if(typeof toast==='function') toast('✅ الحزمة تعمل: '+tr,4000);
+  }catch(e){
+    if(typeof toast==='function') toast('❌ خطأ: '+e.message,3000);
+  }
+};
+
+/* عرض عدد الحزم المفعّلة */
+function _ktRenderPackCount(){
+  const active=Object.keys(window._ktLocalPipelines).length;
+  const badge=document.getElementById('ktPackBadge');
+  if(badge){
+    badge.textContent=active||'';
+    badge.classList.toggle('show',active>0);
+  }
+}
+
+/* رسم بطاقات الحزم */
+window._ktRenderPacks=function(){
+  const wrap=document.getElementById('ktPackCards');
+  if(!wrap) return;
+  wrap.innerHTML=window._KT_PACKS.map(p=>{
+    const loaded=!!window._ktLocalPipelines[p.id];
+    const canDL=navigator.onLine;
+    return `
+    <div class="kt-pack-card ${loaded?'kt-pack-active':''}" id="kt-packcard-${p.id}">
+      <div class="kt-pack-flag">${p.flag}</div>
+      <div class="kt-pack-info">
+        <div class="kt-pack-name">${p.label}</div>
+        <div class="kt-pack-size">${p.size} • Helsinki-NLP Opus-MT</div>
+        <div class="kt-pack-status" id="kt-packstatus-${p.id}">
+          ${loaded?'<i class="fas fa-check-circle" style="color:#22c55e"></i> مفعّل':'<i class="fas fa-circle" style="color:var(--text3)"></i> غير محمّل'}
+        </div>
+      </div>
+      <div>
+        <div class="kt-pack-btns" id="kt-packbtns-${p.id}">
+          ${loaded
+            ?`<button onclick="_ktTestPack('${p.id}')" class="kt-pack-btn green"><i class="fas fa-flask"></i> اختبار</button>
+               <button onclick="_ktDeletePack('${p.id}')" class="kt-pack-btn red"><i class="fas fa-trash"></i> حذف</button>`
+            :`<button onclick="_ktDownloadPack('${p.id}')" class="kt-pack-btn gold" ${canDL?'':'disabled'}><i class="fas fa-download"></i> تحميل</button>`
+          }
+        </div>
+      </div>
+      <div class="kt-pack-bar" id="kt-packbar-${p.id}" style="display:none">
+        <div class="kt-pack-bar-outer"><div class="kt-pack-bar-fill" id="kt-packfill-${p.id}" style="width:0%"></div></div>
+        <div class="kt-pack-bar-txt" id="kt-packtxt-${p.id}">0%</div>
+      </div>
+    </div>`;
+  }).join('');
+  _ktRenderPackCount();
+};
+
+/* تصدير الكاش كـ JSON */
+window._ktExportCache=async function(){
+  const all=await _ktIDB.exportAll();
+  if(!all.length){if(typeof toast==='function')toast('لا يوجد كاش للتصدير',1500);return;}
+  const blob=new Blob([JSON.stringify(all,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='king-translate-cache-'+Date.now()+'.json';a.click();
+  if(typeof toast==='function') toast('✅ تم تصدير '+all.length+' ترجمة',2000);
+};
+
+/* استيراد كاش */
+window._ktImportCache=function(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=async function(){
+    const file=inp.files[0];if(!file)return;
+    try{
+      const text=await file.text();
+      const data=JSON.parse(text);
+      if(!Array.isArray(data)) throw new Error('صيغة خاطئة');
+      let count=0;
+      for(const item of data){
+        if(item.k&&item.v){await _ktIDB.set(item.k,item.v);count++;}
+      }
+      _ktUpdateCacheStats();
+      if(typeof toast==='function') toast('✅ تم استيراد '+count+' ترجمة',2500);
+    }catch(e){
+      if(typeof toast==='function') toast('❌ خطأ في الملف: '+e.message,2500);
+    }
+  };
+  inp.click();
+};
+
+/* مسح الكاش */
+window._ktClearCache=async function(){
+  await _ktIDB.clear();
+  _ktUpdateCacheStats();
+  if(typeof toast==='function') toast('🗑 تم مسح الكاش',1500);
+};
+
+/* تحديث إحصاء الكاش */
+async function _ktUpdateCacheStats(){
+  const n=await _ktIDB.count();
+  const el=document.getElementById('ktCacheCount');
+  if(el) el.textContent=n.toLocaleString('ar-SA');
+}
+
+/* ══ الترجمة الرئيسية المحسّنة ══ */
 async function _ktDoTranslate(text, src, tgt){
   let translated=null, method='';
-  const online = navigator.onLine!==false;
+  const online=navigator.onLine!==false;
+  const cacheKey=src+'|'+tgt+'|'+text.slice(0,300);
+  const detSrc=src==='auto'?_ktDetect(text):src;
+  const packId=detSrc+'-'+tgt;
 
-  if(online){
-    translated = await _ktGoogle(text, src, tgt);
-    if(translated) method='google';
+  /* 1. نموذج AI المحلي */
+  if(window._ktLocalPipelines[packId]){
+    try{
+      const res=await window._ktLocalPipelines[packId](text,{max_new_tokens:512});
+      const t=res[0]?.translation_text;
+      if(t){translated=t;method='local-ai';}
+    }catch(e){}
   }
-  if(!translated && online){
-    translated = await _ktMyMemory(text, src, tgt);
-    if(translated) method='memory';
-  }
+
+  /* 2. كاش IDB */
   if(!translated){
-    translated = _ktOffline(text, src, tgt);
+    const cached=await _ktIDB.get(cacheKey);
+    if(cached){translated=cached;method='cache';}
+  }
+
+  /* 3. Google Translate */
+  if(!translated&&online){
+    translated=await _ktGoogle(text,src,tgt);
+    if(translated){method='google';_ktIDB.set(cacheKey,translated);_ktUpdateCacheStats();}
+  }
+
+  /* 4. MyMemory */
+  if(!translated&&online){
+    translated=await _ktMyMemory(text,src,tgt);
+    if(translated){method='memory';_ktIDB.set(cacheKey,translated);_ktUpdateCacheStats();}
+  }
+
+  /* 5. Lingva */
+  if(!translated&&online){
+    translated=await _ktLingva(text,src,tgt);
+    if(translated){method='lingva';_ktIDB.set(cacheKey,translated);_ktUpdateCacheStats();}
+  }
+
+  /* 6. قاموس محلي */
+  if(!translated){
+    translated=_ktOffline(text,src,tgt);
     method='local';
   }
-  return {translated, method};
+
+  return {translated,method};
 }
+
+/* ══ واجهة: زر الترجمة
 
 /* ══ واجهة: زر الترجمة ══ */
 window._ktTranslate = async function(){
@@ -22972,7 +23608,10 @@ function _ktShowResult(translated, method, src, tgt){
   const methodMap = {
     google:{cls:'google',icon:'fa-check-circle',label:'Google Translate'},
     memory:{cls:'memory',icon:'fa-cloud',label:'MyMemory'},
-    local:{cls:'local',icon:'fa-database',label:'قاموس محلي (أوف لاين)'},
+    lingva:{cls:'memory',icon:'fa-globe',label:'Lingva Translate'},
+    'local-ai':{cls:'google',icon:'fa-brain',label:'🤖 ذكاء اصطناعي محلي'},
+    cache:{cls:'local',icon:'fa-database',label:'💾 محفوظ أوفلاين'},
+    local:{cls:'local',icon:'fa-book',label:'قاموس محلي'},
   };
   const m = methodMap[method]||methodMap.local;
   methodEl.className = 'kt-result-method '+m.cls;
@@ -23449,6 +24088,24 @@ document.addEventListener('DOMContentLoaded', function(){
   const src=document.getElementById('ktSrcLang'), tgt=document.getElementById('ktTgtLang');
   if(src) src.value='ar';
   if(tgt) tgt.value='en';
+
+  // تهيئة لوحة الحزم
+  _ktUpdateCacheStats();
+  // تحديث حالة الاتصال في لوحة الحزم
+  function _ktUpdatePackOnline(){
+    const el=document.getElementById('ktPackOnlineStatus');
+    if(!el) return;
+    if(navigator.onLine){
+      el.style.background='rgba(34,197,94,.08)';el.style.borderColor='rgba(34,197,94,.2)';el.style.color='#4ade80';
+      el.innerHTML='<i class="fas fa-wifi"></i> متصل — يمكنك تحميل الحزم';
+    }else{
+      el.style.background='rgba(239,68,68,.08)';el.style.borderColor='rgba(239,68,68,.2)';el.style.color='#f87171';
+      el.innerHTML='<i class="fas fa-wifi-slash"></i> غير متصل — الحزم المحملة تعمل بشكل طبيعي';
+    }
+  }
+  window.addEventListener('online',_ktUpdatePackOnline);
+  window.addEventListener('offline',_ktUpdatePackOnline);
+  _ktUpdatePackOnline();
 });
 
 })();
@@ -26405,6 +27062,28 @@ document.addEventListener('DOMContentLoaded',()=>{
 ══════════════════════════════════════════════ -->
 <style>
 /* ══ KingTranslate Ultra CSS ══ */
+
+/* ══ Pack Download UI ══ */
+.kt-pack-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:16px;padding:14px 14px 10px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s,box-shadow .2s;}
+.kt-pack-card.kt-pack-active{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.04);box-shadow:0 0 0 1px rgba(34,197,94,.1);}
+.kt-pack-flag{font-size:1.6rem;line-height:1;}
+.kt-pack-info{flex:1;}
+.kt-pack-name{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px;}
+.kt-pack-size{font-size:10px;color:var(--text3);}
+.kt-pack-status{font-size:10.5px;margin-top:4px;}
+.kt-pack-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.kt-pack-btn{padding:5px 12px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid transparent;transition:all .15s;}
+.kt-pack-btn.gold{background:rgba(201,149,42,.12);border-color:rgba(201,149,42,.3);color:var(--gold);}
+.kt-pack-btn.gold:disabled{opacity:.4;cursor:not-allowed;}
+.kt-pack-btn.green{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:#4ade80;}
+.kt-pack-btn.red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:#f87171;}
+.kt-pack-btn.blue{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.25);color:#38bdf8;}
+.kt-pack-btn:not(.gold):not(.green):not(.red):not(.blue){background:var(--surface3);border-color:var(--border);color:var(--text2);}
+.kt-pack-bar{width:100%;}
+.kt-pack-bar-outer{height:5px;background:var(--surface3);border-radius:10px;overflow:hidden;margin-bottom:3px;}
+.kt-pack-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),#f59e0b);border-radius:10px;transition:width .3s;}
+.kt-pack-bar-txt{font-size:10px;color:var(--text3);text-align:center;}
+
 #kingTranslateModal {
   position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9990;
   display:none;align-items:flex-end;justify-content:center;
@@ -27171,6 +27850,10 @@ document.addEventListener('DOMContentLoaded',()=>{
       <button class="kt-tab" data-panel="history" onclick="_ktTab('history',this)">
         <i class="fas fa-history"></i> سجل
       </button>
+      <button class="kt-tab" data-panel="packs" onclick="_ktTab('packs',this);_ktRenderPacks();">
+        <i class="fas fa-download"></i> أوفلاين
+        <span class="kt-tab-badge" id="ktPackBadge"></span>
+      </button>
     </div>
 
     <!-- المحتوى -->
@@ -27451,6 +28134,55 @@ document.addEventListener('DOMContentLoaded',()=>{
           </div>
         </div>
         <div id="ktHistoryList"></div>
+      </div>
+
+
+      <!-- ══ لوحة الحزم الأوفلاين ══ -->
+      <div class="kt-panel" id="kt-panel-packs">
+        <div style="margin-bottom:14px">
+          <div style="font-size:14px;font-weight:900;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <i class="fas fa-brain" style="color:var(--gold)"></i>
+            حزم الترجمة الذكية
+          </div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.6">
+            حمّل نموذج الذكاء الاصطناعي مرة واحدة ← ترجم بلا إنترنت إلى الأبد
+          </div>
+        </div>
+
+        <!-- حالة الاتصال -->
+        <div id="ktPackOnlineStatus" style="display:flex;align-items:center;gap:6px;font-size:11px;padding:7px 12px;border-radius:10px;margin-bottom:12px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:#4ade80">
+          <i class="fas fa-wifi"></i> متصل — يمكنك تحميل الحزم
+        </div>
+
+        <!-- بطاقات الحزم -->
+        <div id="ktPackCards" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+          <div style="text-align:center;padding:30px;color:var(--text3)">
+            <i class="fas fa-circle-notch fa-spin"></i> جارٍ التحميل...
+          </div>
+        </div>
+
+        <!-- كاش التعلم التلقائي -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:800;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <i class="fas fa-database" style="color:#38bdf8"></i>
+            ذاكرة الترجمة التلقائية
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.6">
+            كل ترجمة تجريها أونلاين تُحفظ تلقائياً. الآن عندك
+            <strong style="color:var(--text)" id="ktCacheCount">0</strong> ترجمة محفوظة.
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button onclick="_ktExportCache()" class="kt-pack-btn blue"><i class="fas fa-download"></i> تصدير JSON</button>
+            <button onclick="_ktImportCache()" class="kt-pack-btn" style="background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:#818cf8"><i class="fas fa-upload"></i> استيراد</button>
+            <button onclick="_ktClearCache()" class="kt-pack-btn red"><i class="fas fa-trash"></i> مسح</button>
+          </div>
+        </div>
+
+        <!-- نصيحة -->
+        <div style="font-size:10.5px;color:var(--text3);text-align:center;line-height:1.6;padding:8px;border-radius:10px;background:rgba(201,149,42,.04);border:1px solid rgba(201,149,42,.12)">
+          <i class="fas fa-lightbulb" style="color:var(--gold)"></i>
+          بعد التحميل، الحزمة تُخزَّن في المتصفح وتشتغل بلا إنترنت حتى بعد إغلاق التطبيق
+        </div>
       </div>
 
     </div><!-- /kt-body -->
@@ -29542,7 +30274,9 @@ function _remUpdateHeader(){
   const total   = active + done;
   document.getElementById('remSumActive')  && (document.getElementById('remSumActive').textContent = active);
   document.getElementById('remSumDone')    && (document.getElementById('remSumDone').textContent = done);
+  document.getElementById('remSumDone2')   && (document.getElementById('remSumDone2').textContent = done);
   document.getElementById('remSumTotal')   && (document.getElementById('remSumTotal').textContent = total);
+  document.getElementById('remSumTotal2')  && (document.getElementById('remSumTotal2').textContent = total);
   document.getElementById('remSumRoutine') && (document.getElementById('remSumRoutine').textContent = routine);
   document.getElementById('remSumDate')    && (document.getElementById('remSumDate').textContent = now.toLocaleDateString('ar-SA',{weekday:'short',day:'numeric',month:'short'}));
   const fill = document.getElementById('remProgressFill');
