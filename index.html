@@ -791,48 +791,6 @@ body.fs-xl  { font-size:19px; }
 .deep-card-related strong { color:var(--text3); }
 .deep-card-conf { display:flex; align-items:center; gap:7px; margin-top:11px; padding-top:10px; border-top:1px solid var(--border); }
 
-/* ─── MULTI-ANSWER CARD — وضع التفكير: إجابات متعددة ─── */
-.multi-ans-wrap {
-  display:flex; flex-direction:column; gap:9px; margin:4px 0 8px;
-}
-.multi-ans-header {
-  font-size:.72rem; font-weight:800; color:var(--gold);
-  letter-spacing:.03em; padding-bottom:6px;
-  border-bottom:1px solid rgba(201,149,42,.18);
-  display:flex; align-items:center; gap:6px;
-}
-.multi-ans-item {
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:12px; padding:11px 13px; cursor:default;
-  transition:border-color .2s;
-}
-.multi-ans-item:first-of-type {
-  border-color:rgba(201,149,42,.35);
-  background:rgba(201,149,42,.06);
-}
-.multi-ans-item-q {
-  font-size:.72rem; font-weight:800; color:var(--text3);
-  margin-bottom:4px;
-}
-.multi-ans-item-a {
-  font-size:.9rem; color:var(--text); line-height:1.72; font-weight:600;
-}
-.multi-ans-item-conf {
-  display:flex; align-items:center; gap:6px; margin-top:7px;
-}
-.multi-ans-pick {
-  margin-top:5px; font-size:.72rem; color:var(--text3);
-  font-style:italic;
-}
-
-/* ─── REJECTION BADGE ─── */
-.rej-badge {
-  display:inline-flex; align-items:center; gap:5px;
-  background:rgba(239,68,68,.1); color:#fca5a5;
-  font-size:.6875rem; padding:3px 10px; border-radius:20px;
-  margin-top:5px; font-weight:700; border:1px solid rgba(239,68,68,.2);
-}
-
 /* ─── UNKNOWN CARD ─── */
 .unknown-card {
   background:rgba(239,68,68,.05); border:1px dashed rgba(239,68,68,.2);
@@ -8415,8 +8373,7 @@ const DEF_DB={
   knowledge:{},entities:{},
   history:[],learnLog:[],
   stats:{totalAnswers:0,positive:0,negative:0,corrections:0},
-  flags:{autoLearn:true,confThreshold:30},
-  rejections:{}  /* { normQ: ['normAnsPrefix1','normAnsPrefix2',...] } */
+  flags:{autoLearn:true,confThreshold:30}
 };
 let S={
   smartSugQ:true,mergeSimilar:false,contextAware:false,hideLowConf:true,
@@ -8738,7 +8695,6 @@ function loadDB(){
 function migrate(o){
   if(!o.entities)o.entities={};
   if(!o.flags)o.flags={autoLearn:true,confThreshold:30};
-  if(!o.rejections)o.rejections={};
   if(!o.meta)o.meta={version:'24.0',created:Date.now(),seedVersion:0};
   if(!o.meta.seedVersion)o.meta.seedVersion=0;
   if(o.knowledge){Object.keys(o.knowledge).forEach(k=>{if(typeof o.knowledge[k]==='string')o.knowledge[k]={display:k,answer:o.knowledge[k],confidence:.7,usageCount:0,history:[]};if(!o.knowledge[k].history)o.knowledge[k].history=[];});
@@ -9463,33 +9419,6 @@ function adjConf(q,d,reason){
 }
 function confColor(c){return c>=.85?'#22c55e':c>=.70?'#4ade80':c>=.55?'#e8b84b':c>=.40?'#f97316':'#ef4444';}
 
-/* ══════════════════════════════════════════════════════════
-   🚫 نظام رفض الأخطاء — "هذا السؤال لا يعني هذه الإجابة"
-   يحفظ أزواج (سؤال → إجابة خاطئة) ويتجنبها مستقبلاً
-══════════════════════════════════════════════════════════ */
-function _rejKey(q)  { return norm(q||'').substring(0,100); }
-function _rejVal(ans){ return norm(ans||'').substring(0,80); }
-
-function addRejection(q, ans){
-  if(!q||!ans)return;
-  if(!DB.rejections)DB.rejections={};
-  const k=_rejKey(q), v=_rejVal(ans);
-  if(!k||!v)return;
-  if(!DB.rejections[k]) DB.rejections[k]=[];
-  if(!DB.rejections[k].includes(v)) DB.rejections[k].push(v);
-  /* حد أقصى 10 رفضات لكل سؤال لمنع تضخم التخزين */
-  if(DB.rejections[k].length>10) DB.rejections[k]=DB.rejections[k].slice(-10);
-  DB.learnLog.push({t:Date.now(),reason:'rejection',key:k});
-  if(DB.learnLog.length>500)DB.learnLog=DB.learnLog.slice(-500);
-  saveDB();
-}
-
-function isRejected(q, ans){
-  if(!DB.rejections||!q||!ans)return false;
-  const k=_rejKey(q), v=_rejVal(ans);
-  return !!(DB.rejections[k]&&DB.rejections[k].includes(v));
-}
-
 /* ═══ MATH ═══ */
 /* ═══════════════════════════════════════════════════════════════════
    🔢  MATH ENGINE v4 — محرك رياضيات شامل ومتكامل
@@ -9940,105 +9869,17 @@ function evalLimit(exprStr,to,dir='both'){
   /* ── تنظيف التعبير ── */
   const expr = exprStr.trim();
 
-  /* ══ PRIORITY 0: محلل الدوال الكسرية (polynomial ratio) ══
-     يعطي نتيجة رمزية صحيحة 100% بمقارنة الدرجات — يتجاوز Algebrite */
+  /* ══ صفر: كشف سريع لـ Infinity بالتقييم الفوري ══ */
   if(!isFinite(to)){
-    const sgn = to > 0 ? 1 : -1;
-
-    /* استخرج البسط والمقام إذا كان التعبير كسراً */
-    function _splitRatio(s){
-      s = s.trim();
-      /* يجب أن يبدأ بـ ( ويكون هناك / على نفس المستوى */
-      let depth=0, slashIdx=-1;
-      for(let i=0;i<s.length;i++){
-        if(s[i]==='(')depth++;
-        else if(s[i]===')'){depth--;if(depth<0)break;}
-        else if(s[i]==='/'&&depth===0){slashIdx=i;break;}
-      }
-      if(slashIdx<1) return null;
-      return{num:s.slice(0,slashIdx).trim(), den:s.slice(slashIdx+1).trim()};
-    }
-
-    /* احسب الدرجة القصوى لمتغير x في تعبير متعدد الحدود */
-    function _polyDeg(s){
-      s = s.replace(/\s+/g,'');
-      /* ابحث عن كل x^n أو x**n أو x² أو x³ */
-      let maxDeg = 0;
-      const pats = [
-        /x\*\*(\d+)/g, /x\^(\d+)/g,
-        /x²/g, /x³/g, /x⁴/g, /x⁵/g
-      ];
-      const vals = {'x²':2,'x³':3,'x⁴':4,'x⁵':5};
-      pats.slice(0,2).forEach(p=>{
-        let m; while((m=p.exec(s))!==null) maxDeg=Math.max(maxDeg,+m[1]);
-      });
-      pats.slice(2).forEach(p=>{
-        let m; while((m=p.exec(s))!==null) maxDeg=Math.max(maxDeg,vals[m[0]]||0);
-      });
-      if(maxDeg===0 && /\bx\b/.test(s)) maxDeg=1;
-      return maxDeg;
-    }
-
-    /* استخرج المعامل الرئيسي (leading coefficient) */
-    function _leadCoeff(s, deg){
-      if(deg===0){
-        /* ثابت — احسب القيمة عند x=1 كتقريب */
-        return evalFn(s, 1e8) || 1;
-      }
-      /* اشتق عن طريق: f(x)/x^deg عند x→∞ عددياً */
-      const probe = [1e6,1e8,1e10];
-      const vals = probe.map(v=>{ const r=evalFn(s,v); return r!==null?r/Math.pow(v,deg):null; }).filter(v=>v!==null&&isFinite(v));
-      if(vals.length===0) return null;
-      /* متوسط القيم لاستقرار أفضل */
-      return vals.reduce((a,b)=>a+b,0)/vals.length;
-    }
-
-    const ratio = _splitRatio(expr);
-    if(ratio){
-      const numDeg = _polyDeg(ratio.num);
-      const denDeg = _polyDeg(ratio.den);
-      if(numDeg > denDeg){
-        /* درجة البسط أكبر → النهاية ±∞ */
-        const lc = _leadCoeff(ratio.num, numDeg);
-        const dc = _leadCoeff(ratio.den, denDeg);
-        if(lc!==null && dc!==null){
-          /* إشارة النهاية = إشارة (lc/dc) * sgn^(numDeg-denDeg) */
-          const expDiff = numDeg - denDeg;
-          const signFactor = Math.sign(lc) * Math.sign(dc) * Math.pow(sgn, expDiff);
-          return signFactor >= 0 ? Infinity : -Infinity;
-        }
-        return sgn > 0 ? Infinity : -Infinity; /* تقدير افتراضي */
-      }
-      if(numDeg === denDeg){
-        /* نفس الدرجة → النهاية = نسبة المعاملات الرئيسية */
-        const lc = _leadCoeff(ratio.num, numDeg);
-        const dc = _leadCoeff(ratio.den, denDeg);
-        if(lc!==null && dc!==null && Math.abs(dc)>1e-15) return lc/dc;
-      }
-      if(numDeg < denDeg){
-        /* درجة المقام أكبر → النهاية = 0 */
-        return 0;
-      }
-    }
-
-    /* ══ كشف رقمي سريع شامل — يعمل لكل دالة ══ */
-    const fastPr=[1e3,1e5,1e8,1e12,1e20,1e50,1e100];
+    const sgn=to>0?1:-1;
+    const fastPr=[1e4,1e8,1e15,1e50,1e100,1e200,1e307];
     const fv=fastPr.map(v=>evalFn(expr,v*sgn)).filter(v=>v!==null);
     const fInf=fv.filter(v=>!isFinite(v));
     if(fInf.length>=2){return fInf[fInf.length-1]>0?Infinity:-Infinity;}
     if(fInf.length===1&&fv.length>=3){return fInf[0]>0?Infinity:-Infinity;}
     const fFin=fv.filter(v=>isFinite(v));
-    if(fFin.length>=2){
-      const first=Math.abs(fFin[0])||1;
-      const last=fFin[fFin.length-1];
-      const absLast=Math.abs(last);
-      /* إذا كانت القيم تتنامى بوضوح → النهاية ∞ */
-      if(absLast > first * 1e4 && absLast > 1e3) return last>0?Infinity:-Infinity;
-      if(absLast > 1e12) return last>0?Infinity:-Infinity;
-      /* إذا كانت القيم تستقر → ارجع القيمة المستقرة */
-      const spread = Math.max(...fFin) - Math.min(...fFin);
-      const avg = fFin.reduce((a,b)=>a+b,0)/fFin.length;
-      if(spread < Math.abs(avg)*0.01+1e-9 && fFin.length>=3) return last;
+    if(fFin.length>=2&&Math.abs(fFin[fFin.length-1])>1e12){
+      return fFin[fFin.length-1]>0?Infinity:-Infinity;
     }
   }
 
@@ -10121,10 +9962,6 @@ function evalLimit(exprStr,to,dir='both'){
           const farMean=farV.reduce((a,b)=>a+b,0)/farV.length;
           /* إذا القيم البعيدة مستقرة → تقارب */
           if(farSpread<Math.abs(farMean)*0.001+1e-10) return farV[farV.length-1];
-          /* إذا القيم البعيدة تتنامى → تباعد */
-          const farLast=Math.abs(farV[farV.length-1]);
-          const farFirst=Math.abs(farV[0])||1;
-          if(farLast>farFirst*100&&farLast>1e3) return farV[farV.length-1]>0?Infinity:-Infinity;
         }
         const range=Math.max(...finV)-Math.min(...finV);
         const avg2=finV.reduce((a,b)=>a+b,0)/finV.length;
@@ -10140,13 +9977,8 @@ function evalLimit(exprStr,to,dir='both'){
       const lastDiff=Math.abs(diffs[diffs.length-1]);
       const prevDiff=Math.abs(diffs[diffs.length-2]||diffs[diffs.length-1]);
       if(lastDiff<1e-3&&prevDiff<1e-2&&absLast<1e8) return last;
-      /* ── كشف التنامي الواضح (التباعد) ── */
-      if(absLast>absFirst*1e4&&absLast>1e3) return last>0?Infinity:-Infinity;
       if(absLast>absFirst*100) return last>0?Infinity:-Infinity;
       if(absLast>1e15) return last>0?Infinity:-Infinity;
-      /* إذا كانت القيم تتنامى بشكل رتيب → تباعد */
-      if(incC>=finV.length-2&&decC===0&&absLast>1e3&&absLast>absFirst*10) return last>0?Infinity:-Infinity;
-      if(decC>=finV.length-2&&incC===0&&absLast>1e3&&absLast>absFirst*10) return last>0?Infinity:-Infinity;
       return last;
     }
     if(finV.length>=1){
@@ -10350,8 +10182,7 @@ function derivative(rawExpr){
     steps.push(`<span class="mrc-rule-step">📌 المحرك الرمزي حسب قواعد التفاضل</span>`);
     steps.push(`💡 المشتقة تقيس <b>معدل التغيّر</b> — كم تتغير قيمة الدالة عند تغيّر x بمقدار صغير جداً`);
     steps.push(buildDerivHTML(rawExpr, simplified));
-    const simplifiedH=symFracToHTML(simplified);
-    steps.push(`✅ <b>f′(x) = ${simplifiedH.replace(/\^2/g,'²').replace(/\^3/g,'³')}</b>`);
+    steps.push(`✅ <b>f′(x) = ${simplified.replace(/\^2/g,'²').replace(/\^3/g,'³')}</b>`);
     return R(simplified,'');
   }
 
@@ -10470,8 +10301,7 @@ function integral(rawExpr){
     steps.push(`💡 التكامل هو <b>عكس الاشتقاق</b> — نجد الدالة التي إذا اشتققناها أعطتنا f(x)`);
     steps.push(`<span class="mrc-rule-step">📌 المحرك الرمزي بتطبيق قواعد التكامل</span>`);
     steps.push(`🧮 f(x) = <b>${rawExpr.replace(/\^2/g,'²').replace(/\^3/g,'³')}</b>`);
-    const asKasrH=symFracToHTML(asKasr);
-    steps.push(`✅ <b>∫ f(x) dx = ${asKasrH.replace(/\^2/g,'²').replace(/\^3/g,'³')} + C</b>`);
+    steps.push(`✅ <b>∫ f(x) dx = ${asKasr.replace(/\^2/g,'²').replace(/\^3/g,'³')} + C</b>`);
     steps.push(`💡 ثابت التكامل C يُضاف دائماً لأن مشتقة أي ثابت = صفر`);
     return R(asKasr+' + C','');
   }
@@ -10942,7 +10772,7 @@ function solve(input){
     R._graphExpr=exprD;
     if(d){
       R.steps=[buildDerivHTML(exprD),...d.steps];
-      R.answer=`f′(x) = ${symFracToHTML(d.result)}`;
+      R.answer=`f′(x) = ${d.result}`;
       R._graphExpr2=d.result; /* لرسم المشتقة أيضاً */
     } else {
       R.steps=[buildDerivHTML(exprD),'⚠ يتطلب تحليلاً رمزياً — أرسل للـ AI'];
@@ -11004,7 +10834,7 @@ function solve(input){
     const ig=integral(exprI);
     R.type='calculus';R.subtitle='التكامل';
     R._graphExpr=exprI;
-    if(ig){R.steps=[buildIntegralHTML(exprI),...ig.steps];R.answer=`∫ ${exprI} dx = ${symFracToHTML(ig.result)}`;}
+    if(ig){R.steps=[buildIntegralHTML(exprI),...ig.steps];R.answer=`∫ ${exprI} dx = ${ig.result}`;}
     else{const r01=numIntegral(exprI,0,1);R.steps=[buildIntegralHTML(exprI),r01!==null?`من 0 إلى 1 ≈ ${fmt(r01)}`:'تكامل رمزي — أرسل للـ AI'];R.answer=r01!==null?`∫₀¹ ≈ ${fmt(r01)}`:'أرسل للـ AI';}
     return R;
   }
@@ -11268,18 +11098,6 @@ function mathToHTML(str){
 ══════════════════════════════════════════════════════════════ */
 function mrcFrac(num, den){
   return `<span class="mrc-vfrac"><span class="mrc-vfrac-num">${num}</span><span class="mrc-vfrac-den">${den}</span></span>`;
-}
-
-/* تحويل الكسور الرمزية مثل 1/3 أو x^2/3 إلى عرض جميل HTML */
-function symFracToHTML(s){
-  if(!s||typeof s!=='string') return s;
-  /* نتعامل مع أنماط الكسور: عدد/عدد أو معامل/عدد مثل 1/3 أو -2/5 */
-  return s.replace(/(-?\d+)\/(\d+)(?!\d)/g,(m,num,den)=>{
-    if(den==='1') return num;
-    const g=function(a,b){return b===0?a:g(b,a%b);}(Math.abs(+num),+den);
-    const n2=+num/g, d2=+den/g;
-    return mrcFrac(String(n2),String(d2));
-  });
 }
 
 function buildIntegralHTML(expr, a, b, result){
@@ -12220,37 +12038,10 @@ function respond(orig){
     const all=allAns(sQ,0,200,5000); /* بحث عميق: حد أعلى 200 نتيجة، وقت 5 ثواني */
     if(all.length){
       updateCtx(orig,all[0].answer,all[0].answer);
-
-      /* ── اكتشاف الإجابات المتمايزة: تجميع ما يختلف محتواه اختلافاً حقيقياً ── */
-      const distinct=[];
-      for(const r of all){
-        if(isRejected(orig, r.answer)) continue; /* تجاهل المرفوض */
-        const rn=norm(r.answer||'');
-        /* اعتبرها مكررة إذا التشابه >75% مع أي إجابة مقبولة بالفعل */
-        if(!distinct.some(d=>simC(norm(d.answer||''),rn)>0.75))
-          distinct.push(r);
-        if(distinct.length>=5) break;
-      }
-
-      /* ── إذا توجد إجابات متعددة فعلاً — أعرضها كبطاقات منفصلة ── */
-      if(distinct.length>1){
-        return{
-          text:'تفكير عميق',
-          mainAns:'وجدت '+distinct.length+' إجابات محتملة',
-          ansType:'تفكير عميق', ansClass:'infer',
-          confidence:distinct[0].confidence||0.7,
-          _deepMode:true,
-          _multipleAnswers:distinct.slice(0,5),
-          sugs:getSugs(distinct[0].answer,orig)
-        };
-      }
-
-      /* ── إجابة واحدة أو لا شيء — العرض العادي كقائمة ── */
-      const rows=all.filter(r=>!isRejected(orig,r.answer)).slice(0,20).map((r,i)=>{
+      const rows=all.map((r,i)=>{
         const pct=Math.round((r.confidence||0.7)*100);
         return `**${i+1}.** ${r.display}\n> ${r.answer} _(${pct}%)_`;
       }).join('\n\n');
-      if(!rows){_lastUnanswered=orig;return{_notFound:true};}
       return{text:'تفكير عميق',mainAns:`🔍 **بحث عميق** — ${all.length} نتيجة مرتبة:\n\n`+rows,ansType:'تفكير عميق',ansClass:'infer',confidence:all[0].confidence,_deepMode:true};
     }
   }
@@ -12276,22 +12067,6 @@ function respond(orig){
   const minC=S.hideLowConf?(DB.flags.confThreshold||30)/100:0;
   const match=bestAns(sQ,minC);
   if(match){
-    /* تجاهل الإجابة إذا رفضها المستخدم سابقاً بـ 👎 */
-    if(isRejected(orig, match.answer)){
-      /* ابحث عن بديل غير مرفوض */
-      const alts=allAns(sQ,minC,10,1000).filter(r=>!isRejected(orig,r.answer));
-      if(!alts.length){_lastUnanswered=orig;return{_notFound:true};}
-      /* استخدم أفضل بديل */
-      const alt=alts[0];
-      const sim2=alt.similarity||0.5, conf2=alt.confidence||0.7;
-      const realConf2=Math.min(0.99,sim2*0.45+conf2*0.55);
-      if(realConf2<_getConfThreshold()*0.80){_lastUnanswered=orig;return{_notFound:true};}
-      boostConf(alt.key);upsertEnt(alt.answer,alt.answer,{});updateCtx(orig,alt.answer,alt.answer);_lastUnanswered=null;
-      const fullAns2=_cleanStoredAnswer(alt.answer);
-      const sentences2=fullAns2.split(/(?<=[.؟!])\s+/).filter(s=>s.trim().length>4);
-      const briefAns2=deepMode?fullAns2:(sentences2[0]||fullAns2.substring(0,200));
-      return{text:alt.display,mainAns:briefAns2,fullAns:fullAns2,ansType:'إجابة',ansClass:'fact',confidence:realConf2,sugs:getSugs(alt.answer,orig),ctxUsed:ctx?CTX.subjectName:null,_deepMode:!!deepMode};
-    }
     boostConf(match.key);upsertEnt(match.answer,match.answer,{});updateCtx(orig,match.answer,match.answer);_lastUnanswered=null;
     const sim   = match.similarity||0.5;
     const conf  = match.confidence||0.7;
@@ -12447,85 +12222,36 @@ function buildBotMessage(res,userText){
   }else if(res.text&&res.mainAns){
 
     if(res._deepMode&&res.confidence!==undefined&&!res._isHtml){
-
-      /* ══ وضع التفكير — إجابات متعددة متمايزة ══ */
-      if(res._multipleAnswers&&res._multipleAnswers.length>1){
-        const wrap=document.createElement('div');wrap.className='multi-ans-wrap';
-        const hdr=document.createElement('div');hdr.className='multi-ans-header';
-        hdr.innerHTML='<i class="fas fa-brain"></i> وجدت '+res._multipleAnswers.length+' إجابات محتملة — مرتبة حسب الثقة';
-        wrap.appendChild(hdr);
-
-        res._multipleAnswers.forEach((r,i)=>{
-          const item=document.createElement('div');item.className='multi-ans-item';
-          const pct=Math.round((r.confidence||0.7)*100);
-          const cc=confColor((r.confidence||0.7));
-          /* عنوان السؤال/المصدر */
-          const qDiv=document.createElement('div');qDiv.className='multi-ans-item-q';
-          qDiv.textContent=(i===0?'⭐ الأفضل تطابقاً · ':'('+(i+1)+') ')+esc(r.display||'');
-          item.appendChild(qDiv);
-          /* نص الإجابة */
-          const aDiv=document.createElement('div');aDiv.className='multi-ans-item-a';
-          aDiv.innerHTML=renderMd(_cleanStoredAnswer(r.answer)||'');
-          item.appendChild(aDiv);
-          /* شريط الثقة */
-          const confRow=document.createElement('div');confRow.className='multi-ans-item-conf';
-          confRow.innerHTML='<span style="font-size:.58rem;color:var(--text3)">ثقة:</span>'
-            +'<div class="conf-bar" style="flex:1;max-width:70px"><div class="conf-fill" style="width:'+pct+'%;background:'+cc+'"></div></div>'
-            +'<span class="conf-pct">'+pct+'%</span>'
-            +'<span class="conf-lbl" style="color:'+cc+'">'+(pct>=85?'موثوق':pct>=60?'محتمل':'منخفض')+'</span>';
-          item.appendChild(confRow);
-          /* زر استخدام هذه الإجابة */
-          const useBtn=document.createElement('button');useBtn.className='btn';
-          useBtn.style.cssText='font-size:.68rem;padding:2px 10px;margin-top:5px';
-          useBtn.innerHTML='<i class="fas fa-check"></i> استخدم هذه';
-          const _ra=r.answer;
-          useBtn.addEventListener('click',()=>{
-            setKB(userText,_ra.substring(0,300),.95,'user-pick');
-            toast('<i class="fas fa-check-circle"></i> تم اختيار الإجابة وحفظها');
-            saveDB();updateStats();
-            useBtn.disabled=true;useBtn.textContent='✓ تم الاختيار';
-          });
-          item.appendChild(useBtn);
-          wrap.appendChild(item);
-        });
-
-        const hint=document.createElement('div');hint.className='multi-ans-pick';
-        hint.textContent='اضغط 👍 للتأكيد أو 👎 لتصحيح الإجابة الظاهرة';
-        wrap.appendChild(hint);
-        bot.appendChild(wrap);
-
-      } else {
-        /* ══ وضع التفكير: بطاقة غنية — إجابة واحدة ══ */
-        const card=document.createElement('div');card.className='deep-card';
-        /* الجواب الرئيسي */
-        const mainDiv=document.createElement('div');mainDiv.className='deep-card-main';
-        mainDiv.innerHTML=renderMd(res.mainAns);card.appendChild(mainDiv);
-        /* معلومة مرتبطة — نبحث عن جواب أول اقتراح */
-        if(res.sugs&&res.sugs.length){
-          const relDisplay=res.sugs[0];
-          const relItem=Object.values(DB.knowledge).find(it=>it.display===relDisplay);
-          const sep=document.createElement('div');sep.className='deep-card-sep';card.appendChild(sep);
-          const rel=document.createElement('div');rel.className='deep-card-related';
-          rel.innerHTML='📌 <strong>معلومة مرتبطة:</strong><br>'+(relItem?esc(relDisplay+': '+relItem.answer):esc(relDisplay));
-          card.appendChild(rel);
-          res._deepRelUsed=true;
-        }
-        /* شريط الثقة داخل البطاقة */
-        const pct=Math.round(res.confidence*100);
-        const cconf=document.createElement('div');cconf.className='deep-card-conf';
-        cconf.innerHTML='<span style="font-size:.58rem;color:var(--text3)">ثقة:</span>'
-          +'<div class="conf-bar"><div class="conf-fill" style="width:'+pct+'%;background:'+confColor(res.confidence)+'"></div></div>'
-          +'<span class="conf-pct">'+pct+'%</span>'
-          +'<span class="conf-lbl">'+(pct>=85?'موثوق':pct>=60?'محتمل':'منخفض')+'</span>';
-        card.appendChild(cconf);
-        bot.appendChild(card);
-        /* زر ترجمة */
-        const trBtn=document.createElement('button');trBtn.className='btn';
-        trBtn.style.cssText='font-size:.72rem;padding:3px 12px;margin-top:4px';
-        trBtn.innerHTML='<i class="fas fa-language"></i> ترجمة';
-        trBtn.addEventListener('click',()=>{const inp=document.getElementById('userInput');if(inp){inp.value='ترجم: '+(res.fullAns||res.mainAns||'').substring(0,180);send();}});
-        bot.appendChild(trBtn);
+      /* ══ وضع التفكير: بطاقة غنية ══ */
+      const card=document.createElement('div');card.className='deep-card';
+      /* الجواب الرئيسي */
+      const mainDiv=document.createElement('div');mainDiv.className='deep-card-main';
+      mainDiv.innerHTML=renderMd(res.mainAns);card.appendChild(mainDiv);
+      /* معلومة مرتبطة — نبحث عن جواب أول اقتراح */
+      if(res.sugs&&res.sugs.length){
+        const relDisplay=res.sugs[0];
+        const relItem=Object.values(DB.knowledge).find(it=>it.display===relDisplay);
+        const sep=document.createElement('div');sep.className='deep-card-sep';card.appendChild(sep);
+        const rel=document.createElement('div');rel.className='deep-card-related';
+        rel.innerHTML='📌 <strong>معلومة مرتبطة:</strong><br>'+(relItem?esc(relDisplay+': '+relItem.answer):esc(relDisplay));
+        card.appendChild(rel);
+        res._deepRelUsed=true;
       }
+      /* شريط الثقة داخل البطاقة */
+      const pct=Math.round(res.confidence*100);
+      const cconf=document.createElement('div');cconf.className='deep-card-conf';
+      cconf.innerHTML='<span style="font-size:.58rem;color:var(--text3)">ثقة:</span>'
+        +'<div class="conf-bar"><div class="conf-fill" style="width:'+pct+'%;background:'+confColor(res.confidence)+'"></div></div>'
+        +'<span class="conf-pct">'+pct+'%</span>'
+        +'<span class="conf-lbl">'+(pct>=85?'موثوق':pct>=60?'محتمل':'منخفض')+'</span>';
+      card.appendChild(cconf);
+      bot.appendChild(card);
+      /* زر ترجمة */
+      const trBtn=document.createElement('button');trBtn.className='btn';
+      trBtn.style.cssText='font-size:.72rem;padding:3px 12px;margin-top:4px';
+      trBtn.innerHTML='<i class="fas fa-language"></i> ترجمة';
+      trBtn.addEventListener('click',()=>{const inp=document.getElementById('userInput');if(inp){inp.value='ترجم: '+(res.fullAns||res.mainAns||'').substring(0,180);send();}});
+      bot.appendChild(trBtn);
 
     } else if(!res._isHtml&&!res._util&&res.mainAns){
       /* ══ الوضع العادي: جواب بسيط وواضح ══ */
@@ -12584,18 +12310,15 @@ function buildBotMessage(res,userText){
       {ic:'<i class="fas fa-thumbs-up"></i>',tt:'صحيح (+20% ثقة)',fn:()=>{adjConf(userText,+.20,'positive');toast('<i class="fas fa-arrow-up"></i> +20% ثقة — ممتاز!');closePop();}},
       {ic:'<i class="fas fa-thumbs-down"></i>',tt:'خطأ — صحح (-20% ثقة)',fn:()=>{
         adjConf(userText,-.20,'negative');_lastUnanswered=userText;
-        /* 🚫 حفظ زوج الرفض — "هذا السؤال لا يعني هذه الإجابة" */
-        const _wrongAns=(res.fullAns||res.mainAns||ansText||'').replace(/<[^>]+>/g,'');
-        addRejection(userText, _wrongAns);
         const cp=document.createElement('div');cp.className='quick-teach';cp.style.marginTop='8px';
         const ci=document.createElement('input');ci.setAttribute('inputmode','text');
         /* ملء مسبق بالإجابة الحالية للتعديل */
-        const _currentAns=_wrongAns.substring(0,200);
+        const _currentAns=(res.fullAns||res.mainAns||ansText||'').replace(/<[^>]+>/g,'').substring(0,200);
         ci.value=_currentAns;ci.placeholder='عدّل الإجابة الصحيحة...';
         /* تحديد النص كله للتعديل السريع */
         setTimeout(()=>{try{ci.select();}catch(e){}},50);
         const cb=document.createElement('button');cb.className='send-btn';cb.style.cssText='width:30px;height:30px;flex-shrink:0';cb.innerHTML='<i class="fas fa-check"></i>';
-        cb.addEventListener('click',()=>{const a=ci.value.trim();if(!a)return;setKB(userText,a,.99,'correction');setKB('ما هو '+userText,a,.92,'auto');cp.innerHTML='<span class="learn-badge"><i class="fas fa-check-circle"></i> تم التصحيح: '+esc(a)+'</span><span class="rej-badge"><i class="fas fa-ban"></i> الإجابة الخاطئة محفوظة — لن تتكرر</span>';if(typeof LocalAI!=='undefined')LocalAI._invalidate();saveDB();updateStats();});
+        cb.addEventListener('click',()=>{const a=ci.value.trim();if(!a)return;setKB(userText,a,.99,'correction');setKB('ما هو '+userText,a,.92,'auto');cp.innerHTML='<span class="learn-badge"><i class="fas fa-check-circle"></i> تم التصحيح: '+esc(a)+'</span>';if(typeof LocalAI!=='undefined')LocalAI._invalidate();saveDB();updateStats();});
         ci.addEventListener('keypress',e=>{if(e.key==='Enter')cb.click();});cp.append(ci,cb);bot.appendChild(cp);closePop();
       }},
       {ic:'<i class="fas fa-volume-up"></i>',tt:'استمع',fn:()=>{speak(ansText);closePop();}},
@@ -12618,8 +12341,6 @@ function buildBotMessage(res,userText){
 /* ── Claude/Gemini مباشر بدون إنترنت ── */
 let _claudeDirectMode=false;
 let _offlineMode=false;
-/* ── كاش respond() بين send() و _localAnswerWithIDB لمنع الاستدعاء المزدوج ── */
-let _pendingLocalRes=null;
 async function respondClaudeDirect(orig){
   const cc=document.getElementById('chatContainer');
   const inp=document.getElementById('userInput');
@@ -12633,22 +12354,12 @@ async function respondClaudeDirect(orig){
     if(_eng==='local'){
       /* أظهر رسالة انتظار لو IDF لم يُحمَّل بعد */
       if(typeof KingIDB!=='undefined' && !window._idbWarmDone){
-        /* لا نضبط _idbWarmDone هنا — يُضبط فقط بعد اكتمال warmUp الفعلي */
+        window._idbWarmDone=true;
         loadEl.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> 📚 جارٍ تهيئة قاعدة المعرفة...';
       }
       const idbAns = await _localAnswerWithIDB(orig);
       if(idbAns && idbAns.answer){
         try{loadEl.remove();}catch(e){}
-        /* إذا كانت نتيجة تفكير عميق محفوظة — اعرضها بـ buildBotMessage مباشرة */
-        if(idbAns._deepRes){
-          const bot=buildBotMessage(idbAns._deepRes, orig);
-          cc.appendChild(bot);cc.scrollTop=cc.scrollHeight;
-          DB.history.push({user:orig,bot:idbAns._deepRes.mainAns||'',t:Date.now()});
-          if(DB.history.length>S.maxMsgs)DB.history.shift();
-          saveDB();updateStats();
-          if(S.autoSpeak&&idbAns._deepRes.mainAns)speak(idbAns._deepRes.mainAns);
-          return;
-        }
         const bot=document.createElement('div');bot.className='message bot';
         const badge=document.createElement('div');badge.className='ans-badge learn';
         badge.innerHTML=(idbAns.idb?'📚 قاعدة معرفة ضخمة':'🧠 ذاكرة محلية')+'&nbsp;·&nbsp;'+esc(idbAns.source||'');
@@ -12664,15 +12375,13 @@ async function respondClaudeDirect(orig){
         const _a=idbAns.answer;
         [{ic:'<i class="fas fa-thumbs-up"></i>',tt:'صحيح',fn:()=>{setKB(orig,_a.substring(0,300),.99,'positive');toast('<i class="fas fa-check"></i> تم التثبيت');closePop();}},
          {ic:'<i class="fas fa-thumbs-down"></i>',tt:'خطأ — صحح',fn:()=>{
-           /* 🚫 حفظ زوج الرفض من قاعدة المعرفة الضخمة */
-           addRejection(orig, _a);
            const cp=document.createElement('div');cp.className='quick-teach';cp.style.cssText='margin-top:10px';
            const ci=document.createElement('input');ci.placeholder='اكتب الإجابة الصحيحة...';ci.setAttribute('inputmode','text');ci.style.cssText='flex:1';
            const cb=document.createElement('button');cb.className='send-btn';cb.style.cssText='width:32px;height:32px;flex-shrink:0';cb.innerHTML='<i class="fas fa-check"></i>';
            cb.addEventListener('click',()=>{
              const a=ci.value.trim();if(!a)return;
              setKB(orig,a,.99,'correction');
-             cp.innerHTML='<span class="learn-badge"><i class="fas fa-check-circle"></i> تم التصحيح: '+esc(a)+'</span><span class="rej-badge"><i class="fas fa-ban"></i> الإجابة الخاطئة محفوظة — لن تتكرر</span>';
+             cp.innerHTML='<span class="learn-badge"><i class="fas fa-check-circle"></i> تم التصحيح: '+esc(a)+'</span>';
              saveDB();updateStats();toast('<i class="fas fa-edit"></i> تم حفظ التصحيح');
            });
            ci.addEventListener('keypress',e=>{if(e.key==='Enter')cb.click();});
@@ -12738,15 +12447,13 @@ async function respondClaudeDirect(orig){
     const _a=aiResult.text;
     [{ic:'<i class="fas fa-thumbs-up"></i>',tt:'صحيح',fn:()=>{setKB(orig,_a.substring(0,300),.99,'positive');toast('<i class="fas fa-check"></i> تم التثبيت');closePop();}},
      {ic:'<i class="fas fa-thumbs-down"></i>',tt:'خطأ — صحح',fn:()=>{
-       /* 🚫 حفظ زوج الرفض من رد الـ AI */
-       addRejection(orig, _a);
        const cp=document.createElement('div');cp.className='quick-teach';cp.style.cssText='margin-top:10px';
        const ci=document.createElement('input');ci.placeholder='اكتب الإجابة الصحيحة...';ci.setAttribute('inputmode','text');ci.style.cssText='flex:1';
        const cb=document.createElement('button');cb.className='send-btn';cb.style.cssText='width:32px;height:32px;flex-shrink:0;font-size:.8rem';cb.innerHTML='<i class="fas fa-check"></i>';
        cb.addEventListener('click',()=>{
          const a=ci.value.trim();if(!a)return;
          setKB(orig,a,.99,'ai-correction');setKB('ما هو '+orig,a,.92,'auto');
-         cp.innerHTML='<span class="learn-badge"><i class="fas fa-check-circle"></i> تم التصحيح وحفظه: '+esc(a)+'</span><span class="rej-badge"><i class="fas fa-ban"></i> الإجابة الخاطئة محفوظة — لن تتكرر</span>';
+         cp.innerHTML='<span class="learn-badge"><i class="fas fa-check-circle"></i> تم التصحيح وحفظه: '+esc(a)+'</span>';
          saveDB();updateStats();toast('<i class="fas fa-edit"></i> تم حفظ التصحيح');
        });
        ci.addEventListener('keypress',e=>{if(e.key==='Enter')cb.click();});
@@ -12851,20 +12558,6 @@ function send(){
 
         const hasKey=!!(getApiKey()||getGeminiKey()||getDeepSeekKey());
         const isOnlineNow=_isOnline()&&!_offlineMode;
-
-        /* ─── وضع التفكير العميق — نتيجة محلية تُعرض فوراً بدون API ─── */
-        /* deepMode بحث محلي في قاعدة المعرفة — يتجاوز كل محركات AI */
-        if(res && res._deepMode && !res._notFound && (res._multipleAnswers || res.mainAns)){
-          done=true;clearTimeout(guard);
-          const bot=buildBotMessage(res,txt);
-          cc.appendChild(bot);cc.scrollTop=cc.scrollHeight;
-          DB.history.push({user:txt,bot:res.mainAns||'',t:Date.now()});
-          if(DB.history.length>S.maxMsgs)DB.history.shift();
-          saveDB();setAvatar('idle');
-          inp.disabled=false;if(S.autoFocus)inp.focus();
-          if(S.autoSpeak&&res.mainAns)speak(res.mainAns);
-          return; /* لا نكمل للـ routing */
-        }
         /* isUtilResponse: ردود محلية بحتة (لا تحتاج AI) — لكن إذا وجد مفتاح وإنترنت نرسل للـ API */
         const isUtilResponse=res&&(res._util||res.ansType==='تعلم'||res.ansType==='تصحيح'||res.ansType==='تذكير'||res.ansType==='إحصاء');
         /* حسابات الآلة تُعرض محلياً دائماً (نتائج MathEngine الدقيقة) */
@@ -12912,8 +12605,6 @@ function send(){
         /* ─── وضع محلي: بدون إنترنت أبداً ─── */
         }else if(_eng==='local'){
           done=true;clearTimeout(guard);setAvatar('idle');
-          /* تمرير نتيجة respond() للـ _localAnswerWithIDB لمنع الاستدعاء المزدوج */
-          _pendingLocalRes=res;
           respondClaudeDirect(txt).finally(_fin);
 
         /* ─── Claude فقط ─── */
@@ -16536,155 +16227,101 @@ function initEvents(){
   /* ══════════════ أزرار التفاضل ══════════════ */
   /* mkDerivBtn وmkDeriv2Btn — مُعالَجان بواسطة derivPicker IIFE أدناه */
   /* ═══════════════════════════════════════════════════════
-     FracEngine — محرك الكسور المرئية المشترك
-     يخزّن التعبير كـ tokens ويعرضه HTML مرئي دائماً
-  ═══════════════════════════════════════════════════════ */
-  class FracEngine {
-    constructor(accentColor='#f0c84e') {
-      this.tokens = [];   /* [{type:'text',val:''} | {type:'frac',num:'',den:''}] */
-      this.fracMode = 'none'; /* 'none' | 'num' | 'den' */
-      this.accent = accentColor;
-    }
-    /* token نشط للكتابة */
-    _ensureText(){ if(!this.tokens.length||this.tokens[this.tokens.length-1].type!=='text') this.tokens.push({type:'text',val:''});}
-    _last(){ return this.tokens[this.tokens.length-1]; }
-
-    insert(v){
-      if(this.fracMode==='num')      { this._last().num+=v; }
-      else if(this.fracMode==='den') { this._last().den+=v; }
-      else { this._ensureText(); this._last().val+=v; }
-    }
-    startFrac(){
-      if(this.fracMode!=='none'){ this.fracMode='none'; } /* أنهِ الكسر الحالي */
-      this.tokens.push({type:'frac',num:'',den:''});
-      this.fracMode='num';
-    }
-    setMode(m){
-      if(m==='none'){ this.fracMode='none'; }
-      else if(m==='num'||m==='den'){ this.fracMode=m; }
-    }
-    backspace(){
-      if(!this.tokens.length) return;
-      const cur=this._last();
-      const smart=s=>s.replace(/(asin\(|acos\(|atan\(|sqrt\(|cbrt\(|abs\(|cot\(|sin\(|cos\(|tan\(|log\(|exp\(|ln\(|x\^\(|x\^2|x\^3|pi|Inf)$|.$/, '');
-      if(this.fracMode==='num')      { cur.num=smart(cur.num); }
-      else if(this.fracMode==='den') { cur.den=smart(cur.den); }
-      else {
-        if(cur.type==='frac'){ /* حذف كسر كامل */ this.tokens.pop(); }
-        else { cur.val=smart(cur.val); if(!cur.val&&this.tokens.length>1) this.tokens.pop(); }
-      }
-    }
-    clear(){ this.tokens=[]; this.fracMode='none'; }
-    get isEmpty(){ return !this.toMath().trim(); }
-    get inFrac(){ return this.fracMode!=='none'; }
-
-    /* ── للعرض المرئي (HTML كسور جميلة) ── */
-    toHTML(){
-      if(!this.tokens.length) return '';
-      return this.tokens.map((t,i)=>{
-        if(t.type==='text') return `<span style="color:${this.accent}">${t.val}</span>`;
-        const isActive=(i===this.tokens.length-1)&&this.fracMode!=='none';
-        const numC=isActive&&this.fracMode==='num'?this.accent:'rgba(255,255,255,.75)';
-        const denC=isActive&&this.fracMode==='den'?this.accent:'rgba(255,255,255,.75)';
-        const numBg=isActive&&this.fracMode==='num'?'rgba(255,255,255,.08)':'transparent';
-        const denBg=isActive&&this.fracMode==='den'?'rgba(255,255,255,.08)':'transparent';
-        const numStr=t.num||`<span style="opacity:.25">□</span>`;
-        const denStr=t.den||`<span style="opacity:.25">□</span>`;
-        return `<span style="display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;line-height:1.2;">`
-          +`<span style="padding:1px 5px;border-bottom:1.5px solid rgba(255,255,255,.6);color:${numC};background:${numBg};border-radius:3px 3px 0 0;font-size:.88em;">${numStr}</span>`
-          +`<span style="padding:1px 5px;color:${denC};background:${denBg};border-radius:0 0 3px 3px;font-size:.88em;">${denStr}</span>`
-          +`</span>`;
-      }).join('');
-    }
-
-    /* ── للمحرك الرياضي (نص للحساب) ── */
-    toMath(){
-      return this.tokens.map(t=>{
-        if(t.type==='text') return t.val;
-        return `(${t.num||'0'})/(${t.den||'1'})`;
-      }).join('');
-    }
-
-    /* ── بيانات شريط الكسر (البسط/المقام الحالي) ── */
-    get curNum(){ const l=this._last(); return(l&&l.type==='frac')?l.num:''; }
-    get curDen(){ const l=this._last(); return(l&&l.type==='frac')?l.den:''; }
-  }
-
-  /* ═══════════════════════════════════════════════════════
      DERIV PICKER — واجهة الاشتقاق
   ═══════════════════════════════════════════════════════ */
   (function(){
     const overlay = document.getElementById('derivPickerOverlay');
     if(!overlay) return;
 
-    let _dpOrd = 1;
-    let _dpAt  = null;
-    const _dpE = new FracEngine('rgba(251,113,133,.9)');
-
-    function _dpRefreshFracBar(){
-      const bar=document.getElementById('dpFracBar'); if(!bar) return;
-      bar.style.display=_dpE.inFrac?'block':'none';
-      if(!_dpE.inFrac) return;
-      const nEl=document.getElementById('dpFracNumVis'), dEl=document.getElementById('dpFracDenVis');
-      if(nEl){ nEl.innerHTML=_dpE.curNum||'<span style="opacity:.3">_</span>'; nEl.style.borderColor=_dpE.fracMode==='num'?'rgba(251,113,133,.9)':'rgba(251,113,133,.25)'; nEl.style.background=_dpE.fracMode==='num'?'rgba(251,113,133,.12)':'transparent'; }
-      if(dEl){ dEl.innerHTML=_dpE.curDen||'<span style="opacity:.3">_</span>'; dEl.style.borderColor=_dpE.fracMode==='den'?'rgba(251,113,133,.9)':'rgba(251,113,133,.25)'; dEl.style.background=_dpE.fracMode==='den'?'rgba(251,113,133,.12)':'transparent'; }
-      ['dpFracBtnNum','dpFracBtnDen','dpFracBtnNorm'].forEach(id=>document.getElementById(id)?.classList.remove('active'));
-      document.getElementById(_dpE.fracMode==='num'?'dpFracBtnNum':_dpE.fracMode==='den'?'dpFracBtnDen':'dpFracBtnNorm')?.classList.add('active');
-    }
-    window._dpSetFracMode=m=>{ _dpE.setMode(m); _dpRefreshFracBar(); _dpUpdatePreview(); };
+    let _dpFn = '';
+    let _dpOrd = 1; /* 1 | 2 | 3 */
+    let _dpAt  = null; /* عند نقطة */
 
     function _dpUpdatePreview(){
-      const el=document.getElementById('derivPreviewExpr'); if(!el) return;
-      const fnDisp=_dpE.isEmpty?'<span style="opacity:.3;font-style:italic">f(x)</span>':_dpE.toHTML();
-      const atPart=(_dpAt!==null&&_dpAt!=='')?`<span style="font-size:.7em;color:rgba(251,113,133,.6)"> عند x=${_dpAt}</span>`:'';
-      el.innerHTML=`<span style="color:rgba(251,113,133,.6);font-size:.75em">d${_dpOrd>1?'<sup>'+_dpOrd+'</sup>':''}/dx${_dpOrd>1?'<sup>'+_dpOrd+'</sup>':''}</span>[${fnDisp}]${atPart}`;
-      _dpRefreshFracBar();
+      const el = document.getElementById('derivPreviewExpr');
+      if(!el) return;
+      const fnDisp = _dpFn || '<span style="opacity:.3;font-style:italic">f(x)</span>';
+      const ordSup = _dpOrd===1 ? '′' : (_dpOrd===2 ? '″' : '‴');
+      const atPart = (_dpAt!==null&&_dpAt!=='') ? `<span style="font-size:.7em;color:rgba(251,113,133,.6)"> عند x=${_dpAt}</span>` : '';
+      el.innerHTML = `<span style="color:rgba(251,113,133,.6);font-size:.75em">d${_dpOrd>1?'<sup>'+_dpOrd+'</sup>':''}/dx${_dpOrd>1?'<sup>'+_dpOrd+'</sup>':''}</span>[${fnDisp}]${atPart}`;
     }
 
     function _dpTab(id){
-      ['Fn','Order','Pre'].forEach(t=>{ const el=document.getElementById('dpTab'+t); if(el) el.style.display=t===id?'block':'none'; });
-      document.querySelectorAll('[data-dpTab]').forEach(b=>{ b.classList.toggle('on',b.dataset.dpTab==={Fn:'fn',Order:'order',Pre:'pre'}[id]); });
+      ['Fn','Order','Pre'].forEach(t=>{
+        const el=document.getElementById('dpTab'+t);
+        if(el) el.style.display = t===id?'block':'none';
+      });
+      document.querySelectorAll('[data-dpTab]').forEach(b=>{
+        b.classList.toggle('on', b.dataset.dpTab==={Fn:'fn',Order:'order',Pre:'pre'}[id]);
+      });
     }
-    document.querySelectorAll('[data-dpTab]').forEach(b=>{ b.addEventListener('click',()=>{ _dpTab({fn:'Fn',order:'Order',pre:'Pre'}[b.dataset.dpTab]); }); });
+    document.querySelectorAll('[data-dpTab]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const map={'fn':'Fn','order':'Order','pre':'Pre'};
+        _dpTab(map[b.dataset.dpTab]);
+      });
+    });
 
+    /* أزرار الدالة */
     document.querySelectorAll('[data-dp]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const v=btn.dataset.dp;
-        if(v==='\u232b')       { _dpE.backspace(); }
-        else if(v==='AC') { _dpE.clear(); document.getElementById('dpFracBar').style.display='none'; }
-        else if(v==='FRAC'){ _dpE.startFrac(); }
-        else               { _dpE.insert(v); }
+        if(v==='⌫') _dpFn=_dpFn.replace(/(sin\(x\)|cos\(x\)|tan\(x\)|ln\(x\)|log\(x\)|e\^x|sqrt\(x\)|asin\(x\)|x\^2|x\^3|x\^\()$|.$/, '');
+        else if(v==='AC') _dpFn='';
+        else _dpFn+=v;
         _dpUpdatePreview();
       });
     });
 
-    document.querySelectorAll('.dpOrdBtn').forEach(btn=>{ btn.addEventListener('click',()=>{ _dpOrd=+btn.dataset.ord; document.querySelectorAll('.dpOrdBtn').forEach(b=>b.classList.toggle('sel',b===btn)); _dpUpdatePreview(); }); });
-    document.getElementById('derivAtPoint')?.addEventListener('input',e=>{ _dpAt=e.target.value.trim()||null; _dpUpdatePreview(); });
-    document.querySelectorAll('[data-dpex]').forEach(btn=>{ btn.addEventListener('click',()=>{ _dpE.clear(); _dpE.tokens=[{type:'text',val:btn.dataset.dpex}]; _dpOrd=1; _dpAt=null; document.getElementById('dpFracBar').style.display='none'; _dpUpdatePreview(); _dpTab('Fn'); }); });
+    /* درجة الاشتقاق */
+    document.querySelectorAll('.dpOrdBtn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        _dpOrd=+btn.dataset.ord;
+        document.querySelectorAll('.dpOrdBtn').forEach(b=>b.classList.toggle('sel',b===btn));
+        _dpUpdatePreview();
+      });
+    });
+
+    /* نقطة التقييم */
+    document.getElementById('derivAtPoint')?.addEventListener('input',e=>{
+      _dpAt=e.target.value.trim()||null; _dpUpdatePreview();
+    });
+
+    /* أمثلة */
+    document.querySelectorAll('[data-dpex]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        _dpFn=btn.dataset.dpex; _dpOrd=1; _dpAt=null;
+        _dpUpdatePreview(); _dpTab('Fn');
+      });
+    });
 
     function openDerivPicker(){
       return new Promise(res=>{
-        _dpResolve=res; _dpE.clear(); _dpOrd=1; _dpAt=null;
-        document.getElementById('dpFracBar').style.display='none';
+        _dpResolve=res; _dpFn=''; _dpOrd=1; _dpAt=null;
         const buf=(typeof mkBuffer!=='undefined'?mkBuffer:'').trim();
         const m=buf.match(/^(?:اشتق|d\/dx)\s+(.+)/i);
-        if(m){ _dpE.tokens=[{type:'text',val:m[1].trim()}]; }
-        const atInput=document.getElementById('derivAtPoint'); if(atInput) atInput.value='';
+        if(m) _dpFn=m[1].trim();
+        const atInput=document.getElementById('derivAtPoint');
+        if(atInput) atInput.value='';
         document.querySelectorAll('.dpOrdBtn').forEach(b=>b.classList.toggle('sel',b.dataset.ord==='1'));
-        _dpTab('Fn'); _dpUpdatePreview(); overlay.style.display='flex';
+        _dpTab('Fn'); _dpUpdatePreview();
+        overlay.style.display='flex';
       });
     }
     let _dpResolve=null;
-    function closeDerivPicker(val){ overlay.style.display='none'; if(_dpResolve){ _dpResolve(val); _dpResolve=null; } }
+    function closeDerivPicker(val){
+      overlay.style.display='none';
+      if(_dpResolve){ _dpResolve(val); _dpResolve=null; }
+    }
     overlay.addEventListener('click',e=>{ if(e.target===overlay) closeDerivPicker(null); });
     document.getElementById('derivPickerCancel')?.addEventListener('click',()=>closeDerivPicker(null));
     document.getElementById('derivPickerOk')?.addEventListener('click',()=>{
-      if(_dpE.isEmpty){
+      if(!_dpFn){
         const el=document.getElementById('derivPreviewExpr');
         if(el){el.textContent='⚠ اختر دالة أولاً';el.style.color='#f87171';setTimeout(()=>_dpUpdatePreview(),1200);}
         return;
       }
-      closeDerivPicker({fn:_dpE.toMath(),ord:_dpOrd,at:_dpAt});
+      closeDerivPicker({fn:_dpFn,ord:_dpOrd,at:_dpAt});
     });
 
     /* ربط الأزرار الرئيسية */
@@ -16718,82 +16355,146 @@ function initEvents(){
     let _resolve = null;
 
     /* ── حالة الـ picker ── */
-    let _lpPt = '\u221e';
-    let _lpDir = 'both';
-    const _lpE = new FracEngine('#f0c84e');
-
-    function _lpRefreshFracBar(){
-      const bar=document.getElementById('lpFracBar'); if(!bar) return;
-      bar.style.display=_lpE.inFrac?'block':'none';
-      if(!_lpE.inFrac) return;
-      const nEl=document.getElementById('lpFracNumVis'), dEl=document.getElementById('lpFracDenVis');
-      if(nEl){ nEl.innerHTML=_lpE.curNum||'<span style="opacity:.3">_</span>'; nEl.style.borderColor=_lpE.fracMode==='num'?'rgba(251,191,36,.9)':'rgba(251,191,36,.25)'; nEl.style.background=_lpE.fracMode==='num'?'rgba(251,191,36,.12)':'transparent'; }
-      if(dEl){ dEl.innerHTML=_lpE.curDen||'<span style="opacity:.3">_</span>'; dEl.style.borderColor=_lpE.fracMode==='den'?'rgba(251,191,36,.9)':'rgba(251,191,36,.25)'; dEl.style.background=_lpE.fracMode==='den'?'rgba(251,191,36,.12)':'transparent'; }
-      ['lpFracBtnNum','lpFracBtnDen','lpFracBtnNorm'].forEach(id=>document.getElementById(id)?.classList.remove('active'));
-      document.getElementById(_lpE.fracMode==='num'?'lpFracBtnNum':_lpE.fracMode==='den'?'lpFracBtnDen':'lpFracBtnNorm')?.classList.add('active');
-    }
-    window._lpSetFracMode=m=>{ _lpE.setMode(m); _lpRefreshFracBar(); _lpUpdatePreview(); };
+    let _lpFn = '';      /* الدالة المُبنية */
+    let _lpPt = '∞';    /* النقطة */
+    let _lpDir = 'both'; /* الاتجاه: both | right | left */
 
     function _lpUpdatePreview(){
-      const el=document.getElementById('limPreviewExpr'); if(!el) return;
+      const el=document.getElementById('limPreviewExpr');
+      if(!el) return;
+      /* إظهار الاتجاه */
       const dirSup=_lpDir==='right'?'\u207a':_lpDir==='left'?'\u207b':'';
-      const ptDisp=(_lpPt||'\u221e')+dirSup;
-      if(_lpE.isEmpty&&!_lpE.inFrac){
-        el.textContent='اختر الدالة من الأزرار \u2193'; el.style.color='rgba(255,255,255,.25)';
+      const ptDisp=(_lpPt||'∞')+dirSup;
+      if(!_lpFn){
+        el.textContent='اختر الدالة من الأزرار ↓';
+        el.style.color='rgba(255,255,255,.25)';
       } else {
-        el.innerHTML=`<span style="font-size:.75rem;color:rgba(255,255,255,.45)">lim</span>`
-          +`<sub style="font-size:.6rem;color:rgba(201,149,42,.7)"> x\u2192${ptDisp}</sub> `
-          +`<span style="color:#f0c84e">${_lpE.toHTML()}</span>`;
+        el.innerHTML=`<span style="font-size:.85rem;color:rgba(255,255,255,.5)">lim</span>`
+          +`<sub style="font-size:.65rem;color:rgba(201,149,42,.7)"> x→${ptDisp}</sub>`
+          +`<span style="color:#f0c84e;margin-left:8px">${_lpFn}</span>`;
         el.style.color='';
       }
-      document.querySelectorAll('.lpPointBtn').forEach(b=>b.classList.toggle('sel',b.dataset.lppt===_lpPt));
-      document.querySelectorAll('.lpDirBtn').forEach(b=>{const s=b.dataset.lpdir===_lpDir;b.style.fontWeight=s?'900':'400';b.style.opacity=s?'1':'0.55';b.style.transform=s?'scale(1.04)':'scale(1)';});
-      _lpRefreshFracBar();
+      /* تحديث النقاط */
+      document.querySelectorAll('.lpPointBtn').forEach(b=>{
+        b.classList.toggle('sel', b.dataset.lppt===_lpPt);
+      });
+      /* تحديث أزرار الاتجاه */
+      document.querySelectorAll('.lpDirBtn').forEach(b=>{
+        const isSel=b.dataset.lpdir===_lpDir;
+        b.style.fontWeight=isSel?'900':'400';
+        b.style.opacity=isSel?'1':'0.55';
+        b.style.transform=isSel?'scale(1.04)':'scale(1)';
+      });
     }
 
+    /* ── تبويبات ── */
     function _lpTab(id){
-      ['Fn','Pt','Pre'].forEach(t=>{ const el=document.getElementById('lpTab'+t); if(el) el.style.display=t===id?'block':'none'; });
-      document.querySelectorAll('[data-lptab]').forEach(b=>{ b.classList.toggle('on',b.dataset.lptab==={Fn:'fn',Pt:'pt',Pre:'pre'}[id]); });
+      ['Fn','Pt','Pre'].forEach(t=>{
+        const el=document.getElementById('lpTab'+t);
+        if(el) el.style.display= t===id?'block':'none';
+      });
+      document.querySelectorAll('[data-lptab]').forEach(b=>{
+        b.classList.toggle('on', b.dataset.lptab==={Fn:'fn',Pt:'pt',Pre:'pre'}[id]);
+      });
     }
-    document.querySelectorAll('[data-lptab]').forEach(b=>{ b.addEventListener('click',()=>{ _lpTab({fn:'Fn',pt:'Pt',pre:'Pre'}[b.dataset.lptab]); }); });
+    document.querySelectorAll('[data-lptab]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const map={'fn':'Fn','pt':'Pt','pre':'Pre'};
+        _lpTab(map[b.dataset.lptab]);
+      });
+    });
 
+    /* ── أزرار الدالة ── */
     document.querySelectorAll('[data-lp]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const v=btn.dataset.lp;
-        if(v==='\u232b')       { _lpE.backspace(); }
-        else if(v==='AC') { _lpE.clear(); document.getElementById('lpFracBar').style.display='none'; }
-        else if(v==='FRAC'){ _lpE.startFrac(); }
-        else               { _lpE.insert(v); }
+        if(v==='⌫'){
+          /* حذف آخر حرف */
+          _lpFn=_lpFn.replace(/(sin\(x\)|cos\(x\)|tan\(x\)|ln\(x\)|log\(x\)|exp\(x\)|abs\(x\)|sqrt\(x\)|x\^\(|x\^2|x\^3|x)$|.$/, '');
+        } else if(v==='AC'){
+          _lpFn='';
+        } else if(/^(sin\(x\)|cos\(x\)|tan\(x\)|ln\(x\)|log\(x\)|exp\(x\)|abs\(x\)|sqrt\(x\)|cbrt\(x\))$/.test(v)){
+          /* دالة كاملة → تضاف مباشرة */
+          _lpFn+=v;
+        } else if(/^(x-sqrt\(x\)|x\*sqrt\(x\)|sin\(x\)\/x|\(x\^2-1\)\/\(x-1\))$/.test(v)){
+          /* قوالب كاملة */
+          _lpFn=v;
+        } else if(v==='x^2'){
+          _lpFn+='x^2';
+        } else if(v==='x^3'){
+          _lpFn+='x^3';
+        } else if(v==='1/x'){
+          _lpFn+='1/x';
+        } else {
+          _lpFn+=v;
+        }
         _lpUpdatePreview();
       });
     });
 
-    document.querySelectorAll('.lpPointBtn').forEach(btn=>{ btn.addEventListener('click',()=>{ _lpPt=btn.dataset.lppt; const c=document.getElementById('limCustomPt'); if(c) c.value=''; _lpUpdatePreview(); }); });
-    document.querySelectorAll('.lpDirBtn').forEach(btn=>{ btn.addEventListener('click',()=>{ _lpDir=btn.dataset.lpdir; _lpUpdatePreview(); }); });
-    document.getElementById('limCustomPt')?.addEventListener('input',e=>{ const v=e.target.value.trim(); if(v){ _lpPt=v; _lpUpdatePreview(); } });
-    document.querySelectorAll('[data-lpex]').forEach(btn=>{ btn.addEventListener('click',()=>{ const [fn,pt]=btn.dataset.lpex.split('|'); _lpE.clear(); _lpE.tokens=[{type:'text',val:fn}]; _lpPt=pt||'\u221e'; document.getElementById('lpFracBar').style.display='none'; _lpUpdatePreview(); _lpTab('Fn'); }); });
+    /* ── أزرار النقطة ── */
+    document.querySelectorAll('[data-lppt]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        _lpPt=btn.dataset.lppt;
+        const customEl=document.getElementById('limCustomPt');
+        if(customEl) customEl.value='';
+        _lpUpdatePreview();
+      });
+    });
+
+    /* ── أزرار الاتجاه ── */
+    document.querySelectorAll('.lpDirBtn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        _lpDir=btn.dataset.lpdir;
+        _lpUpdatePreview();
+      });
+    });
+
+    /* ── حقل النقطة المخصص ── */
+    document.getElementById('limCustomPt')?.addEventListener('input',e=>{
+      const v=e.target.value.trim();
+      if(v){ _lpPt=v; _lpUpdatePreview(); }
+    });
+
+    /* ── أمثلة ── */
+    document.querySelectorAll('[data-lpex]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const [fn,pt]=btn.dataset.lpex.split('|');
+        _lpFn=fn; _lpPt=pt||'∞';
+        _lpUpdatePreview();
+        _lpTab('Fn'); /* انتقل لتبويب الدالة لتأكيد */
+      });
+    });
 
     function openLimPicker(){
       return new Promise(res=>{
-        _resolve=res; _lpE.clear(); _lpPt='\u221e'; _lpDir='both';
-        const fb=document.getElementById('lpFracBar'); if(fb) fb.style.display='none';
+        _resolve=res;
+        _lpFn=''; _lpPt='∞'; _lpDir='both';
+        /* prefill من البافر */
         const _bWrap1=mkBuffer.trim().match(/^lim\s*\((.*)\s*,\s*x\s*,\s*([^,)]+)\)/i);
-        const _bWrap2=mkBuffer.trim().match(/^(?:\u062d\u062f|lim)\s+(.+?)\s+(?:\u0639\u0646\u062f\s+)?x\s*\u2192\s*(.+)/i);
-        if(_bWrap1){ _lpE.tokens=[{type:'text',val:_bWrap1[1].trim()==='__'?'':_bWrap1[1].trim()}]; _lpPt=_bWrap1[2].trim()||'\u221e'; }
-        else if(_bWrap2){ _lpE.tokens=[{type:'text',val:_bWrap2[1].trim()}]; _lpPt=_bWrap2[2].trim()||'\u221e'; }
-        _lpTab('Fn'); _lpUpdatePreview(); overlay.style.display='flex';
+        const _bWrap2=mkBuffer.trim().match(/^(?:حد|lim)\s+(.+?)\s+(?:عند\s+)?x\s*→\s*(.+)/i);
+        if(_bWrap1){ _lpFn=_bWrap1[1].trim()==='__'?'':_bWrap1[1].trim(); _lpPt=_bWrap1[2].trim()||'∞'; }
+        else if(_bWrap2){ _lpFn=_bWrap2[1].trim(); _lpPt=_bWrap2[2].trim()||'∞'; }
+        _lpTab('Fn');
+        _lpUpdatePreview();
+        overlay.style.display='flex';
       });
     }
 
-    function closeLimPicker(val){ overlay.style.display='none'; if(_resolve){ _resolve(val); _resolve=null; } }
+    function closeLimPicker(val){
+      overlay.style.display='none';
+      if(_resolve){ _resolve(val); _resolve=null; }
+    }
+
     overlay.addEventListener('click',e=>{ if(e.target===overlay) closeLimPicker(null); });
     document.getElementById('limPickerCancel')?.addEventListener('click',()=>closeLimPicker(null));
     document.getElementById('limPickerOk')?.addEventListener('click',()=>{
-      if(_lpE.isEmpty&&!_lpE.inFrac){
+      if(!_lpFn){ /* تنبيه */
         const el=document.getElementById('limPreviewExpr');
-        if(el){ el.textContent='\u26a0 اختر دالة أولاً'; el.style.color='#f87171'; setTimeout(()=>_lpUpdatePreview(),1200); } return;
+        if(el){ el.textContent='⚠ اختر دالة أولاً';el.style.color='#f87171'; setTimeout(()=>_lpUpdatePreview(),1200); }
+        return;
       }
-      closeLimPicker({fn:_lpE.toMath(), a:_lpPt, dir:_lpDir});
+      closeLimPicker({fn:_lpFn, a:_lpPt, dir:_lpDir});
     });
 
     document.getElementById('mkLimBtn')?.addEventListener('click', async()=>{
@@ -16816,83 +16517,131 @@ function initEvents(){
     if(!overlay) return;
 
     let _ipResolve = null;
-    let _ipA='0', _ipB='1', _ipMode='def';
-    const _ipE = new FracEngine('#6ee7b7');
+    let _ipFn   = '';
+    let _ipA    = '0';
+    let _ipB    = '1';
+    let _ipMode = 'def'; /* def = محدود, ind = غير محدود */
 
-    function _ipRefreshFracBar(){
-      const bar=document.getElementById('ipFracBar'); if(!bar) return;
-      bar.style.display=_ipE.inFrac?'block':'none';
-      if(!_ipE.inFrac) return;
-      const nEl=document.getElementById('ipFracNumVis'), dEl=document.getElementById('ipFracDenVis');
-      if(nEl){ nEl.innerHTML=_ipE.curNum||'<span style="opacity:.3">_</span>'; nEl.style.borderColor=_ipE.fracMode==='num'?'rgba(52,211,153,.9)':'rgba(52,211,153,.25)'; nEl.style.background=_ipE.fracMode==='num'?'rgba(52,211,153,.12)':'transparent'; }
-      if(dEl){ dEl.innerHTML=_ipE.curDen||'<span style="opacity:.3">_</span>'; dEl.style.borderColor=_ipE.fracMode==='den'?'rgba(52,211,153,.9)':'rgba(52,211,153,.25)'; dEl.style.background=_ipE.fracMode==='den'?'rgba(52,211,153,.12)':'transparent'; }
-      ['ipFracBtnNum','ipFracBtnDen','ipFracBtnNorm'].forEach(id=>document.getElementById(id)?.classList.remove('active'));
-      document.getElementById(_ipE.fracMode==='num'?'ipFracBtnNum':_ipE.fracMode==='den'?'ipFracBtnDen':'ipFracBtnNorm')?.classList.add('active');
-    }
-    window._ipSetFracMode=m=>{ _ipE.setMode(m); _ipRefreshFracBar(); _ipUpdatePreview(); };
-
+    /* ── تحديث المعاينة ── */
     function _ipUpdatePreview(){
-      const el=document.getElementById('intPreviewExpr'); if(!el) return;
-      const fnDisp=_ipE.isEmpty&&!_ipE.inFrac?'<span style="opacity:.3;font-style:italic">f(x)</span>':_ipE.toHTML();
-      if(_ipMode==='def'){
-        const aDisp=_ipA.replace(/Math\.PI/g,'\u03c0').replace(/Math\.E(?![a-zA-Z])/g,'e');
-        const bDisp=_ipB.replace(/Math\.PI/g,'\u03c0').replace(/Math\.E(?![a-zA-Z])/g,'e');
-        el.innerHTML=`<span style="font-size:.75rem;opacity:.5">\u222b</span>`
-          +`<sub style="font-size:.6rem;vertical-align:baseline;color:rgba(52,211,153,.7)">${aDisp}</sub>`
-          +`<span style="margin:0 6px;color:#6ee7b7;font-size:1rem">${fnDisp} <span style="opacity:.5">dx</span></span>`
-          +`<sup style="font-size:.6rem;color:rgba(52,211,153,.7)">${bDisp}</sup>`;
+      const el = document.getElementById('intPreviewExpr');
+      if(!el) return;
+      const fnDisp = _ipFn || '<span style="opacity:.3;font-style:italic">f(x)</span>';
+      if(_ipMode === 'def'){
+        const aDisp = _ipA.replace(/Math\.PI/g,'π').replace(/Math\.E(?![a-zA-Z])/g,'e');
+        const bDisp = _ipB.replace(/Math\.PI/g,'π').replace(/Math\.E(?![a-zA-Z])/g,'e');
+        el.innerHTML = `<span style="font-size:.75rem;opacity:.5">∫</span>`
+          +`<span style="font-size:.6rem;vertical-align:baseline;color:rgba(52,211,153,.7)">${aDisp}</span>`
+          +`<span style="margin:0 6px;color:#6ee7b7;font-size:1.05rem">${fnDisp} <span style="opacity:.5">dx</span></span>`
+          +`<span style="font-size:.6rem;vertical-align:super;color:rgba(52,211,153,.7)">${bDisp}</span>`;
       } else {
-        el.innerHTML=`<span style="font-size:1.1rem;color:#6ee7b7">\u222b ${fnDisp} <span style="opacity:.5">dx</span></span>`;
+        el.innerHTML = `<span style="font-size:1.1rem;color:#6ee7b7">∫ ${fnDisp} <span style="opacity:.5">dx</span></span>`;
       }
-      el.style.color='';
-      document.querySelectorAll('.ipBoundBtn').forEach(b=>{ const isA=b.dataset.ipbound==='a'; b.classList.toggle('sel',isA?b.dataset.val===_ipA:b.dataset.val===_ipB); });
-      const boundsTab=document.getElementById('ipBoundsTab'); if(boundsTab) boundsTab.style.display=_ipMode==='def'?'':'none';
-      _ipRefreshFracBar();
+      el.style.color = '';
+      /* تحديث أزرار الحدود */
+      document.querySelectorAll('.ipBoundBtn').forEach(b => {
+        const isA = b.dataset.ipbound === 'a';
+        b.classList.toggle('sel', isA ? b.dataset.val===_ipA : b.dataset.val===_ipB);
+      });
+      /* إظهار/إخفاء تبويب الحدود */
+      const boundsTab = document.getElementById('ipBoundsTab');
+      if(boundsTab) boundsTab.style.display = _ipMode==='def' ? '' : 'none';
     }
 
+    /* ── تبويبات ── */
     function _ipTab(id){
-      ['Fn','Bounds','Pre'].forEach(t=>{ const el=document.getElementById('ipTab'+t); if(el) el.style.display=t===id?'block':'none'; });
-      document.querySelectorAll('[data-iptab]').forEach(b=>{ b.classList.toggle('on',b.dataset.iptab==={Fn:'fn',Bounds:'bounds',Pre:'pre'}[id]); });
+      ['Fn','Bounds','Pre'].forEach(t=>{
+        const el = document.getElementById('ipTab'+t);
+        if(el) el.style.display = t===id ? 'block' : 'none';
+      });
+      document.querySelectorAll('[data-iptab]').forEach(b=>{
+        b.classList.toggle('on', b.dataset.iptab==={Fn:'fn',Bounds:'bounds',Pre:'pre'}[id]);
+      });
     }
-    document.querySelectorAll('[data-iptab]').forEach(b=>{ b.addEventListener('click',()=>{ _ipTab({fn:'Fn',bounds:'Bounds',pre:'Pre'}[b.dataset.iptab]); }); });
+    document.querySelectorAll('[data-iptab]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const map={'fn':'Fn','bounds':'Bounds','pre':'Pre'};
+        _ipTab(map[b.dataset.iptab]);
+      });
+    });
 
+    /* ── أزرار الدالة ── */
     document.querySelectorAll('[data-ip]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const v=btn.dataset.ip;
-        if(v==='\u232b')       { _ipE.backspace(); }
-        else if(v==='AC') { _ipE.clear(); document.getElementById('ipFracBar').style.display='none'; }
-        else if(v==='FRAC'){ _ipE.startFrac(); }
-        else               { _ipE.insert(v); }
+        if(v==='⌫'){
+          _ipFn = _ipFn.replace(/(sin\(x\)|cos\(x\)|tan\(x\)|ln\(x\)|log\(x\)|exp\(x\)|abs\(x\)|sqrt\(x\)|cbrt\(x\)|x\^\(|x\^2|x\^3|x)$|.$/, '');
+        } else if(v==='AC'){
+          _ipFn='';
+        } else if(/^(sin\(x\)|cos\(x\)|tan\(x\)|ln\(x\)|log\(x\)|exp\(x\)|abs\(x\)|sqrt\(x\)|cbrt\(x\))$/.test(v)){
+          _ipFn+=v;
+        } else if(v==='x^2'){ _ipFn+='x^2';
+        } else if(v==='x^3'){ _ipFn+='x^3';
+        } else if(v==='1/x'){ _ipFn+='1/x';
+        } else { _ipFn+=v; }
         _ipUpdatePreview();
       });
     });
 
-    document.querySelectorAll('.ipBoundBtn').forEach(btn=>{ btn.addEventListener('click',()=>{ const w=btn.dataset.ipbound,v=btn.dataset.val; if(w==='a'){_ipA=v;document.getElementById('intCustomA').value='';} else {_ipB=v;document.getElementById('intCustomB').value='';} _ipUpdatePreview(); }); });
-    document.getElementById('intCustomA')?.addEventListener('input',e=>{ _ipA=e.target.value.trim()||'0'; _ipUpdatePreview(); });
-    document.getElementById('intCustomB')?.addEventListener('input',e=>{ _ipB=e.target.value.trim()||'1'; _ipUpdatePreview(); });
-    document.querySelectorAll('[data-ipex]').forEach(btn=>{ btn.addEventListener('click',()=>{ const parts=btn.dataset.ipex.split('|'); _ipE.clear(); _ipE.tokens=[{type:'text',val:parts[0]||''}]; _ipA=parts[1]||''; _ipB=parts[2]||''; _ipMode=(_ipA===''&&_ipB==='')?'ind':'def'; if(_ipMode==='def'){_ipA=_ipA||'0';_ipB=_ipB||'1';} document.getElementById('ipFracBar').style.display='none'; _ipUpdatePreview(); _ipTab('Fn'); }); });
+    /* ── أزرار الحدود ── */
+    document.querySelectorAll('.ipBoundBtn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const which = btn.dataset.ipbound;
+        const val   = btn.dataset.val;
+        if(which==='a'){ _ipA=val; document.getElementById('intCustomA').value=''; }
+        else           { _ipB=val; document.getElementById('intCustomB').value=''; }
+        _ipUpdatePreview();
+      });
+    });
+    document.getElementById('intCustomA')?.addEventListener('input',e=>{
+      _ipA=e.target.value.trim()||'0'; _ipUpdatePreview();
+    });
+    document.getElementById('intCustomB')?.addEventListener('input',e=>{
+      _ipB=e.target.value.trim()||'1'; _ipUpdatePreview();
+    });
+
+    /* ── أمثلة ── */
+    document.querySelectorAll('[data-ipex]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const parts=btn.dataset.ipex.split('|');
+        _ipFn=parts[0]||''; _ipA=parts[1]||''; _ipB=parts[2]||'';
+        if(_ipA===''&&_ipB===''){ _ipMode='ind'; }
+        else { _ipMode='def'; _ipA=_ipA||'0'; _ipB=_ipB||'1'; }
+        _ipUpdatePreview();
+        _ipTab('Fn');
+      });
+    });
 
     function openIntPicker(mode){
       return new Promise(res=>{
-        _ipResolve=res; _ipE.clear(); _ipA='0'; _ipB='1'; _ipMode=mode||'def';
-        document.getElementById('ipFracBar').style.display='none';
+        _ipResolve=res; _ipFn=''; _ipA='0'; _ipB='1'; _ipMode=mode||'def';
+        /* prefill من البافر */
         const buf=(typeof mkBuffer!=='undefined'?mkBuffer:'').trim();
-        const m1=buf.match(/^\u062a\u0643\u0627\u0645\u0644\s+(.+?)\s+\u0645\u0646\s+(.+?)\s+\u0625\u0644\u0649\s+(.+)/i);
-        const m2=buf.match(/^(?:\u062a\u0643\u0627\u0645\u0644|\u222b)\s+(.+?)(?:\s+dx)?$/i);
-        if(m1){ _ipE.tokens=[{type:'text',val:m1[1].trim()}]; _ipA=m1[2].trim(); _ipB=m1[3].trim(); _ipMode='def'; }
-        else if(m2){ _ipE.tokens=[{type:'text',val:m2[1].trim()}]; _ipMode='ind'; }
-        const bt=document.getElementById('ipBoundsTab'); if(bt) bt.style.display=_ipMode==='def'?'':'none';
-        _ipTab('Fn'); _ipUpdatePreview(); overlay.style.display='flex';
+        const m1=buf.match(/^تكامل\s+(.+?)\s+من\s+(.+?)\s+إلى\s+(.+)/i);
+        const m2=buf.match(/^(?:تكامل|∫)\s+(.+?)(?:\s+dx)?$/i);
+        if(m1){ _ipFn=m1[1].trim(); _ipA=m1[2].trim(); _ipB=m1[3].trim(); _ipMode='def'; }
+        else if(m2){ _ipFn=m2[1].trim(); _ipMode='ind'; }
+        /* أخفِ تبويب الحدود للغير محدود */
+        const bt=document.getElementById('ipBoundsTab');
+        if(bt) bt.style.display=_ipMode==='def'?'':'none';
+        _ipTab('Fn');
+        _ipUpdatePreview();
+        overlay.style.display='flex';
       });
     }
-    function closeIntPicker(val){ overlay.style.display='none'; if(_ipResolve){ _ipResolve(val); _ipResolve=null; } }
+    function closeIntPicker(val){
+      overlay.style.display='none';
+      if(_ipResolve){ _ipResolve(val); _ipResolve=null; }
+    }
     overlay.addEventListener('click',e=>{ if(e.target===overlay) closeIntPicker(null); });
     document.getElementById('intPickerCancel')?.addEventListener('click',()=>closeIntPicker(null));
     document.getElementById('intPickerOk')?.addEventListener('click',()=>{
-      if(_ipE.isEmpty&&!_ipE.inFrac){
-        const el=document.getElementById('intPreviewExpr'); if(el){ el.textContent='\u26a0 اختر دالة أولاً'; el.style.color='#f87171'; setTimeout(()=>_ipUpdatePreview(),1200); } return;
+      if(!_ipFn){
+        const el=document.getElementById('intPreviewExpr');
+        if(el){ el.textContent='⚠ اختر دالة أولاً'; el.style.color='#f87171';
+          setTimeout(()=>_ipUpdatePreview(),1200); } return;
       }
-      closeIntPicker({fn:_ipE.toMath(), a:_ipA, b:_ipB, mode:_ipMode});
+      closeIntPicker({fn:_ipFn, a:_ipA, b:_ipB, mode:_ipMode});
     });
 
     /* ── ربط الأزرار ── */
@@ -18766,8 +18515,7 @@ else initEvents();
 
 /* ── تسخين مسبق لـ KingIDB: يُحمَّل فهرس IDF في الذاكرة فور تشغيل التطبيق
    لتجنب التأخير الطويل عند أول بحث في قاعدة المعرفة الضخمة ── */
-/* _idbWarmDone يُضبط بعد اكتمال warmUp فعلياً — ليس عند بدء التهيئة */
-setTimeout(async ()=>{ try{ await KingIDB.warmUp(); window._idbWarmDone=true; }catch(e){} }, 1200);
+setTimeout(()=>{ try{ KingIDB.warmUp(); }catch(e){} }, 1200);
 
 /* ── اعتراض روابط المحادثة وفتحها داخلياً ── */
 document.addEventListener('click', e=>{
@@ -21071,10 +20819,9 @@ async function _localAnswerWithIDB(question){
       if (/[F-Gg]=|g≈|m\/s²|6\.674|\d{4,}|kg·m|n·m/.test(al)) return false;
       if (/^[\d\s+\-×÷=.]+$/.test(al.trim())) return false;
     }
-    /* إصلاح Bug3: سؤال "كم/عدد" يجب أن يرجع رقم أو كمية —
-       لكن نتجاهل الفلتر إذا كانت الإجابة تحتوي على رقم في أي مكان */
+    /* سؤال "كم/عدد" يجب أن يرجع رقم أو كمية */
     if (/^(كم|عدد|كمية|حجم|ارتفاع|مساحة|وزن|طول)/.test(qn)) {
-      if (/^(هو|هي|يعد|يُعد|يُعتبر)\s+[^\d]/.test(al) && !/\d/.test(al)) return false;
+      if (/^(هو|هي|يعد|يُعد|يُعتبر)\s+[^\d]/.test(al)) return false;
     }
     /* سؤال "أين/موقع" يجب أن يرجع مكان */
     if (/^(أين|وين|موقع|يقع|عاصمة)/.test(qn)) {
@@ -21084,10 +20831,7 @@ async function _localAnswerWithIDB(question){
   }
   if (la     && !_semCheck(question, la.answer))     { la     = null; }
   if (idbRes && !_semCheck(question, idbRes.answer)) { idbRes = null; }
-  /* فلتر الرفض — تجاهل الإجابات التي رفضها المستخدم سابقاً */
-  if (la     && isRejected(question, la.answer))     { la     = null; }
-  if (idbRes && isRejected(question, idbRes.answer)) { idbRes = null; }
-  const laConf  = (la  && la.answer  ) ? (la.confidence  || 0) : 0;
+    const laConf  = (la  && la.answer  ) ? (la.confidence  || 0) : 0;
   const idbConf = (idbRes && idbRes.answer) ? (idbRes.confidence || 0) : 0;
 
   /* اختر الأعلى ثقة */
@@ -21104,36 +20848,16 @@ async function _localAnswerWithIDB(question){
     return { answer:idbRes.answer, source:idbRes.source,
              confidence:idbConf, idb:true };
   }
-
-  /* إصلاح Bug1: استخدام نتيجة respond() المخزّنة من send() بدل استدعاء ثانٍ
-     — هذا يمنع: تسجيل التاريخ مرتين، وزيادة الثقة مرتين، وبطء الأداء */
+  /* إصلاح Bug5: قبل ما نرجع null — جرب DB.knowledge عبر respond()
+     هذا يحل مشكلة الجواب موجود بالذاكرة بس ما يجاوب */
   try {
-    const kbRes = _pendingLocalRes || respond(question);
-    _pendingLocalRes = null; /* تنظيف الكاش بعد الاستخدام */
-    /* إذا كانت نتيجة التفكير العميق — احفظها كاملة بدون تفكيك */
-    if (kbRes && kbRes._deepMode && !kbRes._notFound) {
-      return { answer: kbRes.mainAns||'', confidence: Math.round((kbRes.confidence||0.7)*100),
-               source: 'تفكير عميق', _deepRes: kbRes };
-    }
+    const kbRes = respond(question);
     if (kbRes && kbRes.mainAns && !kbRes._notFound) {
       const ans = kbRes.fullAns || kbRes.mainAns;
       const conf = Math.round((kbRes.confidence || 0.65) * 100);
       return { answer: ans, confidence: conf, source: kbRes.ansType || 'ذاكرة محلية' };
     }
-    /* إصلاح Bug4: عند _notFound بسبب عتبة ثقة مرتفعة — جرب bestAns بعتبة=0
-       قد يوجد جواب معقول لم يظهر بسبب إعداد confThreshold المرتفع */
-    if (kbRes && kbRes._notFound) {
-      const directMatch = bestAns(question, 0);
-      if (directMatch && directMatch.answer) {
-        const sim  = directMatch.similarity || 0.5;
-        const conf = Math.round(Math.min(0.99, sim*0.45 + (directMatch.confidence||0.7)*0.55) * 100);
-        if (conf >= 40) {
-          return { answer: directMatch.answer, confidence: conf,
-                   source: 'ذاكرة محلية (عتبة مرنة)' };
-        }
-      }
-    }
-  } catch(e) { _pendingLocalRes = null; }
+  } catch(e) {}
   /* إذا لم يرجع شيء ذو قيمة — نُعيد null ليطلب التطبيق من المستخدم التعليم */
   return null;
 }
@@ -29719,30 +29443,18 @@ document.addEventListener('DOMContentLoaded',()=>{
 #intPreviewExpr{font-size:1.1rem;color:#6ee7b7;font-weight:700;letter-spacing:.02em;text-align:center;word-break:break-all;direction:ltr;}
 #intPickerOk{width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#059669,#34d399);color:#fff;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:8px;box-shadow:0 3px 16px rgba(52,211,153,.3);letter-spacing:.02em;}
 #intPickerCancel{position:absolute;top:14px;left:14px;background:none;border:none;color:rgba(255,255,255,.3);font-size:1.2rem;cursor:pointer;padding:4px 8px;line-height:1;}
-.ipBoundBtn{flex:1;min-width:0;direction:ltr;unicode-bidi:isolate;padding:9px 2px;border-radius:10px;border:1px solid rgba(52,211,153,.25);background:rgba(52,211,153,.07);color:#6ee7b7;font-size:.95rem;font-weight:800;cursor:pointer;text-align:center;transition:.1s;}
+.ipBoundBtn{flex:1;min-width:0;padding:9px 2px;border-radius:10px;border:1px solid rgba(52,211,153,.25);background:rgba(52,211,153,.07);color:#6ee7b7;font-size:.95rem;font-weight:800;cursor:pointer;text-align:center;transition:.1s;}
 .ipBoundBtn.sel{background:rgba(52,211,153,.25);border-color:#34d399;box-shadow:0 0 10px rgba(52,211,153,.25);}
 .ipBoundBtn:active{background:rgba(52,211,153,.2);}
 /* زر الرسم التلقائي */
 #mkAutoGraphBtn{display:none;width:auto;padding:0 10px;margin:0;}
 #mkAutoGraphBtn:active{background:rgba(201,149,42,.18);color:var(--gold);}
-.lpRow{display:grid;gap:6px;margin-bottom:6px;direction:ltr;}
+.lpRow{display:grid;gap:6px;margin-bottom:6px;}
 .lpRow.g4{grid-template-columns:repeat(4,1fr);}
 .lpRow.g5{grid-template-columns:repeat(5,1fr);}
 .lpRow.g3{grid-template-columns:repeat(3,1fr);}
 .lpRow.g2{grid-template-columns:repeat(2,1fr);}
-.lpRow.g6{grid-template-columns:repeat(6,1fr);}
-.lpBtn.up-frac{font-size:.72rem;font-weight:900;background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:#fde68a;padding:6px 4px;}
-.lpBtn.up-frac:active{background:rgba(251,191,36,.28);}
-.lpBtn.up-frac span span{display:block;}
-.lpFracModeBtn{flex:1;padding:7px 4px;border-radius:8px;border:1px solid rgba(251,191,36,.25);background:rgba(251,191,36,.06);color:rgba(253,230,138,.5);font-size:.75rem;font-weight:700;cursor:pointer;text-align:center;transition:.12s;font-family:inherit;}
-.lpFracModeBtn.active{background:rgba(251,191,36,.22);border-color:rgba(251,191,36,.7);color:#fde68a;box-shadow:0 0 8px rgba(251,191,36,.25);}
-.lpFracModeBtn.norm{border-color:rgba(52,211,153,.3);color:rgba(110,231,183,.5);}
-.lpFracModeBtn.norm.active{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.7);color:#6ee7b7;}
-.up-examples-toggle{width:100%;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:transparent;color:rgba(255,255,255,.35);font-size:.7rem;cursor:pointer;margin-bottom:4px;text-align:center;}
-.up-examples-toggle:hover{color:rgba(255,255,255,.6);}
-.up-examples-box{display:none;margin-bottom:6px;}
-.up-section-hdr{font-size:.6rem;color:rgba(255,255,255,.28);font-weight:700;letter-spacing:.08em;margin:8px 0 4px;text-align:center;padding-top:6px;border-top:1px solid rgba(255,255,255,.06);direction:rtl;}
-.lpBtn{padding:10px 4px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.05);color:#e2e8f0;font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:background .1s,transform .07s;-webkit-tap-highlight-color:transparent;line-height:1.2;direction:ltr;unicode-bidi:isolate;}
+.lpBtn{padding:10px 4px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.05);color:#e2e8f0;font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:background .1s,transform .07s;-webkit-tap-highlight-color:transparent;line-height:1.2;}
 .lpBtn:active{transform:scale(.93);background:rgba(255,255,255,.12);}
 .lpBtn.gold{background:rgba(201,149,42,.12);border-color:rgba(201,149,42,.3);color:#f0c84e;}
 .lpBtn.gold:active{background:rgba(201,149,42,.25);}
@@ -29754,7 +29466,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 .lpSec{font-size:.58rem;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:6px 0 4px;text-align:center;}
 #limPickerOk{width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#c9952a,#e8b84b);color:#000;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:8px;box-shadow:0 3px 16px rgba(201,149,42,.35);letter-spacing:.02em;}
 #limPickerCancel{position:absolute;top:14px;left:14px;background:none;border:none;color:rgba(255,255,255,.3);font-size:1.2rem;cursor:pointer;padding:4px 8px;line-height:1;}
-.lpPointBtn{flex:1;min-width:0;padding:10px 2px;border-radius:10px;border:1px solid rgba(201,149,42,.25);background:rgba(201,149,42,.07);color:#f0c84e;font-size:1rem;font-weight:800;cursor:pointer;text-align:center;transition:.1s;-webkit-tap-highlight-color:transparent;direction:ltr;unicode-bidi:isolate;}
+.lpPointBtn{flex:1;min-width:0;padding:10px 2px;border-radius:10px;border:1px solid rgba(201,149,42,.25);background:rgba(201,149,42,.07);color:#f0c84e;font-size:1rem;font-weight:800;cursor:pointer;text-align:center;transition:.1s;-webkit-tap-highlight-color:transparent;}
 .lpPointBtn:active{background:rgba(201,149,42,.2);}
 .lpPointBtn.sel{background:rgba(201,149,42,.28);border-color:#e8b84b;box-shadow:0 0 10px rgba(201,149,42,.3);}
 .lpTab{flex:1;padding:7px 4px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:transparent;color:rgba(255,255,255,.35);font-size:.72rem;font-weight:700;cursor:pointer;text-align:center;transition:.1s;}
@@ -29771,104 +29483,84 @@ document.addEventListener('DOMContentLoaded',()=>{
     <div id="derivPreviewExpr" style="color:rgba(255,255,255,.25);">اختر الدالة من الأزرار ↓</div>
   </div>
 
-  <!-- شريط وضع الكسر -->
-  <div id="dpFracBar" style="display:none;margin-bottom:6px;background:rgba(251,113,133,.07);border:1px solid rgba(251,113,133,.3);border-radius:10px;padding:6px 8px;">
-    <div style="text-align:center;margin-bottom:6px;min-height:44px;display:flex;align-items:center;justify-content:center;">
-      <div style="display:inline-flex;flex-direction:column;align-items:center;gap:1px;">
-        <div id="dpFracNumVis" style="min-width:60px;padding:2px 8px;border-radius:5px;border:1.5px solid rgba(251,113,133,.3);color:#fda4af;min-height:20px;text-align:center;">_</div>
-        <div style="width:80%;height:1.5px;background:rgba(255,255,255,.5);margin:2px 0;"></div>
-        <div id="dpFracDenVis" style="min-width:60px;padding:2px 8px;border-radius:5px;border:1.5px solid rgba(251,113,133,.3);color:#fda4af;min-height:20px;text-align:center;">_</div>
-      </div>
+  <!-- تبويبات -->
+  <div style="display:flex;gap:5px;margin-bottom:8px;">
+    <button class="lpTab on" data-dpTab="fn">✏️ الدالة f(x)</button>
+    <button class="lpTab" data-dpTab="order">🔢 الدرجة</button>
+    <button class="lpTab" data-dpTab="pre">⭐ أمثلة</button>
+  </div>
+
+  <!-- تبويب الدالة -->
+  <div id="dpTabFn">
+    <div class="lpRow g5" style="margin-bottom:8px;">
+      <button class="lpBtn pur big" data-dp="x"  style="font-size:1.1rem;font-weight:900;border-color:rgba(251,113,133,.5);background:rgba(251,113,133,.15);">x</button>
+      <button class="lpBtn pur big" data-dp="x^2">x²</button>
+      <button class="lpBtn pur big" data-dp="x^3">x³</button>
+      <button class="lpBtn pur"     data-dp="^(" style="font-size:.85rem;">xⁿ</button>
+      <button class="lpBtn blue"    data-dp="sqrt(x)">√x</button>
     </div>
-    <div style="display:flex;gap:5px;">
-      <button id="dpFracBtnNum" class="lpFracModeBtn active" style="border-color:rgba(251,113,133,.4);color:#fda4af;" onclick="_dpSetFracMode('num')">▲ البسط</button>
-      <button id="dpFracBtnDen" class="lpFracModeBtn" style="border-color:rgba(251,113,133,.25);color:rgba(253,164,175,.4);" onclick="_dpSetFracMode('den')">▼ المقام</button>
-      <button id="dpFracBtnNorm" class="lpFracModeBtn norm" onclick="_dpSetFracMode('none')">✓ عادي</button>
+    <div class="lpRow g5">
+      <button class="lpBtn" data-dp="7">7</button>
+      <button class="lpBtn" data-dp="8">8</button>
+      <button class="lpBtn" data-dp="9">9</button>
+      <button class="lpBtn gold" data-dp="/">÷</button>
+      <button class="lpBtn red"  data-dp="⌫">⌫</button>
+    </div>
+    <div class="lpRow g5">
+      <button class="lpBtn" data-dp="4">4</button>
+      <button class="lpBtn" data-dp="5">5</button>
+      <button class="lpBtn" data-dp="6">6</button>
+      <button class="lpBtn gold" data-dp="*">×</button>
+      <button class="lpBtn red"  data-dp="AC">AC</button>
+    </div>
+    <div class="lpRow g5">
+      <button class="lpBtn" data-dp="1">1</button>
+      <button class="lpBtn" data-dp="2">2</button>
+      <button class="lpBtn" data-dp="3">3</button>
+      <button class="lpBtn gold" data-dp="+">+</button>
+      <button class="lpBtn gold" data-dp="-">−</button>
+    </div>
+    <div class="lpRow g5">
+      <button class="lpBtn" data-dp="0">0</button>
+      <button class="lpBtn" data-dp=".">.</button>
+      <button class="lpBtn" data-dp="(">(</button>
+      <button class="lpBtn" data-dp=")">)</button>
+      <button class="lpBtn blue" data-dp="x">x</button>
+    </div>
+    <div class="lpSec">دوال</div>
+    <div class="lpRow g4">
+      <button class="lpBtn" data-dp="sin(x)">sin</button>
+      <button class="lpBtn" data-dp="cos(x)">cos</button>
+      <button class="lpBtn" data-dp="tan(x)">tan</button>
+      <button class="lpBtn" data-dp="ln(x)">ln</button>
+      <button class="lpBtn" data-dp="log(x)">log</button>
+      <button class="lpBtn" data-dp="e^x">eˣ</button>
+      <button class="lpBtn" data-dp="sqrt(x)">√</button>
+      <button class="lpBtn" data-dp="asin(x)">arcsin</button>
     </div>
   </div>
 
-  <!-- لوحة مفاتيح -->
-  <div class="lpRow g5" style="margin-bottom:6px;">
-    <button class="lpBtn pur big" data-dp="x" style="border-color:rgba(251,113,133,.5);background:rgba(251,113,133,.15);font-size:1.05rem;font-weight:900;">x</button>
-    <button class="lpBtn pur" data-dp="x^2">x²</button>
-    <button class="lpBtn pur" data-dp="x^3">x³</button>
-    <button class="lpBtn pur" data-dp="^(" style="font-size:.8rem;">xⁿ</button>
-    <button class="lpBtn blue" data-dp="sqrt(">√(</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-dp="7">7</button>
-    <button class="lpBtn" data-dp="8">8</button>
-    <button class="lpBtn" data-dp="9">9</button>
-    <button class="lpBtn gold" data-dp="/">÷</button>
-    <button class="lpBtn red" data-dp="⌫">⌫</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-dp="4">4</button>
-    <button class="lpBtn" data-dp="5">5</button>
-    <button class="lpBtn" data-dp="6">6</button>
-    <button class="lpBtn gold" data-dp="*">×</button>
-    <button class="lpBtn red" data-dp="AC">AC</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-dp="1">1</button>
-    <button class="lpBtn" data-dp="2">2</button>
-    <button class="lpBtn" data-dp="3">3</button>
-    <button class="lpBtn gold" data-dp="-">−</button>
-    <button class="lpBtn gold" data-dp="+">+</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-dp="0">0</button>
-    <button class="lpBtn" data-dp=".">.</button>
-    <button class="lpBtn gold" data-dp="(">(</button>
-    <button class="lpBtn gold" data-dp=")">)</button>
-    <button class="lpBtn up-frac" data-dp="FRAC" title="إدراج كسر">
-      <span style="display:flex;flex-direction:column;align-items:center;line-height:1;gap:0px;">
-        <span style="font-size:.6rem;padding:0 4px;color:#fde68a;">▪▪▪</span>
-        <span style="display:block;width:22px;height:1.5px;background:#fde68a;margin:1px auto;"></span>
-        <span style="font-size:.6rem;padding:0 4px;color:#fde68a;">▪▪▪</span>
-      </span>
-    </button>
-  </div>
-  <div class="lpRow g5" style="margin-top:4px;">
-    <button class="lpBtn blue" data-dp="sin(">sin</button>
-    <button class="lpBtn blue" data-dp="cos(">cos</button>
-    <button class="lpBtn blue" data-dp="tan(">tan</button>
-    <button class="lpBtn blue" data-dp="cot(">cot</button>
-    <button class="lpBtn blue" data-dp="abs(">|x|</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn grn" data-dp="ln(">ln</button>
-    <button class="lpBtn grn" data-dp="log(">log</button>
-    <button class="lpBtn grn" data-dp="exp(">eˣ</button>
-    <button class="lpBtn blue" data-dp="cbrt(">∛</button>
-    <button class="lpBtn gold" data-dp="pi">π</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-dp="asin(">asin</button>
-    <button class="lpBtn" data-dp="acos(">acos</button>
-    <button class="lpBtn" data-dp="atan(">atan</button>
-    <button class="lpBtn gold" data-dp="e">e</button>
-    <button class="lpBtn gold" data-dp="Inf">∞</button>
+  <!-- تبويب الدرجة -->
+  <div id="dpTabOrder" style="display:none;">
+    <div class="lpSec">درجة الاشتقاق</div>
+    <div class="lpRow g3" style="margin:10px 0;">
+      <button class="lpBtn pur dpOrdBtn sel" data-ord="1" style="font-size:1.1rem;padding:14px;">f′(x)<br><span style="font-size:.6rem;opacity:.6">أولى</span></button>
+      <button class="lpBtn blue dpOrdBtn"    data-ord="2" style="font-size:1.1rem;padding:14px;">f″(x)<br><span style="font-size:.6rem;opacity:.6">ثانية</span></button>
+      <button class="lpBtn gold dpOrdBtn"    data-ord="3" style="font-size:1.1rem;padding:14px;">f‴(x)<br><span style="font-size:.6rem;opacity:.6">ثالثة</span></button>
+    </div>
+    <div class="lpSec">أو اشتق عند نقطة</div>
+    <div style="display:flex;gap:8px;align-items:center;margin:6px 0;">
+      <span style="color:var(--text2);font-size:.8rem;">x₀ =</span>
+      <input id="derivAtPoint" type="number" placeholder="مثال: 2" style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid rgba(251,113,133,.3);background:rgba(251,113,133,.06);color:#fb7185;font-size:.9rem;font-family:inherit;outline:none;text-align:center;">
+    </div>
   </div>
 
-  <!-- درجة الاشتقاق -->
-  <div class="up-section-hdr" style="direction:rtl;">⚙ درجة الاشتقاق</div>
-  <div class="lpRow g3" style="margin-bottom:6px;">
-    <button class="lpBtn pur dpOrdBtn sel" data-ord="1" style="padding:10px 4px;">f′<br><span style="font-size:.6rem;opacity:.6">أولى</span></button>
-    <button class="lpBtn blue dpOrdBtn"    data-ord="2" style="padding:10px 4px;">f″<br><span style="font-size:.6rem;opacity:.6">ثانية</span></button>
-    <button class="lpBtn gold dpOrdBtn"    data-ord="3" style="padding:10px 4px;">f‴<br><span style="font-size:.6rem;opacity:.6">ثالثة</span></button>
-  </div>
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
-    <span style="color:rgba(255,255,255,.35);font-size:.75rem;white-space:nowrap;">عند x₀=</span>
-    <input id="derivAtPoint" type="number" placeholder="اختياري" style="flex:1;padding:7px 10px;border-radius:10px;border:1px solid rgba(251,113,133,.25);background:rgba(251,113,133,.05);color:#fb7185;font-size:.85rem;font-family:inherit;outline:none;text-align:center;">
-  </div>
-
-  <!-- أمثلة -->
-  <button class="up-examples-toggle" onclick="const b=this.nextElementSibling;b.style.display=b.style.display==='block'?'none':'block';this.textContent=b.style.display==='block'?'⭐ أمثلة ▲':'⭐ أمثلة ▼';">⭐ أمثلة ▼</button>
-  <div class="up-examples-box">
-    <div class="lpRow g2" style="gap:5px;">
-      <button class="lpBtn grn" data-dpex="x^2">d/dx(x²)=2x</button>
-      <button class="lpBtn grn" data-dpex="x^3">d/dx(x³)=3x²</button>
+  <!-- تبويب الأمثلة -->
+  <div id="dpTabPre" style="display:none;">
+    <div class="lpSec">أمثلة جاهزة</div>
+    <div class="lpRow g2" style="gap:7px;">
+      <button class="lpBtn grn" data-dpex="x^2">d/dx(x²) = 2x</button>
+      <button class="lpBtn grn" data-dpex="x^3">d/dx(x³) = 3x²</button>
       <button class="lpBtn grn" data-dpex="sin(x)">d/dx(sin x)</button>
       <button class="lpBtn grn" data-dpex="cos(x)">d/dx(cos x)</button>
       <button class="lpBtn grn" data-dpex="e^x">d/dx(eˣ)</button>
@@ -29887,150 +29579,129 @@ document.addEventListener('DOMContentLoaded',()=>{
   <button id="limPickerCancel">✕</button>
   <div style="text-align:center;font-size:.72rem;color:rgba(201,149,42,.65);font-weight:900;letter-spacing:.1em;margin-bottom:10px;">حاسبة النهاية  lim</div>
 
+  <!-- معاينة التعبير -->
   <div id="limPreviewBar">
     <div id="limPreviewExpr" style="color:rgba(255,255,255,.25);">اختر الدالة من الأزرار ↓</div>
   </div>
 
-  <!-- ── تبويبات النهاية الثلاثة ── -->
+  <!-- تبويبات الإدخال -->
   <div style="display:flex;gap:5px;margin-bottom:8px;">
     <button class="lpTab on" data-lptab="fn">✏️ الدالة f(x)</button>
-    <button class="lpTab" data-lptab="pt">↗ النقطة x</button>
+    <button class="lpTab" data-lptab="pt">↗ النقطة x→</button>
     <button class="lpTab" data-lptab="pre">⭐ أمثلة</button>
   </div>
 
-  <!-- ══ تبويب 1: لوحة مفاتيح الدالة ══ -->
+  <!-- ── تبويب الدالة ── -->
   <div id="lpTabFn">
-
-  <!-- ══ شريط وضع الكسر — يظهر فقط عند الضغط على زر الكسر ══ -->
-  <div id="lpFracBar" style="display:none;margin-bottom:6px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:6px 8px;">
-    <!-- عرض الكسر المرئي -->
-    <div id="lpFracVis" style="text-align:center;margin-bottom:6px;font-size:.9rem;direction:ltr;min-height:44px;display:flex;align-items:center;justify-content:center;">
-      <div style="display:inline-flex;flex-direction:column;align-items:center;gap:1px;">
-        <div id="lpFracNumVis" style="min-width:60px;padding:2px 8px;border-radius:5px;border:1.5px solid rgba(251,191,36,.3);color:#fde68a;min-height:20px;text-align:center;">_</div>
-        <div style="width:80%;height:1.5px;background:rgba(255,255,255,.5);margin:2px 0;"></div>
-        <div id="lpFracDenVis" style="min-width:60px;padding:2px 8px;border-radius:5px;border:1.5px solid rgba(251,191,36,.3);color:#fde68a;min-height:20px;text-align:center;">_</div>
-      </div>
+    <!-- صف x المتغير + القوى — الأهم أولاً -->
+    <div class="lpRow g5" style="margin-bottom:8px;">
+      <button class="lpBtn pur big" data-lp="x"  style="font-size:1.1rem;font-weight:900;border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.18);">x</button>
+      <button class="lpBtn pur big" data-lp="x^2" style="font-size:1rem;font-weight:900;">x²</button>
+      <button class="lpBtn pur big" data-lp="x^3" style="font-size:1rem;font-weight:900;">x³</button>
+      <button class="lpBtn pur"     data-lp="^("  style="font-size:.85rem;">xⁿ</button>
+      <button class="lpBtn blue"    data-lp="sqrt(x)" style="font-size:.9rem;">√x</button>
     </div>
-    <!-- أزرار التنقل بين أجزاء الكسر -->
-    <div style="display:flex;gap:5px;">
-      <button id="lpFracBtnNum" class="lpFracModeBtn active" onclick="_lpSetFracMode('num')">▲ البسط</button>
-      <button id="lpFracBtnDen" class="lpFracModeBtn" onclick="_lpSetFracMode('den')">▼ المقام</button>
-      <button id="lpFracBtnNorm" class="lpFracModeBtn norm" onclick="_lpSetFracMode('none')">✓ عادي</button>
+    <!-- أرقام + عمليات -->
+    <div class="lpRow g5">
+      <button class="lpBtn" data-lp="7">7</button>
+      <button class="lpBtn" data-lp="8">8</button>
+      <button class="lpBtn" data-lp="9">9</button>
+      <button class="lpBtn gold" data-lp="/">÷</button>
+      <button class="lpBtn red"  data-lp="⌫">⌫</button>
+    </div>
+    <div class="lpRow g5">
+      <button class="lpBtn" data-lp="4">4</button>
+      <button class="lpBtn" data-lp="5">5</button>
+      <button class="lpBtn" data-lp="6">6</button>
+      <button class="lpBtn gold" data-lp="*">×</button>
+      <button class="lpBtn gold" data-lp="(">(</button>
+    </div>
+    <div class="lpRow g5">
+      <button class="lpBtn" data-lp="1">1</button>
+      <button class="lpBtn" data-lp="2">2</button>
+      <button class="lpBtn" data-lp="3">3</button>
+      <button class="lpBtn gold" data-lp="-">−</button>
+      <button class="lpBtn gold" data-lp=")">)</button>
+    </div>
+    <div class="lpRow g5">
+      <button class="lpBtn" data-lp="0">0</button>
+      <button class="lpBtn" data-lp=".">.</button>
+      <button class="lpBtn gold" data-lp="+">+</button>
+      <button class="lpBtn red"  data-lp="AC" style="font-size:.75rem;">AC</button>
+      <button class="lpBtn gold" data-lp="1/x" style="font-size:.8rem;">1/x</button>
+    </div>
+    <!-- دوال -->
+    <div class="lpRow g4" style="margin-top:6px;">
+      <button class="lpBtn blue" data-lp="sin(x)">sin x</button>
+      <button class="lpBtn blue" data-lp="cos(x)">cos x</button>
+      <button class="lpBtn blue" data-lp="tan(x)">tan x</button>
+      <button class="lpBtn blue" data-lp="abs(x)">|x|</button>
+    </div>
+    <div class="lpRow g4">
+      <button class="lpBtn grn" data-lp="ln(x)">ln x</button>
+      <button class="lpBtn grn" data-lp="log(x)">log x</button>
+      <button class="lpBtn grn" data-lp="exp(x)">eˣ</button>
+      <button class="lpBtn grn" data-lp="cbrt(x)">∛x</button>
+    </div>
+    <div class="lpRow g4">
+      <button class="lpBtn pur" data-lp="x-sqrt(x)">x−√x</button>
+      <button class="lpBtn pur" data-lp="x*sqrt(x)">x·√x</button>
+      <button class="lpBtn pur" data-lp="sin(x)/x">sin(x)/x</button>
+      <button class="lpBtn pur" data-lp="(x^2-1)/(x-1)">(x²-1)/(x-1)</button>
     </div>
   </div>
 
-  <!-- ══ لوحة المفاتيح ══ -->
-  <div class="lpRow g5" style="margin-bottom:6px;">
-    <button class="lpBtn pur big" data-lp="x" style="border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.18);font-size:1.05rem;font-weight:900;">x</button>
-    <button class="lpBtn pur" data-lp="x^2">x²</button>
-    <button class="lpBtn pur" data-lp="x^3">x³</button>
-    <button class="lpBtn pur" data-lp="^(" style="font-size:.8rem;">xⁿ</button>
-    <button class="lpBtn blue" data-lp="sqrt(">√(</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-lp="7">7</button>
-    <button class="lpBtn" data-lp="8">8</button>
-    <button class="lpBtn" data-lp="9">9</button>
-    <button class="lpBtn gold" data-lp="/">÷</button>
-    <button class="lpBtn red" data-lp="⌫">⌫</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-lp="4">4</button>
-    <button class="lpBtn" data-lp="5">5</button>
-    <button class="lpBtn" data-lp="6">6</button>
-    <button class="lpBtn gold" data-lp="*">×</button>
-    <button class="lpBtn red" data-lp="AC">AC</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-lp="1">1</button>
-    <button class="lpBtn" data-lp="2">2</button>
-    <button class="lpBtn" data-lp="3">3</button>
-    <button class="lpBtn gold" data-lp="-">−</button>
-    <button class="lpBtn gold" data-lp="+">+</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-lp="0">0</button>
-    <button class="lpBtn" data-lp=".">.</button>
-    <button class="lpBtn gold" data-lp="(">(</button>
-    <button class="lpBtn gold" data-lp=")">)</button>
-    <!-- زر الكسر -->
-    <button class="lpBtn up-frac" data-lp="FRAC" title="إدراج كسر">
-      <span style="display:flex;flex-direction:column;align-items:center;line-height:1;gap:0px;">
-        <span style="font-size:.6rem;padding:0 4px;color:#fde68a;">▪▪▪</span>
-        <span style="display:block;width:22px;height:1.5px;background:#fde68a;margin:1px auto;"></span>
-        <span style="font-size:.6rem;padding:0 4px;color:#fde68a;">▪▪▪</span>
-      </span>
-    </button>
-  </div>
-  <div class="lpRow g5" style="margin-top:4px;">
-    <button class="lpBtn blue" data-lp="sin(">sin</button>
-    <button class="lpBtn blue" data-lp="cos(">cos</button>
-    <button class="lpBtn blue" data-lp="tan(">tan</button>
-    <button class="lpBtn blue" data-lp="cot(">cot</button>
-    <button class="lpBtn blue" data-lp="abs(">|x|</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn grn" data-lp="ln(">ln</button>
-    <button class="lpBtn grn" data-lp="log(">log</button>
-    <button class="lpBtn grn" data-lp="exp(">eˣ</button>
-    <button class="lpBtn blue" data-lp="cbrt(">∛</button>
-    <button class="lpBtn gold" data-lp="pi">π</button>
-  </div>
-  <div class="lpRow g5">
-    <button class="lpBtn" data-lp="asin(">asin</button>
-    <button class="lpBtn" data-lp="acos(">acos</button>
-    <button class="lpBtn" data-lp="atan(">atan</button>
-    <button class="lpBtn gold" data-lp="e">e</button>
-    <button class="lpBtn gold" data-lp="Inf">∞</button>
-  </div>
-  </div><!-- /lpTabFn -->
-
-  <!-- ══ تبويب 2: النقطة والاتجاه ══ -->
+  <!-- ── تبويب النقطة ── -->
   <div id="lpTabPt" style="display:none;">
-  <div class="up-section-hdr" style="direction:rtl;">📍 النقطة — x يتجه نحو</div>
-  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;direction:ltr;">
-    <button class="lpPointBtn" data-lppt="∞">∞</button>
-    <button class="lpPointBtn" data-lppt="-∞">−∞</button>
-    <button class="lpPointBtn" data-lppt="0">0</button>
-    <button class="lpPointBtn" data-lppt="1">1</button>
-    <button class="lpPointBtn" data-lppt="-1">−1</button>
-    <button class="lpPointBtn" data-lppt="π">π</button>
-    <button class="lpPointBtn" data-lppt="2">2</button>
-    <button class="lpPointBtn" data-lppt="-2">−2</button>
+    <div class="lpSec">اختر x يتجه نحو</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+      <button class="lpPointBtn" data-lppt="∞">∞</button>
+      <button class="lpPointBtn" data-lppt="-∞">−∞</button>
+      <button class="lpPointBtn" data-lppt="0">0</button>
+      <button class="lpPointBtn" data-lppt="1">1</button>
+      <button class="lpPointBtn" data-lppt="-1">−1</button>
+      <button class="lpPointBtn" data-lppt="π">π</button>
+      <button class="lpPointBtn" data-lppt="2">2</button>
+      <button class="lpPointBtn" data-lppt="-2">−2</button>
+    </div>
+    <div class="lpSec">اتجاه الاقتراب</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <button id="lpDirLeft"  class="lpDirBtn" data-lpdir="left"  title="من اليسار" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(248,113,113,.4);background:rgba(248,113,113,.1);color:#f87171;font-size:.85rem;cursor:pointer;">← من اليسار (a⁻)</button>
+      <button id="lpDirBoth"  class="lpDirBtn lpDirSel" data-lpdir="both"  title="ثنائي الاتجاه" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(201,149,42,.6);background:rgba(201,149,42,.2);color:#f0c84e;font-size:.85rem;cursor:pointer;font-weight:700;">↔ ثنائي</button>
+      <button id="lpDirRight" class="lpDirBtn" data-lpdir="right" title="من اليمين" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(52,211,153,.4);background:rgba(52,211,153,.1);color:#34d399;font-size:.85rem;cursor:pointer;">من اليمين (a⁺) →</button>
+    </div>
+    <div class="lpSec">أو اكتب قيمة مخصصة</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span style="color:rgba(255,255,255,.4);font-size:.8rem;">x →</span>
+      <input id="limCustomPt" type="text" inputmode="decimal" placeholder="مثال: 3.5"
+        style="flex:1;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-size:.9rem;font-family:monospace;outline:none;text-align:center;"/>
+    </div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;direction:ltr;">
-    <span style="color:rgba(255,255,255,.35);font-size:.75rem;">x →</span>
-    <input id="limCustomPt" type="text" inputmode="decimal" placeholder="قيمة مخصصة"
-      style="flex:1;padding:7px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;font-family:monospace;outline:none;text-align:center;"/>
-  </div>
-  <div class="up-section-hdr" style="direction:rtl;">↔ اتجاه الاقتراب</div>
-  <div style="display:flex;gap:5px;margin-bottom:8px;direction:rtl;">
-    <button id="lpDirLeft"  class="lpDirBtn" data-lpdir="left"  style="flex:1;padding:9px 6px;border-radius:10px;border:1px solid rgba(248,113,113,.4);background:rgba(248,113,113,.1);color:#f87171;font-size:.82rem;cursor:pointer;">من اليسار (a⁻)</button>
-    <button id="lpDirBoth"  class="lpDirBtn lpDirSel" data-lpdir="both"  style="flex:1;padding:9px 6px;border-radius:10px;border:1px solid rgba(201,149,42,.6);background:rgba(201,149,42,.2);color:#f0c84e;font-size:.82rem;cursor:pointer;font-weight:700;">↔ ثنائي</button>
-    <button id="lpDirRight" class="lpDirBtn" data-lpdir="right" style="flex:1;padding:9px 6px;border-radius:10px;border:1px solid rgba(52,211,153,.4);background:rgba(52,211,153,.1);color:#34d399;font-size:.82rem;cursor:pointer;">من اليمين (a⁺)</button>
-  </div>
-  </div><!-- /lpTabPt -->
 
-  <!-- ══ تبويب 3: أمثلة ══ -->
+  <!-- ── تبويب الأمثلة ── -->
   <div id="lpTabPre" style="display:none;">
-  <div class="lpRow g2" style="gap:5px;">
-    <button class="lpBtn grn big" data-lpex="sin(x)/x|0">lim sin(x)/x  x→0 = 1</button>
-    <button class="lpBtn grn big" data-lpex="(1+1/x)^x|∞">lim (1+1/x)ˣ  x→∞ = e</button>
-    <button class="lpBtn blue big" data-lpex="(x^2-1)/(x-1)|1">lim (x²-1)/(x-1)  x→1</button>
-    <button class="lpBtn blue big" data-lpex="sin(x)/x^2|0">lim sin(x)/x²  x→0</button>
-    <button class="lpBtn pur big" data-lpex="x^2|∞">lim x²  x→∞ = ∞</button>
-    <button class="lpBtn pur big" data-lpex="1/x|∞">lim 1/x  x→∞ = 0</button>
-    <button class="lpBtn gold big" data-lpex="ln(x)|∞">lim ln(x)  x→∞</button>
-    <button class="lpBtn red big" data-lpex="(1-cos(x))/x|0">lim (1−cosx)/x  x→0</button>
-    <button class="lpBtn grn big" data-lpex="(exp(x)-1)/x|0">lim (eˣ−1)/x  x→0 = 1</button>
-    <button class="lpBtn blue big" data-lpex="x*sin(1/x)|∞">lim x·sin(1/x)  x→∞ = 1</button>
+    <div class="lpSec">انقر لتطبيق مثال</div>
+    <div class="lpRow g2">
+      <button class="lpBtn grn big" data-lpex="sin(x)/x|0">lim sin(x)/x  x→0 = 1</button>
+      <button class="lpBtn grn big" data-lpex="(1+1/x)^x|∞">lim (1+1/x)ˣ  x→∞ = e</button>
+      <button class="lpBtn blue big" data-lpex="x*sqrt(x)|∞">lim x·√x  x→∞ = ∞</button>
+      <button class="lpBtn blue big" data-lpex="x-sqrt(x)|∞">lim x−√x  x→∞ = ∞</button>
+      <button class="lpBtn pur big" data-lpex="(x^2-1)/(x-1)|1">lim (x²-1)/(x-1)  x→1 = 2</button>
+      <button class="lpBtn pur big" data-lpex="sin(x)/x^2|0">lim sin(x)/x²  x→0 = ∞</button>
+      <button class="lpBtn gold big" data-lpex="x^2|∞">lim x²  x→∞ = ∞</button>
+      <button class="lpBtn gold big" data-lpex="1/x|∞">lim 1/x  x→∞ = 0</button>
+      <button class="lpBtn red big" data-lpex="(1-cos(x))/x|0">lim (1-cosx)/x  x→0 = 0</button>
+      <button class="lpBtn red big" data-lpex="ln(x)|∞">lim ln(x)  x→∞ = ∞</button>
+    </div>
   </div>
-  </div><!-- /lpTabPre -->
 
   <button id="limPickerOk">احسب النهاية  →</button>
 </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════
+     INTEGRAL PICKER — نفس واجهة النهايات بالضبط
+══════════════════════════════════════════════════════ -->
 <div id="intPickerOverlay">
 <div id="intPickerBox" style="position:relative;">
   <button id="intPickerCancel">✕</button>
@@ -30050,28 +29721,12 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   <!-- تبويب الدالة -->
   <div id="ipTabFn">
-    <!-- شريط وضع الكسر -->
-    <div id="ipFracBar" style="display:none;margin-bottom:6px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.3);border-radius:10px;padding:6px 8px;">
-      <div style="text-align:center;margin-bottom:6px;min-height:44px;display:flex;align-items:center;justify-content:center;">
-        <div style="display:inline-flex;flex-direction:column;align-items:center;gap:1px;">
-          <div id="ipFracNumVis" style="min-width:60px;padding:2px 8px;border-radius:5px;border:1.5px solid rgba(52,211,153,.3);color:#6ee7b7;min-height:20px;text-align:center;">_</div>
-          <div style="width:80%;height:1.5px;background:rgba(255,255,255,.5);margin:2px 0;"></div>
-          <div id="ipFracDenVis" style="min-width:60px;padding:2px 8px;border-radius:5px;border:1.5px solid rgba(52,211,153,.3);color:#6ee7b7;min-height:20px;text-align:center;">_</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:5px;">
-        <button id="ipFracBtnNum" class="lpFracModeBtn active" style="border-color:rgba(52,211,153,.4);color:#6ee7b7;" onclick="_ipSetFracMode('num')">▲ البسط</button>
-        <button id="ipFracBtnDen" class="lpFracModeBtn" style="border-color:rgba(52,211,153,.2);color:rgba(110,231,183,.4);" onclick="_ipSetFracMode('den')">▼ المقام</button>
-        <button id="ipFracBtnNorm" class="lpFracModeBtn norm" onclick="_ipSetFracMode('none')">✓ عادي</button>
-      </div>
-    </div>
-
     <div class="lpRow g5" style="margin-bottom:8px;">
       <button class="lpBtn pur big" data-ip="x"  style="font-size:1.1rem;font-weight:900;border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.18);">x</button>
       <button class="lpBtn pur big" data-ip="x^2">x²</button>
       <button class="lpBtn pur big" data-ip="x^3">x³</button>
       <button class="lpBtn pur"     data-ip="^(" style="font-size:.85rem;">xⁿ</button>
-      <button class="lpBtn blue"    data-ip="sqrt(">√(</button>
+      <button class="lpBtn blue"    data-ip="sqrt(x)">√x</button>
     </div>
     <div class="lpRow g5">
       <button class="lpBtn" data-ip="7">7</button>
@@ -30099,25 +29754,19 @@ document.addEventListener('DOMContentLoaded',()=>{
       <button class="lpBtn" data-ip=".">.</button>
       <button class="lpBtn gold" data-ip="+">+</button>
       <button class="lpBtn red"  data-ip="AC" style="font-size:.75rem;">AC</button>
-      <button class="lpBtn up-frac" data-ip="FRAC" title="إدراج كسر">
-        <span style="display:flex;flex-direction:column;align-items:center;line-height:1;gap:0px;">
-          <span style="font-size:.6rem;padding:0 4px;color:#fde68a;">▪▪▪</span>
-          <span style="display:block;width:22px;height:1.5px;background:#fde68a;margin:1px auto;"></span>
-          <span style="font-size:.6rem;padding:0 4px;color:#fde68a;">▪▪▪</span>
-        </span>
-      </button>
+      <button class="lpBtn gold" data-ip="1/x" style="font-size:.8rem;">1/x</button>
     </div>
     <div class="lpRow g4" style="margin-top:6px;">
-      <button class="lpBtn blue" data-ip="sin(">sin</button>
-      <button class="lpBtn blue" data-ip="cos(">cos</button>
-      <button class="lpBtn blue" data-ip="tan(">tan</button>
-      <button class="lpBtn blue" data-ip="abs(">|x|</button>
+      <button class="lpBtn blue" data-ip="sin(x)">sin x</button>
+      <button class="lpBtn blue" data-ip="cos(x)">cos x</button>
+      <button class="lpBtn blue" data-ip="tan(x)">tan x</button>
+      <button class="lpBtn blue" data-ip="abs(x)">|x|</button>
     </div>
     <div class="lpRow g4">
-      <button class="lpBtn grn" data-ip="ln(">ln</button>
-      <button class="lpBtn grn" data-ip="log(">log</button>
-      <button class="lpBtn grn" data-ip="exp(">eˣ</button>
-      <button class="lpBtn grn" data-ip="cbrt(">∛</button>
+      <button class="lpBtn grn" data-ip="ln(x)">ln x</button>
+      <button class="lpBtn grn" data-ip="log(x)">log x</button>
+      <button class="lpBtn grn" data-ip="exp(x)">eˣ</button>
+      <button class="lpBtn grn" data-ip="cbrt(x)">∛x</button>
     </div>
   </div>
 
